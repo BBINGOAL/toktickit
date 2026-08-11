@@ -14,6 +14,6 @@ app.get('/api/health', (req, res) => {
         status: 'ok',
         service: "TokTickIT API"
     })
-})
-
+}
+)
 export default app
