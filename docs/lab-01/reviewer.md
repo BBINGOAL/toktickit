@@ -51,5 +51,11 @@
   - [PR #2: Feature/2 health check](https://github.com/PpAnpt/toktickit/pull/2)
 - **My Review Comment:** 
   - "[ถูกต้องครบถ้วนมากเลยครับ]"
-- **Their Response:** 
-  - "[ใส่ข้อความที่เพื่อนตอบกลับคุณ เช่น 'รับทราบครับ ขอบคุณที่มาตรวจให้']"
+- **Link to PR I reviewed for them:** 
+  - [PR #3: Feature/3 catagory seed](https://github.com/PpAnpt/toktickit/pull/3)
+- **My Review Comment:** 
+  - "[สมบูรณ์เเบบครับ สุดยอดมากครับ]"
+- **Link to PR I reviewed for them:** 
+  - [PR #4: Feature/4 catagory list](https://github.com/PpAnpt/toktickit/pull/4)
+- **My Review Comment:** 
+  - "[ครบถ้วนเรียบร้อยครับ]"
