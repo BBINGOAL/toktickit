@@ -30,7 +30,33 @@ app.get('/api/categories', async (_req, res) => {
         res.status(500).json({ error: 'Failed to fetch categories' })
     }
 })
+// ─── Related Systems ──────────────────────────────────────
+app.get('/api/related-systems', async (_req, res) => {
+    try {
+        const systems = await prisma.relatedSystem.findMany({
+            where: { isActive: true },
+            select: { id: true, name: true },
+            orderBy: { id: 'asc' },
+        })
+        res.status(200).json(systems)
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch related systems' })
+    }
+})
 
+// ─── Dev Requesters ───────────────────────────────────────
+app.get('/api/requesters', async (_req, res) => {
+    try {
+        const requesters = await prisma.devRequester.findMany({
+            where: { isActive: true },
+            select: { id: true, name: true, email: true },
+            orderBy: { name: 'asc' },
+        })
+        res.status(200).json(requesters)
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch requesters' })
+    }
+})
 // ─── Ticket Helper ────────────────────────────────────────
 async function generateTicketNumber(tx: typeof prisma): Promise<string> {
     const year = new Date().getFullYear()
