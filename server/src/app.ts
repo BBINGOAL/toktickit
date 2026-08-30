@@ -9,7 +9,6 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 const app = express()
-
 app.use(cors({ origin: "http://localhost:5173" }))
 app.use(express.json())
 
@@ -57,6 +56,84 @@ app.get('/api/requesters', async (_req, res) => {
         res.status(200).json(requesters)
     } catch {
         res.status(500).json({ error: 'Failed to fetch requesters' })
+    }
+})
+
+// ─── Ticket Helper ────────────────────────────────────────
+async function generateTicketNumber(tx: typeof prisma): Promise<string> {
+    const year = new Date().getFullYear()
+    const last = await tx.ticket.findFirst({
+        orderBy: { id: 'desc' },
+        select: { ticketNumber: true },
+    })
+    let nextNum = 1
+    if (last) {
+        const parts = last.ticketNumber.split('-')
+        nextNum = parseInt(parts[2], 10) + 1
+    }
+    return `TKT-${year}-${String(nextNum).padStart(6, '0')}`
+}
+
+// ─── Create Ticket ────────────────────────────────────────
+app.post('/api/tickets', async (req, res) => {
+    const requesterId = parseInt(req.headers['x-requester-id'] as string)
+    if (!requesterId || isNaN(requesterId)) {
+        res.status(400).json({ error: 'Requester ID is required' })
+        return
+    }
+
+    const requester = await prisma.devRequester.findUnique({ where: { id: requesterId } })
+    if (!requester || !requester.isActive) {
+        res.status(403).json({ error: 'Requester not found or inactive' })
+        return
+    }
+
+    const { categoryId, relatedSystemId, summary, description, requestedPriority } = req.body
+    const errors: Record<string, string> = {}
+
+    if (!categoryId || !Number.isInteger(categoryId)) errors.categoryId = 'Category is required'
+    if (!relatedSystemId || !Number.isInteger(relatedSystemId)) errors.relatedSystemId = 'Related system is required'
+    if (!summary || typeof summary !== 'string' || summary.trim().length < 5 || summary.trim().length > 200)
+        errors.summary = 'Summary must be between 5 and 200 characters'
+    if (!description || typeof description !== 'string' || description.trim().length < 10 || description.trim().length > 2000)
+        errors.description = 'Description must be between 10 and 2000 characters'
+    if (!['LOW', 'MEDIUM', 'HIGH'].includes(requestedPriority))
+        errors.requestedPriority = 'Priority must be LOW, MEDIUM, or HIGH'
+
+    if (Object.keys(errors).length > 0) {
+        res.status(400).json({ error: 'Validation failed', details: errors })
+        return
+    }
+
+    const category = await prisma.category.findUnique({ where: { id: categoryId } })
+    if (!category || !category.isActive) {
+        res.status(400).json({ error: 'Category not found or inactive' })
+        return
+    }
+    const relatedSystem = await prisma.relatedSystem.findUnique({ where: { id: relatedSystemId } })
+    if (!relatedSystem || !relatedSystem.isActive) {
+        res.status(400).json({ error: 'Related system not found or inactive' })
+        return
+    }
+
+    try {
+        const ticket = await prisma.$transaction(async (tx) => {
+            const ticketNumber = await generateTicketNumber(tx as typeof prisma)
+            return tx.ticket.create({
+                data: {
+                    ticketNumber,
+                    requesterId,
+                    categoryId,
+                    relatedSystemId,
+                    summary: summary.trim(),
+                    description: description.trim(),
+                    requestedPriority,
+                },
+            })
+        })
+        res.status(201).json(ticket)
+    } catch {
+        res.status(500).json({ error: 'Failed to create ticket' })
     }
 })
 
