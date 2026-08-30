@@ -30,6 +30,7 @@ app.get('/api/categories', async (_req, res) => {
         res.status(500).json({ error: 'Failed to fetch categories' })
     }
 })
+
 // ─── Related Systems ──────────────────────────────────────
 app.get('/api/related-systems', async (_req, res) => {
     try {
@@ -57,6 +58,7 @@ app.get('/api/requesters', async (_req, res) => {
         res.status(500).json({ error: 'Failed to fetch requesters' })
     }
 })
+
 // ─── Ticket Helper ────────────────────────────────────────
 async function generateTicketNumber(tx: typeof prisma): Promise<string> {
     const year = new Date().getFullYear()
