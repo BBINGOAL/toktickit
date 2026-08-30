@@ -9,28 +9,55 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 const app = express()
-app.use(cors({
-    origin: "http://localhost:5173",
-}))
 
+app.use(cors({ origin: "http://localhost:5173" }))
 app.use(express.json())
 
-app.get('/api/health', (req, res) => {
-    res.status(200).json({
-        status: 'ok',
-        service: "TokTickIT API"
-    })
-}
-)
-app.get('/api/categories', async (req, res) => {
+// ─── Health ───────────────────────────────────────────────
+app.get('/api/health', (_req, res) => {
+    res.status(200).json({ status: 'ok', service: "TokTickIT API" })
+})
+
+// ─── Categories ───────────────────────────────────────────
+app.get('/api/categories', async (_req, res) => {
     try {
         const categories = await prisma.category.findMany({
+            where: { isActive: true },
             select: { id: true, name: true },
             orderBy: { id: 'asc' },
         })
         res.status(200).json(categories)
-    } catch (error) {
+    } catch {
         res.status(500).json({ error: 'Failed to fetch categories' })
     }
 })
+
+// ─── Related Systems ──────────────────────────────────────
+app.get('/api/related-systems', async (_req, res) => {
+    try {
+        const systems = await prisma.relatedSystem.findMany({
+            where: { isActive: true },
+            select: { id: true, name: true },
+            orderBy: { id: 'asc' },
+        })
+        res.status(200).json(systems)
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch related systems' })
+    }
+})
+
+// ─── Dev Requesters ───────────────────────────────────────
+app.get('/api/requesters', async (_req, res) => {
+    try {
+        const requesters = await prisma.devRequester.findMany({
+            where: { isActive: true },
+            select: { id: true, name: true, email: true },
+            orderBy: { name: 'asc' },
+        })
+        res.status(200).json(requesters)
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch requesters' })
+    }
+})
+
 export default app
