@@ -4,9 +4,9 @@ import AppShell from './components/AppShell'
 import RequesterSelectionPage from './pages/RequesterSelectionPage'
 import CreateTicketPage from './pages/CreateTicketPage'
 import MyTicketsPage from './pages/MyTicketsPage'
+import TicketDetailPage from './pages/TicketDetailPage'
 import { useRequester } from './context/RequesterContext'
 
-// Guard: ถ้ายังไม่เลือก requester ให้ redirect กลับหน้า /
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { requester } = useRequester()
     if (!requester) return <Navigate to="/" replace />
@@ -38,10 +38,7 @@ function AppRoutes() {
                     path="/tickets/:id"
                     element={
                         <ProtectedRoute>
-                            <div style={{ textAlign: 'center', padding: 'var(--space-12)', color: 'var(--color-text-secondary)' }}>
-                                <h2>Ticket Detail</h2>
-                                <p style={{ marginTop: 'var(--space-4)' }}>Coming soon — Issue 8 🚀</p>
-                            </div>
+                            <TicketDetailPage />
                         </ProtectedRoute>
                     }
                 />
