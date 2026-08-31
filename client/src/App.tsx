@@ -11,8 +11,8 @@ function App() {
     try {
       // เรียก 2 API พร้อมกัน
       const [healthRes, categoriesRes] = await Promise.all([
-        fetch('http://localhost:3000/api/health'),
-        fetch('http://localhost:3000/api/categories'),
+        fetch('http://localhost:4000/api/health'),
+        fetch('http://localhost:4000/api/categories'),
       ])
 
       if (!healthRes.ok || !categoriesRes.ok) throw new Error('Server error')
