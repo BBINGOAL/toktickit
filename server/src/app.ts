@@ -325,6 +325,7 @@ app.post('/api/tickets/:id/attachments', (req, res, next) => {
             const attachment = await prisma.attachment.create({
                 data: {
                     ticketId: ticket.id,
+                    uploadedById: requesterId,
                     originalFilename: req.file.originalname,
                     storedFilename: req.file.filename,
                     mimeType: req.file.mimetype,
