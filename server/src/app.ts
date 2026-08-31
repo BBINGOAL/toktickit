@@ -77,7 +77,7 @@ app.get('/api/requesters', async (_req, res) => {
     try {
         const requesters = await prisma.devRequester.findMany({
             where: { isActive: true },
-            select: { id: true, name: true, email: true },
+            select: { id: true, name: true, email: true, isActive: true },
             orderBy: { name: 'asc' },
         })
         res.status(200).json(requesters)
