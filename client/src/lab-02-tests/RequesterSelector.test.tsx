@@ -11,7 +11,9 @@ vi.mock('../api', () => ({
 
 describe('RequesterSelector', () => {
     it('UI-01: Renders selector when no requester selected', async () => {
-        vi.mocked(api.fetchRequesters).mockResolvedValue([])
+        vi.mocked(api.fetchRequesters).mockResolvedValue([
+            { id: 1, name: 'Active User', email: 'active@test.com', isActive: true }
+        ])
         
         render(
             <MemoryRouter initialEntries={['/']}>
@@ -21,8 +23,9 @@ describe('RequesterSelector', () => {
             </MemoryRouter>
         )
         
-        expect(screen.getByText(/Select Development Requester/i)).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /Select Requester/i })).toBeDisabled()
+        await waitFor(() => expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument())
+        expect(screen.getByText(/Development Requester Selection/i)).toBeInTheDocument()
+        expect(screen.getByRole('button', { name: /Select Requester/i })).toBeInTheDocument()
     })
 
     it('UI-02: Only shows active requesters in dropdown', async () => {

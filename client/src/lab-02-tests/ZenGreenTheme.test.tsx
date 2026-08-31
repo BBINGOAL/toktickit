@@ -16,8 +16,8 @@ describe('ZenGreenTheme', () => {
             </MemoryRouter>
         )
         
-        const header = screen.getByRole('banner')
-        // ตรวจสอบว่ามี backgroundColor เป็น #006B3C หรือคล้ายคลึง
-        expect(header).toHaveStyle({ backgroundColor: '#006B3C' })
+        const header = screen.getByRole('navigation')
+        // ตรวจสอบว่ามี background เป็น var(--color-primary) เนื่องจาก JSDOM ไม่ทำการแปลง CSS Variable
+        expect(header).toHaveStyle({ background: 'var(--color-primary)' })
     })
 })

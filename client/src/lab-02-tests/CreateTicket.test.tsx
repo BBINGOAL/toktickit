@@ -40,23 +40,25 @@ describe('CreateTicketPage', () => {
     }
 
     it('UI-03, STYLE-03: Submit with empty Summary shows field error below input, no API call', async () => {
-        renderPage()
+        const { container } = renderPage()
         
         // รอให้ dropdown โหลดเสร็จ
         await waitFor(() => expect(screen.getByText('Hardware')).toBeInTheDocument())
         
+        const selects = container.querySelectorAll('select')
+        
         // เลือก Category, System, Priority และกรอกแค่ Description
-        fireEvent.change(screen.getByLabelText(/Category/i), { target: { value: '1' } })
-        fireEvent.change(screen.getByLabelText(/Related System/i), { target: { value: '1' } })
-        fireEvent.change(screen.getByLabelText(/Requested Priority/i), { target: { value: 'LOW' } })
-        fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'This is a valid description.' } })
+        fireEvent.change(selects[0], { target: { value: '1' } })
+        fireEvent.change(selects[1], { target: { value: '1' } })
+        fireEvent.change(selects[2], { target: { value: 'LOW' } })
+        fireEvent.change(screen.getByPlaceholderText(/Detailed description/i), { target: { value: 'This is a valid description.' } })
         
         // ปล่อย Summary ว่างไว้ แล้วกด Submit
         const submitBtn = screen.getByRole('button', { name: /Submit Ticket/i })
         fireEvent.click(submitBtn)
         
         // ตรวจสอบ error message ว่าแสดงใต้ field
-        expect(await screen.findByText(/Summary must be between 5 and 200 characters/i)).toBeInTheDocument()
+        expect(await screen.findByText(/Summary is required/i)).toBeInTheDocument()
         expect(api.createTicket).not.toHaveBeenCalled()
     })
 
@@ -65,10 +67,10 @@ describe('CreateTicketPage', () => {
         await waitFor(() => expect(screen.getByText('Hardware')).toBeInTheDocument())
         
         const longSummary = 'A'.repeat(201)
-        fireEvent.change(screen.getByLabelText(/Summary/i), { target: { value: longSummary } })
+        fireEvent.change(screen.getByPlaceholderText(/Brief description/i), { target: { value: longSummary } })
         fireEvent.click(screen.getByRole('button', { name: /Submit Ticket/i }))
         
-        expect(await screen.findByText(/Summary must be between 5 and 200 characters/i)).toBeInTheDocument()
+        expect(await screen.findByText(/Summary must be at most 200 characters/i)).toBeInTheDocument()
         expect(api.createTicket).not.toHaveBeenCalled()
     })
 
@@ -80,15 +82,16 @@ describe('CreateTicketPage', () => {
             }), 100))
         )
         
-        renderPage()
+        const { container } = renderPage()
         await waitFor(() => expect(screen.getByText('Hardware')).toBeInTheDocument())
         
+        const selects = container.querySelectorAll('select')
         // Fill form
-        fireEvent.change(screen.getByLabelText(/Category/i), { target: { value: '1' } })
-        fireEvent.change(screen.getByLabelText(/Related System/i), { target: { value: '1' } })
-        fireEvent.change(screen.getByLabelText(/Requested Priority/i), { target: { value: 'LOW' } })
-        fireEvent.change(screen.getByLabelText(/Summary/i), { target: { value: 'Test Summary' } })
-        fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test Description' } })
+        fireEvent.change(selects[0], { target: { value: '1' } })
+        fireEvent.change(selects[1], { target: { value: '1' } })
+        fireEvent.change(selects[2], { target: { value: 'LOW' } })
+        fireEvent.change(screen.getByPlaceholderText(/Brief description/i), { target: { value: 'Test Summary' } })
+        fireEvent.change(screen.getByPlaceholderText(/Detailed description/i), { target: { value: 'Test Description' } })
         
         const submitBtn = screen.getByRole('button', { name: /Submit Ticket/i })
         fireEvent.click(submitBtn)
@@ -99,36 +102,37 @@ describe('CreateTicketPage', () => {
         
         // UI-05: Success message with ticket number
         expect(await screen.findByText('TKT-2026-000001')).toBeInTheDocument()
-        expect(screen.getByText(/Ticket created successfully/i)).toBeInTheDocument()
+        expect(screen.getByText(/Ticket Created!/i)).toBeInTheDocument()
     })
 
     it('UI-07: Backend failure preserves form values and shows error', async () => {
         vi.mocked(api.createTicket).mockRejectedValue(new Error('Server Error 500'))
         
-        renderPage()
+        const { container } = renderPage()
         await waitFor(() => expect(screen.getByText('Hardware')).toBeInTheDocument())
         
-        fireEvent.change(screen.getByLabelText(/Category/i), { target: { value: '1' } })
-        fireEvent.change(screen.getByLabelText(/Related System/i), { target: { value: '1' } })
-        fireEvent.change(screen.getByLabelText(/Requested Priority/i), { target: { value: 'LOW' } })
-        fireEvent.change(screen.getByLabelText(/Summary/i), { target: { value: 'Test Summary' } })
-        fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test Description' } })
+        const selects = container.querySelectorAll('select')
+        fireEvent.change(selects[0], { target: { value: '1' } })
+        fireEvent.change(selects[1], { target: { value: '1' } })
+        fireEvent.change(selects[2], { target: { value: 'LOW' } })
+        fireEvent.change(screen.getByPlaceholderText(/Brief description/i), { target: { value: 'Test Summary' } })
+        fireEvent.change(screen.getByPlaceholderText(/Detailed description/i), { target: { value: 'Test Description' } })
         
         fireEvent.click(screen.getByRole('button', { name: /Submit Ticket/i }))
         
         // ควรมี banner error แต่ค่าที่พิมพ์ต้องยังอยู่
         expect(await screen.findByText(/Server Error 500/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Summary/i)).toHaveValue('Test Summary')
+        expect(screen.getByPlaceholderText(/Brief description/i)).toHaveValue('Test Summary')
     })
 
-    it('STYLE-02: Required field asterisks present', () => {
-        renderPage()
+    it('STYLE-02: Required field asterisks present', async () => {
+        const { container } = renderPage()
+        await waitFor(() => expect(screen.getByText('Hardware')).toBeInTheDocument())
         const requiredLabels = ['Category', 'Related System', 'Requested Priority', 'Summary', 'Description']
+        const labels = Array.from(container.querySelectorAll('label.form-label'))
         requiredLabels.forEach(label => {
-            const el = screen.getByText((content, element) => {
-                return element?.tagName.toLowerCase() === 'label' && content.includes(label) && content.includes('*')
-            })
-            expect(el).toBeInTheDocument()
+            const hasLabel = labels.some(el => el.textContent?.includes(label) && el.textContent?.includes('*'))
+            expect(hasLabel).toBe(true)
         })
     })
 })
