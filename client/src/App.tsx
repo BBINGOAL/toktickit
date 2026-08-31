@@ -1,69 +1,53 @@
-import { useState } from 'react'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { RequesterProvider } from './context/RequesterContext'
+import AppShell from './components/AppShell'
+import RequesterSelectionPage from './pages/RequesterSelectionPage'
+import CreateTicketPage from './pages/CreateTicketPage'
+import { useRequester } from './context/RequesterContext'
 
-function App() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'online' | 'error'>('idle')
-  const [errorMsg, setErrorMsg] = useState('')
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([])
-
-  const checkSystem = async () => {
-    setStatus('loading')
-    try {
-      // เรียก 2 API พร้อมกัน
-      const [healthRes, categoriesRes] = await Promise.all([
-        fetch('http://localhost:4000/api/health'),
-        fetch('http://localhost:4000/api/categories'),
-      ])
-
-      if (!healthRes.ok || !categoriesRes.ok) throw new Error('Server error')
-
-      const healthData = await healthRes.json()
-      const categoriesData = await categoriesRes.json()
-
-      if (healthData.status === 'ok') {
-        setStatus('online')
-        setCategories(categoriesData)
-      }
-    } catch (err) {
-      setStatus('error')
-      setErrorMsg('Unable to connect to TokTickIT API')
-      setCategories([])
-    }
-  }
-
-
-  return (
-    <div className="container mt-5 text-center">
-      <h1>TokTickIT</h1>
-      <p>IT Service Desk</p>
-
-      <button className="btn btn-primary" onClick={checkSystem}>
-        Check System
-      </button>
-
-      {status === 'loading' && <p className="mt-3">⏳ loading...</p>}
-
-      {status === 'error' && (
-        <div className="mt-3 text-danger">
-          <p>System Status: Offline ❌</p>
-          <p>{errorMsg}</p>
-        </div>
-      )}
-
-      {status === 'online' && (
-        <div className="mt-3">
-          <p className="text-success">System Status: Online ✅</p>
-          <h5>Supported Request Categories:</h5>
-          <ul className="list-unstyled">
-            {categories.map((cat) => (
-              <li key={cat.id}>• {cat.name}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
-
+// Guard: ถ้ายังไม่เลือก requester ให้ redirect กลับหน้า /
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+    const { requester } = useRequester()
+    if (!requester) return <Navigate to="/" replace />
+    return <>{children}</>
 }
 
-export default App
+function AppRoutes() {
+    return (
+        <AppShell>
+            <Routes>
+                <Route path="/" element={<RequesterSelectionPage />} />
+                <Route
+                    path="/create"
+                    element={
+                        <ProtectedRoute>
+                            <CreateTicketPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/tickets"
+                    element={
+                        <ProtectedRoute>
+                            <div style={{ textAlign: 'center', padding: 'var(--space-12)', color: 'var(--color-text-secondary)' }}>
+                                <h2>My Tickets</h2>
+                                <p style={{ marginTop: 'var(--space-4)' }}>Coming soon — Issue 7 🚀</p>
+                            </div>
+                        </ProtectedRoute>
+                    }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </AppShell>
+    )
+}
+
+export default function App() {
+    return (
+        <BrowserRouter>
+            <RequesterProvider>
+                <AppRoutes />
+            </RequesterProvider>
+        </BrowserRouter>
+    )
+}
