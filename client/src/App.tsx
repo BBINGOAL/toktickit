@@ -3,6 +3,7 @@ import { RequesterProvider } from './context/RequesterContext'
 import AppShell from './components/AppShell'
 import RequesterSelectionPage from './pages/RequesterSelectionPage'
 import CreateTicketPage from './pages/CreateTicketPage'
+import MyTicketsPage from './pages/MyTicketsPage'
 import { useRequester } from './context/RequesterContext'
 
 // Guard: ถ้ายังไม่เลือก requester ให้ redirect กลับหน้า /
@@ -29,9 +30,17 @@ function AppRoutes() {
                     path="/tickets"
                     element={
                         <ProtectedRoute>
+                            <MyTicketsPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/tickets/:id"
+                    element={
+                        <ProtectedRoute>
                             <div style={{ textAlign: 'center', padding: 'var(--space-12)', color: 'var(--color-text-secondary)' }}>
-                                <h2>My Tickets</h2>
-                                <p style={{ marginTop: 'var(--space-4)' }}>Coming soon — Issue 7 🚀</p>
+                                <h2>Ticket Detail</h2>
+                                <p style={{ marginTop: 'var(--space-4)' }}>Coming soon — Issue 8 🚀</p>
                             </div>
                         </ProtectedRoute>
                     }
