@@ -18,7 +18,7 @@ export default function RequesterSelectionPage() {
         setError(null)
         try {
             const data = await fetchRequesters()
-            setRequesters(data.filter(r => r.isActive))
+            setRequesters(data)
         } catch {
             setError('Failed to load requesters. Please try again.')
         } finally {
