@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "test": "vitest run",
+    "test": "vitest run --fileParallelism=false",
     "db:start": "docker compose up -d",
     "db:push": "npx prisma db push",
     "db:migrate": "npx prisma migrate dev",

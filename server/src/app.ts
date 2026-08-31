@@ -36,7 +36,7 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 const app = express()
-app.use(cors({ origin: "http://localhost:5173" }))
+app.use(cors())
 app.use(express.json())
 
 // ─── Health ───────────────────────────────────────────────
