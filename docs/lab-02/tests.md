@@ -120,18 +120,18 @@ To be completed during implementation using Playwright screenshots at 3 viewport
 
 | Check | Desktop (1280px) | Tablet (768px) | Mobile (375px) |
 |---|---|---|---|
-| No horizontal page scrolling | ☐ | ☐ | ☐ |
-| No clipped labels or text | ☐ | ☐ | ☐ |
-| No overlapping elements | ☐ | ☐ | ☐ |
-| All buttons visible and touchable | ☐ | ☐ | ☐ |
-| Required asterisks visible | ☐ | ☐ | ☐ |
-| Validation messages below fields | ☐ | ☐ | ☐ |
-| Badge colors consistent | ☐ | ☐ | ☐ |
-| Header color `#006B3C` | ☐ | ☐ | ☐ |
-| Read-only fields visually distinct | ☐ | ☐ | ☐ |
-| Empty/no-results states shown | ☐ | ☐ | ☐ |
-| Attachment names not clipped | ☐ | ☐ | ☐ |
-| Pagination controls usable | ☐ | ☐ | ☐ |
+| No horizontal page scrolling | ✅ | ✅ | ✅ |
+| No clipped labels or text | ✅ | ✅ | ✅ |
+| No overlapping elements | ✅ | ✅ | ✅ |
+| All buttons visible and touchable | ✅ | ✅ | ✅ |
+| Required asterisks visible | ✅ | ✅ | ✅ |
+| Validation messages below fields | ✅ | ✅ | ✅ |
+| Badge colors consistent | ✅ | ✅ | ✅ |
+| Header color `#006B3C` | ✅ | ✅ | ✅ |
+| Read-only fields visually distinct | ✅ | ✅ | ✅ |
+| Empty/no-results states shown | ✅ | ✅ | ✅ |
+| Attachment names not clipped | ✅ | ✅ | ✅ |
+| Pagination controls usable | ✅ | ✅ | ✅ |
 
 ---
 
