@@ -1,13 +1,14 @@
 # TokTickIT
 
-ToktickIT is the lab 1 of CPE 334 Software Engineering ,a Full-Stack Hello World Starter application.
-It demonstrates a complete vertical slice proving that every layer of the tech stack works well.
+ToktickIT is a Full-Stack Starter application for CPE 334 Software Engineering.
+- **Lab 1:** Project Foundation (Hello World, DB Setup, Basic APIs)
+- **Lab 2:** Requester Ticketing MVP with UI Foundation (Ticket Creation, My Tickets, Attachments, E2E Testing)
 
 ## Tech Stack
 - **Frontend:** React + TypeScript + Vite + Bootstrap
 - **Backend:** Node.js + Express + TypeScript
 - **Database:** PostgreSQL (via Docker) + Prisma
-- **Testing:** Vitest + Supertest
+- **Testing:** Vitest (Frontend), Supertest (Backend), Playwright (E2E)
 
 ---
 
@@ -19,12 +20,14 @@ toktickit/
 ├── server/                 # Express backend application
 │   ├── prisma/             # Database schema and seeds
 │   ├── src/                # Backend source code
-│   └── tests/              # Supertest API tests
-│       └── lab-01/
+│   └── tests/              # Supertest API tests (lab-01, lab-02)
+├── e2e/                    # Playwright End-to-End tests
+│   └── lab-02/
 ├── docs/
-│   └── lab-01/             # Lab submission documents
-│       ├── ai_use.md
-│       └── reviewer.md
+│   ├── lab-01/             # Lab 1 submission documents
+│   └── lab-02/             # Lab 2 submission documents (specs, ai-use, tests)
+├── artifacts/              # Screenshots and visual evidence
+│   └── lab-02/
 ├── .gitignore
 └── README.md
 ```
@@ -93,4 +96,12 @@ npm test
 ```bash
 cd client
 npm test
+```
+
+### End-to-End Tests (Playwright)
+Ensure both the frontend and backend servers are running locally before executing E2E tests.
+```bash
+cd e2e
+npm install
+npx playwright test
 ```
