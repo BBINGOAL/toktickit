@@ -17,8 +17,21 @@ enum Priority {
   HIGH
 }
 
+enum Role {
+  REQUESTER
+  IT_STAFF
+  ADMIN
+}
+
 enum TicketStatus {
   NEW
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_REQUESTER
+  RESOLVED
+  CLOSED
+  REOPENED
+  CANCELLED
 }
 
 // ─── Reference Tables ─────────────────────────────────────
@@ -38,16 +51,26 @@ model RelatedSystem {
   tickets   Ticket[]
 }
 
-// ─── Dev Requester (replaces login in Lab 2) ──────────────
-model DevRequester {
-  id          Int          @id @default(autoincrement())
-  name        String
-  email       String       @unique
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  tickets     Ticket[]
-  attachments Attachment[]
+// ─── User (New in Lab 3) ──────────────────────────────────
+model User {
+  id                 Int       @id @default(autoincrement())
+  name               String
+  email              String    @unique
+  passwordHash       String    // เก็บพาสเวิร์ดที่เข้ารหัสแล้ว
+  role               Role      @default(REQUESTER)
+  isActive           Boolean   @default(true)
+  mustChangePassword Boolean   @default(true) // บังคับเปลี่ยนรหัสผ่านครั้งแรก
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  ticketsOwned     Ticket[]        @relation("TicketRequester")
+  ticketsAssigned  Ticket[]        @relation("TicketOwner")
+  attachments      Attachment[]
+  publicComments   PublicComment[]
+  internalNotes    InternalNote[]
 }
+
 
 // ─── Ticket ───────────────────────────────────────────────
 model Ticket {
@@ -61,19 +84,41 @@ model Ticket {
   requestedPriority Priority
   itPriority        Priority?
   status            TicketStatus @default(NEW)
-  ticketOwner       String?
+  ownerId           Int?         // ชี้ไปหาพนักงาน IT (User)
   resolutionSummary String?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
-
-  requester     DevRequester  @relation(fields: [requesterId], references: [id])
+  // Relations
+  requester     User          @relation("TicketRequester", fields: [requesterId], references: [id])
+  owner         User?         @relation("TicketOwner", fields: [ownerId], references: [id])
   category      Category      @relation(fields: [categoryId], references: [id])
   relatedSystem RelatedSystem @relation(fields: [relatedSystemId], references: [id])
   attachments   Attachment[]
-
+  comments      PublicComment[]
+  notes         InternalNote[]
   @@index([requesterId])
+  @@index([ownerId])
   @@index([createdAt])
   @@index([status])
+}
+
+model PublicComment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  ticketId  Int
+  authorId  Int
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
+}
+model InternalNote {
+  id        Int      @id @default(autoincrement())
+  content   String
+  ticketId  Int
+  authorId  Int
+  createdAt DateTime @default(now())
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
 }
 
 // ─── Attachment ───────────────────────────────────────────
@@ -91,7 +136,7 @@ model Attachment {
   createdAt         DateTime     @default(now())
 
   ticket      Ticket       @relation(fields: [ticketId], references: [id])
-  uploadedBy  DevRequester @relation(fields: [uploadedById], references: [id])
+  uploadedBy  User         @relation(fields: [uploadedById], references: [id])
 
   @@index([ticketId])
   @@index([isRemoved])
