@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchTickets, fetchCategories } from '../api'
 import type { TicketListItem, Category } from '../api'
-import { useRequester } from '../context/RequesterContext'
+import { useAuth } from '../context/AuthContext'
 
 const PRIORITY_COLORS: Record<string, { bg: string; color: string }> = {
     LOW: { bg: '#EAF6EF', color: '#006B3C' },
@@ -45,7 +45,7 @@ function formatDate(iso: string) {
 }
 
 export default function MyTicketsPage() {
-    const { requester } = useRequester()
+    const { user } = useAuth()
 
     // filter / sort / pagination state
     const [search, setSearch] = useState('')
@@ -71,11 +71,11 @@ export default function MyTicketsPage() {
     }, [])
 
     const load = useCallback(async () => {
-        if (!requester) return
+        if (!user) return
         setLoading(true)
         setError(null)
         try {
-            const res = await fetchTickets(requester.id, {
+            const res = await fetchTickets(user.id, {
                 search: search || undefined,
                 categoryId: categoryId ? Number(categoryId) : undefined,
                 requestedPriority: priority || undefined,
@@ -92,7 +92,7 @@ export default function MyTicketsPage() {
         } finally {
             setLoading(false)
         }
-    }, [requester, search, categoryId, priority, sort, order, page, pageSize])
+    }, [user, search, categoryId, priority, sort, order, page, pageSize])
 
     useEffect(() => { load() }, [load])
 

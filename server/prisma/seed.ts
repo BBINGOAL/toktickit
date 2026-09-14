@@ -58,7 +58,7 @@ async function main() {
   for (const r of activeRequesters) {
     await prisma.user.upsert({
       where: { email: r.email },
-      update: { name: r.name, isActive: true },
+      update: { name: r.name, isActive: true, passwordHash: defaultPassword },
       create: { ...r, passwordHash: defaultPassword, isActive: true, mustChangePassword: true },
     });
   }
@@ -72,7 +72,7 @@ async function main() {
   for (const u of staffAndAdmin) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: { name: u.name, isActive: true },
+      update: { name: u.name, isActive: true, passwordHash: defaultPassword },
       create: { ...u, passwordHash: defaultPassword, isActive: true, mustChangePassword: true },
     });
   }

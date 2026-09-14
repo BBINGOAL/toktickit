@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { fetchTicketDetail, uploadAttachment, downloadAttachment, removeAttachment } from '../api'
 import type { TicketDetail, Attachment } from '../api'
-import { useRequester } from '../context/RequesterContext'
+import { useAuth } from '../context/AuthContext'
 
 const PRIORITY_COLORS: Record<string, { bg: string; color: string }> = {
     LOW: { bg: '#EAF6EF', color: '#006B3C' },
@@ -197,7 +197,7 @@ function AttachmentRow({ att, requesterId, onRemoved, onDownload }: {
 // ─── Main Page ─────────────────────────────────────────────
 export default function TicketDetailPage() {
     const { id } = useParams<{ id: string }>()
-    const { requester } = useRequester()
+    const { user } = useAuth()
     const navigate = useNavigate()
 
     const [ticket, setTicket] = useState<TicketDetail | null>(null)
@@ -209,7 +209,7 @@ export default function TicketDetailPage() {
     const [uploading, setUploading] = useState(false)
 
     useEffect(() => {
-        if (!requester || !id) return
+        if (!user || !id) return
         setLoading(true)
         setError(null)
         fetchTicketDetail(requester.id, parseInt(id))
@@ -234,7 +234,7 @@ export default function TicketDetailPage() {
     }
 
     async function handleUpload(file: File) {
-        if (!requester || !ticket) return
+        if (!user || !ticket) return
         setUploading(true)
         setUploadError(null)
         try {
@@ -255,7 +255,7 @@ export default function TicketDetailPage() {
     }
 
     async function handleDownload(att: Attachment) {
-        if (!requester) return
+        if (!user) return
         try {
             await downloadAttachment(requester.id, att.id, att.originalFilename)
         } catch {
@@ -431,7 +431,7 @@ export default function TicketDetailPage() {
                         <AttachmentRow
                             key={att.id}
                             att={att}
-                            requesterId={requester!.id}
+                            requesterId={user!.id}
                             onRemoved={handleRemoved}
                             onDownload={handleDownload}
                         />

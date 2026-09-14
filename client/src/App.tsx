@@ -1,15 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { RequesterProvider } from './context/RequesterContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import AppShell from './components/AppShell'
-import RequesterSelectionPage from './pages/RequesterSelectionPage'
+import Login from './pages/Login'
 import CreateTicketPage from './pages/CreateTicketPage'
 import MyTicketsPage from './pages/MyTicketsPage'
 import TicketDetailPage from './pages/TicketDetailPage'
-import { useRequester } from './context/RequesterContext'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-    const { requester } = useRequester()
-    if (!requester) return <Navigate to="/" replace />
+    const { user } = useAuth()
+    if (!user) return <Navigate to="/" replace />
     return <>{children}</>
 }
 
@@ -17,7 +16,7 @@ function AppRoutes() {
     return (
         <AppShell>
             <Routes>
-                <Route path="/" element={<RequesterSelectionPage />} />
+                <Route path="/" element={<Login />} />
                 <Route
                     path="/create"
                     element={
@@ -51,9 +50,9 @@ function AppRoutes() {
 export default function App() {
     return (
         <BrowserRouter>
-            <RequesterProvider>
+            <AuthProvider>
                 <AppRoutes />
-            </RequesterProvider>
+            </AuthProvider>
         </BrowserRouter>
     )
 }

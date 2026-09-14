@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchCategories, fetchRelatedSystems, createTicket, uploadAttachment } from '../api'
 import type { Category, RelatedSystem } from '../api'
-import { useRequester } from '../context/RequesterContext'
+import { useAuth } from '../context/AuthContext'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
 const MAX_SIZE = 5 * 1024 * 1024
@@ -21,7 +21,7 @@ interface FormErrors {
 }
 
 export default function CreateTicketPage() {
-    const { requester } = useRequester()
+    const { user } = useAuth()
     const navigate = useNavigate()
 
     // Reference data
@@ -118,7 +118,7 @@ export default function CreateTicketPage() {
         setApiError(null)
 
         try {
-            const ticket = await createTicket(requester!.id, {
+            const ticket = await createTicket(user!.id, {
                 categoryId: parseInt(categoryId),
                 relatedSystemId: parseInt(relatedSystemId),
                 summary: summary.trim(),
@@ -130,7 +130,7 @@ export default function CreateTicketPage() {
             const uploadErrors: string[] = []
             for (const entry of validFiles) {
                 try {
-                    await uploadAttachment(requester!.id, ticket.id, entry.file)
+                    await uploadAttachment(user!.id, ticket.id, entry.file)
                 } catch (err: unknown) {
                     uploadErrors.push(
                         `${entry.file.name}: ${err instanceof Error ? err.message : 'Upload failed'}`
