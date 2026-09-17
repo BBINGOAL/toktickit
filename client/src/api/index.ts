@@ -1,5 +1,27 @@
 const BASE_URL = 'http://localhost:4000'
 
+async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
+    return fetch(input, { ...init, credentials: 'include' })
+}
+
+export async function login(payload: any) {
+    const res = await apiFetch(`${BASE_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Login failed')
+    }
+    return res.json()
+}
+
+export async function logout() {
+    await apiFetch(`${BASE_URL}/api/auth/logout`, { method: 'POST' })
+}
+
+
 export interface Requester {
     id: number
     name: string
@@ -89,19 +111,19 @@ export interface TicketQuery {
 }
 
 export async function fetchRequesters(): Promise<Requester[]> {
-    const res = await fetch(`${BASE_URL}/api/requesters`)
+    const res = await apiFetch(`${BASE_URL}/api/requesters`)
     if (!res.ok) throw new Error('Failed to load requesters')
     return res.json()
 }
 
 export async function fetchCategories(): Promise<Category[]> {
-    const res = await fetch(`${BASE_URL}/api/categories`)
+    const res = await apiFetch(`${BASE_URL}/api/categories`)
     if (!res.ok) throw new Error('Failed to load categories')
     return res.json()
 }
 
 export async function fetchRelatedSystems(): Promise<RelatedSystem[]> {
-    const res = await fetch(`${BASE_URL}/api/related-systems`)
+    const res = await apiFetch(`${BASE_URL}/api/related-systems`)
     if (!res.ok) throw new Error('Failed to load related systems')
     return res.json()
 }
@@ -110,7 +132,7 @@ export async function createTicket(
     requesterId: number,
     payload: CreateTicketPayload
 ): Promise<Ticket> {
-    const res = await fetch(`${BASE_URL}/api/tickets`, {
+    const res = await apiFetch(`${BASE_URL}/api/tickets`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -138,7 +160,7 @@ export async function fetchTickets(
     if (query.order) params.set('order', query.order)
     if (query.page) params.set('page', String(query.page))
     if (query.pageSize) params.set('pageSize', String(query.pageSize))
-    const res = await fetch(`${BASE_URL}/api/tickets?${params.toString()}`, {
+    const res = await apiFetch(`${BASE_URL}/api/tickets?${params.toString()}`, {
         headers: { 'X-Requester-Id': String(requesterId) },
     })
     if (!res.ok) throw new Error('Failed to fetch tickets')
@@ -149,7 +171,7 @@ export async function fetchTicketDetail(
     requesterId: number,
     ticketId: number
 ): Promise<TicketDetail> {
-    const res = await fetch(`${BASE_URL}/api/tickets/${ticketId}`, {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}`, {
         headers: { 'X-Requester-Id': String(requesterId) },
     })
     if (!res.ok) throw new Error('Failed to fetch ticket detail')
@@ -163,7 +185,7 @@ export async function uploadAttachment(
 ): Promise<Attachment> {
     const form = new FormData()
     form.append('file', file)
-    const res = await fetch(`${BASE_URL}/api/tickets/${ticketId}/attachments`, {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/attachments`, {
         method: 'POST',
         headers: { 'X-Requester-Id': String(requesterId) },
         body: form,
@@ -180,7 +202,7 @@ export async function downloadAttachment(
     attachmentId: number,
     filename: string
 ): Promise<void> {
-    const res = await fetch(`${BASE_URL}/api/attachments/${attachmentId}/download`, {
+    const res = await apiFetch(`${BASE_URL}/api/attachments/${attachmentId}/download`, {
         headers: { 'X-Requester-Id': String(requesterId) },
     })
     if (!res.ok) throw new Error('Failed to download attachment')
@@ -198,7 +220,7 @@ export async function removeAttachment(
     attachmentId: number,
     removalReason: string
 ): Promise<Attachment> {
-    const res = await fetch(`${BASE_URL}/api/attachments/${attachmentId}/remove`, {
+    const res = await apiFetch(`${BASE_URL}/api/attachments/${attachmentId}/remove`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',

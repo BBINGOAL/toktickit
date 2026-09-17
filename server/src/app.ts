@@ -7,6 +7,9 @@ import { PrismaClient } from "./generated/prisma/client"
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
+import cookieParser from 'cookie-parser'
+import authRoutes from './routes/auth.routes'
+
 
 // ─── Upload Config ────────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads')
@@ -34,10 +37,18 @@ const upload = multer({
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
-const prisma = new PrismaClient({ adapter })
+export const prisma = new PrismaClient({ adapter })
 const app = express()
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173', // เปลี่ยนพอร์ตถ้า Frontend ของคุณไม่ได้รันที่ 5173
+    credentials: true
+}))
 app.use(express.json())
+app.use(cookieParser())
+
+// ─── Auth Routes ──────────────────────────────────────────────
+app.use('/api/auth', authRoutes)
+
 
 // ─── Health ───────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

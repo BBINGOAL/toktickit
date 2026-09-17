@@ -2,6 +2,7 @@ import "dotenv/config";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
+import bcrypt from 'bcryptjs';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -9,6 +10,8 @@ const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("🌱 Starting seed...");
+
+  const defaultPassword = bcrypt.hashSync('password123', 10);
 
   // ─── Categories ───────────────────────────────────────────
   const categories = [
@@ -45,33 +48,50 @@ async function main() {
   }
   console.log("✅ Related systems seeded");
 
-  // ─── Dev Requesters (Active) ──────────────────────────────
+  // ─── Users (Requesters) ───────────────────────────────────
   const activeRequesters = [
-    { name: "Jennifer Anderson", email: "jennifer.anderson@kmutt.ac.th" },
-    { name: "Michael Brown",     email: "michael.brown@kmutt.ac.th" },
-    { name: "Sarah Johnson",     email: "sarah.johnson@kmutt.ac.th" },
-    { name: "David Lee",         email: "david.lee@kmutt.ac.th" },
+    { name: "Jennifer Anderson", email: "jennifer.anderson@kmutt.ac.th", role: "REQUESTER" as const },
+    { name: "Michael Brown",     email: "michael.brown@kmutt.ac.th", role: "REQUESTER" as const },
+    { name: "Sarah Johnson",     email: "sarah.johnson@kmutt.ac.th", role: "REQUESTER" as const },
+    { name: "David Lee",         email: "david.lee@kmutt.ac.th", role: "REQUESTER" as const },
   ];
   for (const r of activeRequesters) {
-    await prisma.devRequester.upsert({
+    await prisma.user.upsert({
       where: { email: r.email },
-      update: { name: r.name, isActive: true },
-      create: { ...r, isActive: true },
+      update: { name: r.name, isActive: true, passwordHash: defaultPassword },
+      create: { ...r, passwordHash: defaultPassword, isActive: true, mustChangePassword: true },
     });
   }
-  console.log("✅ Active dev requesters seeded");
+  console.log("✅ Active Requesters seeded");
 
-  // ─── Dev Requester (Inactive) ─────────────────────────────
-  await prisma.devRequester.upsert({
+  // ─── Users (IT Staff & Admin) ─────────────────────────────
+  const staffAndAdmin = [
+    { name: "IT Staff One", email: "it1@kmutt.ac.th", role: "IT_STAFF" as const },
+    { name: "Admin System", email: "admin@kmutt.ac.th", role: "ADMIN" as const },
+  ];
+  for (const u of staffAndAdmin) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: { name: u.name, isActive: true, passwordHash: defaultPassword },
+      create: { ...u, passwordHash: defaultPassword, isActive: true, mustChangePassword: true },
+    });
+  }
+  console.log("✅ IT Staff and Admin seeded");
+
+  // ─── Inactive User ────────────────────────────────────────
+  await prisma.user.upsert({
     where: { email: "inactive.user@kmutt.ac.th" },
     update: { isActive: false },
     create: {
       name: "Inactive User",
       email: "inactive.user@kmutt.ac.th",
+      passwordHash: defaultPassword,
+      role: "REQUESTER" as const,
       isActive: false,
+      mustChangePassword: true
     },
   });
-  console.log("✅ Inactive dev requester seeded");
+  console.log("✅ Inactive user seeded");
 
   console.log("🎉 Seeding finished successfully!");
 }

@@ -1,12 +1,18 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { useRequester } from '../context/RequesterContext'
+import { useAuth } from '../context/AuthContext'
+import { logout as apiLogout } from '../api'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-    const { requester, setRequester } = useRequester()
+    const { user, logout } = useAuth()
     const navigate = useNavigate()
 
-    function handleChange() {
-        setRequester(null)
+    async function handleLogout() {
+        try {
+            await apiLogout()
+        } catch (e) {
+            console.error(e)
+        }
+        logout()
         navigate('/')
     }
 
@@ -29,40 +35,60 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     TokTickIT
                 </span>
 
-                {/* Nav links — only shown when requester is selected */}
-                {requester && (
+                {/* Nav links */}
+                {user && (
                     <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
-                        <NavLink
-                            to="/tickets"
-                            style={({ isActive }) => ({
-                                color: isActive ? 'var(--color-pale-green)' : '#fff',
-                                textDecoration: isActive ? 'underline' : 'none',
-                                fontWeight: 500,
-                                fontSize: 14,
-                            })}
-                        >
-                            My Tickets
-                        </NavLink>
-                        <NavLink
-                            to="/create"
-                            style={({ isActive }) => ({
-                                color: isActive ? 'var(--color-pale-green)' : '#fff',
-                                textDecoration: isActive ? 'underline' : 'none',
-                                fontWeight: 500,
-                                fontSize: 14,
-                            })}
-                        >
-                            Create Ticket
-                        </NavLink>
+                        {user.role === 'REQUESTER' && (
+                            <>
+                                <NavLink
+                                    to="/tickets"
+                                    style={({ isActive }) => ({
+                                        color: isActive ? 'var(--color-pale-green)' : '#fff',
+                                        textDecoration: isActive ? 'underline' : 'none',
+                                        fontWeight: 500,
+                                        fontSize: 14,
+                                    })}
+                                >
+                                    My Tickets
+                                </NavLink>
+                                <NavLink
+                                    to="/create"
+                                    style={({ isActive }) => ({
+                                        color: isActive ? 'var(--color-pale-green)' : '#fff',
+                                        textDecoration: isActive ? 'underline' : 'none',
+                                        fontWeight: 500,
+                                        fontSize: 14,
+                                    })}
+                                >
+                                    Create Ticket
+                                </NavLink>
+                            </>
+                        )}
+                        {user.role === 'IT_STAFF' && (
+                            <span style={{ color: '#fff', fontSize: 14, opacity: 0.8 }}>Ticket Queue (Coming Soon)</span>
+                        )}
+                        {user.role === 'ADMIN' && (
+                            <span style={{ color: '#fff', fontSize: 14, opacity: 0.8 }}>User Management (Coming Soon)</span>
+                        )}
                     </div>
                 )}
 
-                {/* Requester info */}
-                {requester ? (
+                {/* User info */}
+                {user ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                        <span style={{ color: '#fff', fontSize: 14 }}>{requester.name}</span>
+                        <span style={{ 
+                            background: '#7b9c7b', 
+                            color: '#fff', 
+                            fontSize: 11, 
+                            padding: '2px 6px', 
+                            borderRadius: 4, 
+                            fontWeight: 600 
+                        }}>
+                            {user.role}
+                        </span>
+                        <span style={{ color: '#fff', fontSize: 14 }}>{user.name}</span>
                         <button
-                            onClick={handleChange}
+                            onClick={handleLogout}
                             style={{
                                 background: 'transparent',
                                 border: '1px solid rgba(255,255,255,0.5)',
@@ -73,16 +99,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                                 cursor: 'pointer',
                             }}
                         >
-                            Change Requester
+                            Logout
                         </button>
                     </div>
                 ) : (
-                    <NavLink
-                        to="/"
-                        style={{ color: '#fff', fontSize: 14, fontWeight: 500 }}
-                    >
-                        Select Requester
-                    </NavLink>
+                    <span style={{ color: '#fff', fontSize: 14 }}>Not logged in</span>
                 )}
             </nav>
 
