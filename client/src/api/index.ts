@@ -21,12 +21,11 @@ export async function logout() {
     await apiFetch(`${BASE_URL}/api/auth/logout`, { method: 'POST' })
 }
 
-
-export interface Requester {
+export interface User {
     id: number
     name: string
     email: string
-    isActive: boolean
+    role: string
 }
 
 export interface Category {
@@ -48,7 +47,7 @@ export interface TicketListItem {
     requestedPriority: string
     itPriority?: string | null
     status: string
-    ticketOwner?: string | null
+    owner?: { id: number; name: string } | null
     createdAt: string
     updatedAt: string
 }
@@ -81,6 +80,20 @@ export interface Ticket {
     updatedAt: string
 }
 
+export interface PublicComment {
+    id: number
+    content: string
+    author: { id: number; name: string; role: string }
+    createdAt: string
+}
+
+export interface InternalNote {
+    id: number
+    content: string
+    author: { id: number; name: string; role: string }
+    createdAt: string
+}
+
 export interface CreateTicketPayload {
     categoryId: number
     relatedSystemId: number
@@ -91,7 +104,7 @@ export interface CreateTicketPayload {
 
 export interface TicketsResponse {
     data: TicketListItem[]
-    pagination: {
+    meta: {
         page: number
         pageSize: number
         totalItems: number
@@ -110,10 +123,13 @@ export interface TicketQuery {
     pageSize?: number
 }
 
-export async function fetchRequesters(): Promise<Requester[]> {
-    const res = await apiFetch(`${BASE_URL}/api/requesters`)
-    if (!res.ok) throw new Error('Failed to load requesters')
-    return res.json()
+export interface StaffTicketQuery {
+    search?: string
+    status?: string
+    priority?: string
+    ownerId?: number
+    page?: number
+    pageSize?: number
 }
 
 export async function fetchCategories(): Promise<Category[]> {
@@ -128,16 +144,12 @@ export async function fetchRelatedSystems(): Promise<RelatedSystem[]> {
     return res.json()
 }
 
-export async function createTicket(
-    requesterId: number,
-    payload: CreateTicketPayload
-): Promise<Ticket> {
+// ─── Requesters ───────────────────────────────────────────
+
+export async function createTicket(payload: CreateTicketPayload): Promise<Ticket> {
     const res = await apiFetch(`${BASE_URL}/api/tickets`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requester-Id': String(requesterId),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
     })
     if (!res.ok) {
@@ -147,10 +159,7 @@ export async function createTicket(
     return res.json()
 }
 
-export async function fetchTickets(
-    requesterId: number,
-    query: TicketQuery = {}
-): Promise<TicketsResponse> {
+export async function fetchTickets(query: TicketQuery = {}): Promise<TicketsResponse> {
     const params = new URLSearchParams()
     if (query.search) params.set('search', query.search)
     if (query.categoryId) params.set('categoryId', String(query.categoryId))
@@ -160,34 +169,103 @@ export async function fetchTickets(
     if (query.order) params.set('order', query.order)
     if (query.page) params.set('page', String(query.page))
     if (query.pageSize) params.set('pageSize', String(query.pageSize))
-    const res = await apiFetch(`${BASE_URL}/api/tickets?${params.toString()}`, {
-        headers: { 'X-Requester-Id': String(requesterId) },
-    })
+    const res = await apiFetch(`${BASE_URL}/api/tickets?${params.toString()}`)
     if (!res.ok) throw new Error('Failed to fetch tickets')
     return res.json()
 }
 
-export async function fetchTicketDetail(
-    requesterId: number,
-    ticketId: number
-): Promise<TicketDetail> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}`, {
-        headers: { 'X-Requester-Id': String(requesterId) },
-    })
+export async function fetchTicketDetail(ticketId: number): Promise<TicketDetail> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}`)
     if (!res.ok) throw new Error('Failed to fetch ticket detail')
     return res.json()
 }
 
-export async function uploadAttachment(
-    requesterId: number,
-    ticketId: number,
-    file: File
-): Promise<Attachment> {
+// ─── IT Staff ─────────────────────────────────────────────
+
+export async function fetchStaffTickets(query: StaffTicketQuery = {}): Promise<TicketsResponse> {
+    const params = new URLSearchParams()
+    if (query.search) params.set('search', query.search)
+    if (query.status) params.set('status', query.status)
+    if (query.priority) params.set('priority', query.priority)
+    if (query.ownerId) params.set('ownerId', String(query.ownerId))
+    if (query.page) params.set('page', String(query.page))
+    if (query.pageSize) params.set('pageSize', String(query.pageSize))
+    const res = await apiFetch(`${BASE_URL}/api/staff/tickets?${params.toString()}`)
+    if (!res.ok) throw new Error('Failed to fetch staff tickets')
+    return res.json()
+}
+
+export async function updateTicketStatus(ticketId: number, status: string): Promise<any> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+    });
+    if (!res.ok) throw new Error('Failed to update status');
+    return res.json();
+}
+
+export async function updateTicketOwner(ticketId: number, ownerId: number | null): Promise<any> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/owner`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ownerId })
+    });
+    if (!res.ok) throw new Error('Failed to update owner');
+    return res.json();
+}
+
+export async function updateTicketPriority(ticketId: number, itPriority: string): Promise<any> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/priority`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itPriority })
+    });
+    if (!res.ok) throw new Error('Failed to update priority');
+    return res.json();
+}
+
+// ─── Collaboration ────────────────────────────────────────
+
+export async function fetchComments(ticketId: number): Promise<PublicComment[]> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/comments`);
+    if (!res.ok) throw new Error('Failed to fetch comments');
+    return res.json();
+}
+
+export async function addComment(ticketId: number, content: string): Promise<PublicComment> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+    });
+    if (!res.ok) throw new Error('Failed to add comment');
+    return res.json();
+}
+
+export async function fetchNotes(ticketId: number): Promise<InternalNote[]> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/notes`);
+    if (!res.ok) throw new Error('Failed to fetch notes');
+    return res.json();
+}
+
+export async function addNote(ticketId: number, content: string): Promise<InternalNote> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+    });
+    if (!res.ok) throw new Error('Failed to add note');
+    return res.json();
+}
+
+// ─── Attachments ──────────────────────────────────────────
+
+export async function uploadAttachment(ticketId: number, file: File): Promise<Attachment> {
     const form = new FormData()
     form.append('file', file)
     const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/attachments`, {
         method: 'POST',
-        headers: { 'X-Requester-Id': String(requesterId) },
         body: form,
     })
     if (!res.ok) {
@@ -197,14 +275,8 @@ export async function uploadAttachment(
     return res.json()
 }
 
-export async function downloadAttachment(
-    requesterId: number,
-    attachmentId: number,
-    filename: string
-): Promise<void> {
-    const res = await apiFetch(`${BASE_URL}/api/attachments/${attachmentId}/download`, {
-        headers: { 'X-Requester-Id': String(requesterId) },
-    })
+export async function downloadAttachment(attachmentId: number, filename: string): Promise<void> {
+    const res = await apiFetch(`${BASE_URL}/api/attachments/${attachmentId}/download`)
     if (!res.ok) throw new Error('Failed to download attachment')
     const blob = await res.blob()
     const url = URL.createObjectURL(blob)
@@ -215,17 +287,10 @@ export async function downloadAttachment(
     URL.revokeObjectURL(url)
 }
 
-export async function removeAttachment(
-    requesterId: number,
-    attachmentId: number,
-    removalReason: string
-): Promise<Attachment> {
+export async function removeAttachment(attachmentId: number, removalReason: string): Promise<Attachment> {
     const res = await apiFetch(`${BASE_URL}/api/attachments/${attachmentId}/remove`, {
         method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requester-Id': String(requesterId),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ removalReason }),
     })
     if (!res.ok) {

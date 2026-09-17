@@ -25,7 +25,11 @@ export default function Login() {
             setLoading(true);
             const data = await apiLogin({ email, password });
             setUser(data);
-            navigate('/tickets');
+            if (data.role === 'IT_STAFF' || data.role === 'ADMIN') {
+                navigate('/staff/tickets');
+            } else {
+                navigate('/tickets');
+            }
         } catch (err: any) {
             setError(err.message || 'Login failed. Please check your credentials.');
         } finally {
