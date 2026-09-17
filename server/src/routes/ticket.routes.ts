@@ -122,6 +122,7 @@ router.get('/staff/tickets', requireAuth, async (req: Request, res: Response) =>
                 where,
                 include: {
                     category: true,
+                    relatedSystem: true,
                     requester: { select: { id: true, name: true } },
                     owner: { select: { id: true, name: true } }
                 },
