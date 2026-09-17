@@ -85,8 +85,8 @@ export default function MyTicketsPage() {
                 pageSize,
             })
             setTickets(res.data)
-            setTotalPages(res.pagination.totalPages)
-            setTotalItems(res.pagination.totalItems)
+            setTotalPages(res.meta.totalPages)
+            setTotalItems(res.meta.totalItems)
         } catch {
             setError('Failed to load tickets. Please try again.')
         } finally {
