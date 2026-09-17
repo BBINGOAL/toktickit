@@ -64,8 +64,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                                 </NavLink>
                             </>
                         )}
-                        {user.role === 'IT_STAFF' && (
-                            <span style={{ color: '#fff', fontSize: 14, opacity: 0.8 }}>Ticket Queue (Coming Soon)</span>
+                        {(user.role === 'IT_STAFF' || user.role === 'ADMIN') && (
+                            <NavLink
+                                to="/staff/tickets"
+                                style={({ isActive }) => ({
+                                    color: isActive ? 'var(--color-pale-green)' : '#fff',
+                                    textDecoration: isActive ? 'underline' : 'none',
+                                    fontWeight: 500,
+                                    fontSize: 14,
+                                })}
+                            >
+                                Ticket Queue
+                            </NavLink>
                         )}
                         {user.role === 'ADMIN' && (
                             <span style={{ color: '#fff', fontSize: 14, opacity: 0.8 }}>User Management (Coming Soon)</span>

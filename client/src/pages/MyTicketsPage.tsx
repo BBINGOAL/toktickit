@@ -75,7 +75,7 @@ export default function MyTicketsPage() {
         setLoading(true)
         setError(null)
         try {
-            const res = await fetchTickets(user.id, {
+            const res = await fetchTickets({
                 search: search || undefined,
                 categoryId: categoryId ? Number(categoryId) : undefined,
                 requestedPriority: priority || undefined,

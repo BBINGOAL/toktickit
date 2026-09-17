@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import CreateTicketPage from './pages/CreateTicketPage'
 import MyTicketsPage from './pages/MyTicketsPage'
 import TicketDetailPage from './pages/TicketDetailPage'
+import ITStaffQueue from './pages/ITStaffQueue'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { user } = useAuth()
@@ -38,6 +39,14 @@ function AppRoutes() {
                     element={
                         <ProtectedRoute>
                             <TicketDetailPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/staff/tickets"
+                    element={
+                        <ProtectedRoute>
+                            <ITStaffQueue />
                         </ProtectedRoute>
                     }
                 />

@@ -118,7 +118,7 @@ export default function CreateTicketPage() {
         setApiError(null)
 
         try {
-            const ticket = await createTicket(user!.id, {
+            const ticket = await createTicket({
                 categoryId: parseInt(categoryId),
                 relatedSystemId: parseInt(relatedSystemId),
                 summary: summary.trim(),
@@ -130,7 +130,7 @@ export default function CreateTicketPage() {
             const uploadErrors: string[] = []
             for (const entry of validFiles) {
                 try {
-                    await uploadAttachment(user!.id, ticket.id, entry.file)
+                    await uploadAttachment(ticket.id, entry.file)
                 } catch (err: unknown) {
                     uploadErrors.push(
                         `${entry.file.name}: ${err instanceof Error ? err.message : 'Upload failed'}`
