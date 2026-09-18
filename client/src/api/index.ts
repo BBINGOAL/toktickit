@@ -21,6 +21,19 @@ export async function logout() {
     await apiFetch(`${BASE_URL}/api/auth/logout`, { method: 'POST' })
 }
 
+export async function changePassword(newPassword: string) {
+    const res = await apiFetch(`${BASE_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword })
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to change password')
+    }
+    return res.json()
+}
+
 export interface User {
     id: number
     name: string

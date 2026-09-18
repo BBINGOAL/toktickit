@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../app';
-import { comparePassword, generateToken } from '../utils/auth';
+import { comparePassword, generateToken, hashPassword } from '../utils/auth';
 
 export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -26,4 +26,29 @@ export const login = async (req: Request, res: Response) => {
 export const logout = (req: Request, res: Response) => {
   res.clearCookie('token');
   res.json({ message: 'Logged out' });
+};
+
+export const changePassword = async (req: Request, res: Response) => {
+  const { newPassword } = req.body;
+  const userReq = (req as any).user;
+  
+  if (!userReq) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  }
+
+  const hashedPassword = await hashPassword(newPassword);
+  
+  await prisma.user.update({
+    where: { id: userReq.userId },
+    data: { 
+      passwordHash: hashedPassword,
+      mustChangePassword: false
+    }
+  });
+
+  res.json({ message: 'Password changed successfully' });
 };
