@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { login, logout, changePassword } from '../controllers/auth.controller';
-import { requireAuth } from '../middlewares/auth.middleware';
+import { requireAuth } from '../middleware/auth.middleware';
 
 const router = Router();
 router.post('/login', login);
