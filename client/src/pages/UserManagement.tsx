@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { fetchAdminUsers, createAdminUser, updateAdminUser, resetAdminUserPassword, AdminUser } from '../api'
+import { fetchAdminUsers, createAdminUser, updateAdminUser, resetAdminUserPassword } from '../api'
+import type { AdminUser } from '../api'
 import { useAuth } from '../context/AuthContext'
 
 export default function UserManagement() {
