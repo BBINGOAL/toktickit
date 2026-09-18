@@ -78,7 +78,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             </NavLink>
                         )}
                         {user.role === 'ADMIN' && (
-                            <span style={{ color: '#fff', fontSize: 14, opacity: 0.8 }}>User Management (Coming Soon)</span>
+                            <NavLink to="/admin/users" style={({ isActive }) => ({ textDecoration: 'none', color: isActive ? '#A7F3D0' : '#fff', fontWeight: isActive ? 'bold' : 'normal', padding: '8px 12px', borderRadius: 8, background: isActive ? 'rgba(255,255,255,0.1)' : 'transparent' })}>
+                                User Management
+                            </NavLink>
                         )}
                     </div>
                 )}

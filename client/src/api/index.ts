@@ -299,3 +299,66 @@ export async function removeAttachment(attachmentId: number, removalReason: stri
     }
     return res.json()
 }
+
+ / /    % % %  A d m i n   U s e r   M a n a g e m e n t    % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % %
+ 
+ e x p o r t   i n t e r f a c e   A d m i n U s e r   { 
+         i d :   n u m b e r ; 
+         n a m e :   s t r i n g ; 
+         e m a i l :   s t r i n g ; 
+         r o l e :   s t r i n g ; 
+         i s A c t i v e :   b o o l e a n ; 
+         m u s t C h a n g e P a s s w o r d :   b o o l e a n ; 
+         c r e a t e d A t :   s t r i n g ; 
+         u p d a t e d A t :   s t r i n g ; 
+ } 
+ 
+ e x p o r t   a s y n c   f u n c t i o n   f e t c h A d m i n U s e r s ( s e a r c h ? :   s t r i n g ,   r o l e ? :   s t r i n g ) :   P r o m i s e < A d m i n U s e r [ ] >   { 
+         c o n s t   p a r a m s   =   n e w   U R L S e a r c h P a r a m s ( ) 
+         i f   ( s e a r c h )   p a r a m s . s e t ( " s e a r c h " ,   s e a r c h ) 
+         i f   ( r o l e )   p a r a m s . s e t ( " r o l e " ,   r o l e ) 
+         c o n s t   r e s   =   a w a i t   a p i F e t c h ( ` $ { B A S E _ U R L } / a p i / a d m i n / u s e r s ? $ { p a r a m s . t o S t r i n g ( ) } ` ) 
+         i f   ( ! r e s . o k )   t h r o w   n e w   E r r o r ( " F a i l e d   t o   f e t c h   u s e r s " ) 
+         r e t u r n   r e s . j s o n ( ) 
+ } 
+ 
+ e x p o r t   a s y n c   f u n c t i o n   c r e a t e A d m i n U s e r ( d a t a :   a n y ) :   P r o m i s e < A d m i n U s e r >   { 
+         c o n s t   r e s   =   a w a i t   a p i F e t c h ( ` $ { B A S E _ U R L } / a p i / a d m i n / u s e r s ` ,   { 
+                 m e t h o d :   " P O S T " , 
+                 h e a d e r s :   {   " C o n t e n t - T y p e " :   " a p p l i c a t i o n / j s o n "   } , 
+                 b o d y :   J S O N . s t r i n g i f y ( d a t a ) 
+         } ) 
+         i f   ( ! r e s . o k )   { 
+                 c o n s t   e r r   =   a w a i t   r e s . j s o n ( ) 
+                 t h r o w   n e w   E r r o r ( e r r . e r r o r   | |   " F a i l e d   t o   c r e a t e   u s e r " ) 
+         } 
+         r e t u r n   r e s . j s o n ( ) 
+ } 
+ 
+ e x p o r t   a s y n c   f u n c t i o n   u p d a t e A d m i n U s e r ( i d :   n u m b e r ,   d a t a :   a n y ) :   P r o m i s e < A d m i n U s e r >   { 
+         c o n s t   r e s   =   a w a i t   a p i F e t c h ( ` $ { B A S E _ U R L } / a p i / a d m i n / u s e r s / $ { i d } ` ,   { 
+                 m e t h o d :   " P U T " , 
+                 h e a d e r s :   {   " C o n t e n t - T y p e " :   " a p p l i c a t i o n / j s o n "   } , 
+                 b o d y :   J S O N . s t r i n g i f y ( d a t a ) 
+         } ) 
+         i f   ( ! r e s . o k )   { 
+                 c o n s t   e r r   =   a w a i t   r e s . j s o n ( ) 
+                 t h r o w   n e w   E r r o r ( e r r . e r r o r   | |   " F a i l e d   t o   u p d a t e   u s e r " ) 
+         } 
+         r e t u r n   r e s . j s o n ( ) 
+ } 
+ 
+ e x p o r t   a s y n c   f u n c t i o n   r e s e t A d m i n U s e r P a s s w o r d ( i d :   n u m b e r ,   n e w I n i t i a l P a s s w o r d :   s t r i n g ) :   P r o m i s e < a n y >   { 
+         c o n s t   r e s   =   a w a i t   a p i F e t c h ( ` $ { B A S E _ U R L } / a p i / a d m i n / u s e r s / $ { i d } / r e s e t - p a s s w o r d ` ,   { 
+                 m e t h o d :   " P O S T " , 
+                 h e a d e r s :   {   " C o n t e n t - T y p e " :   " a p p l i c a t i o n / j s o n "   } , 
+                 b o d y :   J S O N . s t r i n g i f y ( {   n e w I n i t i a l P a s s w o r d   } ) 
+         } ) 
+         i f   ( ! r e s . o k )   { 
+                 c o n s t   e r r   =   a w a i t   r e s . j s o n ( ) 
+                 t h r o w   n e w   E r r o r ( e r r . e r r o r   | |   " F a i l e d   t o   r e s e t   p a s s w o r d " ) 
+         } 
+         r e t u r n   r e s . j s o n ( ) 
+ } 
+  
+ 

@@ -6,6 +6,7 @@ import CreateTicketPage from './pages/CreateTicketPage'
 import MyTicketsPage from './pages/MyTicketsPage'
 import TicketDetailPage from './pages/TicketDetailPage'
 import ITStaffQueue from './pages/ITStaffQueue'
+import UserManagement from './pages/UserManagement'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { user } = useAuth()
@@ -47,6 +48,14 @@ function AppRoutes() {
                     element={
                         <ProtectedRoute>
                             <ITStaffQueue />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/admin/users"
+                    element={
+                        <ProtectedRoute>
+                            <UserManagement />
                         </ProtectedRoute>
                     }
                 />
