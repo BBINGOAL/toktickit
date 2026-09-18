@@ -21,6 +21,19 @@ export async function logout() {
     await apiFetch(`${BASE_URL}/api/auth/logout`, { method: 'POST' })
 }
 
+export async function changePassword(newPassword: string) {
+    const res = await apiFetch(`${BASE_URL}/api/auth/change-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword })
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to change password')
+    }
+    return res.json()
+}
+
 export interface User {
     id: number
     name: string
@@ -296,6 +309,67 @@ export async function removeAttachment(attachmentId: number, removalReason: stri
     if (!res.ok) {
         const err = await res.json()
         throw new Error(err.error || 'Failed to remove attachment')
+    }
+    return res.json()
+}
+
+// ─── Admin User Management ────────────────────────────────
+
+export interface AdminUser {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    isActive: boolean;
+    mustChangePassword: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export async function fetchAdminUsers(search?: string, role?: string): Promise<AdminUser[]> {
+    const params = new URLSearchParams()
+    if (search) params.set('search', search)
+    if (role) params.set('role', role)
+    const res = await apiFetch(`${BASE_URL}/api/admin/users?${params.toString()}`)
+    if (!res.ok) throw new Error('Failed to fetch users')
+    return res.json()
+}
+
+export async function createAdminUser(data: any): Promise<AdminUser> {
+    const res = await apiFetch(`${BASE_URL}/api/admin/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to create user')
+    }
+    return res.json()
+}
+
+export async function updateAdminUser(id: number, data: any): Promise<AdminUser> {
+    const res = await apiFetch(`${BASE_URL}/api/admin/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to update user')
+    }
+    return res.json()
+}
+
+export async function resetAdminUserPassword(id: number, newInitialPassword: string): Promise<any> {
+    const res = await apiFetch(`${BASE_URL}/api/admin/users/${id}/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newInitialPassword })
+    })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to reset password')
     }
     return res.json()
 }

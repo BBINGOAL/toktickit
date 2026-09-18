@@ -10,7 +10,7 @@ import fs from 'fs'
 import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth.routes'
 import ticketRoutes from './routes/ticket.routes'
-
+import adminRoutes from './routes/admin.routes'
 
 // ─── Upload Config ────────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads')
@@ -50,7 +50,7 @@ app.use(cookieParser())
 // ─── Auth Routes ──────────────────────────────────────────────
 app.use('/api/auth', authRoutes)
 app.use('/api', ticketRoutes)
-
+app.use('/api', adminRoutes)
 
 // ─── Health ───────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
