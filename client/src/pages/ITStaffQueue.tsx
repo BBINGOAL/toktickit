@@ -84,11 +84,13 @@ export default function ITStaffQueue() {
                         style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: '0.875rem', background: 'white' }}
                     >
                         <option value="">All Statuses</option>
-                        <option value="DRAFT">Draft</option>
+                        <option value="NEW">New</option>
                         <option value="OPEN">Open</option>
                         <option value="IN_PROGRESS">In Progress</option>
+                        <option value="WAITING_FOR_REQUESTER">Waiting for Requester</option>
                         <option value="RESOLVED">Resolved</option>
                         <option value="CLOSED">Closed</option>
+                        <option value="REOPENED">Reopened</option>
                         <option value="CANCELLED">Cancelled</option>
                     </select>
                     

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import request from 'supertest'
 import app from '../../src/app'
 import jwt from 'jsonwebtoken'
@@ -29,6 +29,11 @@ describe('Admin User Management APIs', () => {
         if (!admin || !itStaff) {
             throw new Error('Seed data missing for tests')
         }
+
+        await prisma.user.updateMany({
+            where: { id: { in: [admin.id, itStaff.id] } },
+            data: { mustChangePassword: false }
+        })
 
         adminUserId = admin.id
         adminToken = generateToken(admin.id, admin.role)
@@ -71,11 +76,11 @@ describe('Admin User Management APIs', () => {
         it('should prevent creating a user with a duplicate email', async () => {
             const email = `duplicate_${Date.now()}@kmutt.ac.th`
             await request(app).post('/api/admin/users').set('Cookie', [`token=${adminToken}`]).send({
-                name: 'Dup 1', email, role: 'REQUESTER', initialPassword: 'pw'
+                name: 'Dup 1', email, role: 'REQUESTER', initialPassword: 'password123'
             })
             
             const res = await request(app).post('/api/admin/users').set('Cookie', [`token=${adminToken}`]).send({
-                name: 'Dup 2', email, role: 'REQUESTER', initialPassword: 'pw'
+                name: 'Dup 2', email, role: 'REQUESTER', initialPassword: 'password123'
             })
             expect(res.status).toBe(409)
         })
@@ -146,5 +151,9 @@ describe('Admin User Management APIs', () => {
             const isValid = await bcrypt.compare('newsecurepassword', dbUser!.passwordHash)
             expect(isValid).toBe(true)
         })
+    })
+
+    afterAll(async () => {
+        await prisma.$disconnect()
     })
 })

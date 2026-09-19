@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import request from 'supertest'
 import app from '../../src/app'
 import jwt from 'jsonwebtoken'
@@ -20,6 +20,7 @@ describe('Ticket Collaboration APIs (Comments & Notes)', () => {
     let itStaffToken: string
     let requesterToken: string
     let testTicketId: number
+    let testTicketNumber: string
 
     beforeAll(async () => {
         const itStaff = await prisma.user.findFirst({ where: { role: 'IT_STAFF', isActive: true } })
@@ -31,12 +32,17 @@ describe('Ticket Collaboration APIs (Comments & Notes)', () => {
             throw new Error('Seed data missing for tests')
         }
 
+        await prisma.user.updateMany({
+            where: { id: { in: [itStaff.id, requester.id] } },
+            data: { mustChangePassword: false }
+        })
+
         itStaffToken = generateToken(itStaff.id, itStaff.role)
         requesterToken = generateToken(requester.id, requester.role)
 
         const ticket = await prisma.ticket.create({
             data: {
-                ticketNumber: 'TEST-002',
+                ticketNumber: `TEST-CN-${Date.now()}`,
                 summary: 'Test ticket for collaboration',
                 description: 'Test desc',
                 requestedPriority: 'LOW',
@@ -47,6 +53,14 @@ describe('Ticket Collaboration APIs (Comments & Notes)', () => {
             }
         })
         testTicketId = ticket.id
+        testTicketNumber = ticket.ticketNumber
+    })
+
+    afterAll(async () => {
+        if (testTicketNumber) {
+            await prisma.ticket.deleteMany({ where: { ticketNumber: testTicketNumber } })
+        }
+        await prisma.$disconnect()
     })
 
     describe('Public Comments', () => {

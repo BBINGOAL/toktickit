@@ -195,16 +195,16 @@ export default function UserManagement() {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Full Name</label>
-                                <input type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
+                                <label htmlFor="user-full-name" style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Full Name</label>
+                                <input id="user-full-name" type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Email Address</label>
-                                <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
+                                <label htmlFor="user-email" style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Email Address</label>
+                                <input id="user-email" type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
                             </div>
                             <div>
-                                <label style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Role</label>
-                                <select value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8, background: 'white' }}>
+                                <label htmlFor="user-role" style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Role</label>
+                                <select id="user-role" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8, background: 'white' }}>
                                     <option value="REQUESTER">Requester</option>
                                     <option value="IT_STAFF">IT Staff</option>
                                     <option value="ADMIN">Administrator</option>
@@ -221,11 +221,11 @@ export default function UserManagement() {
                             )}
 
                             <div style={{ marginTop: 12, paddingTop: 16, borderTop: '1px solid #E5E7EB' }}>
-                                <label style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
+                                <label htmlFor="user-password" style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>
                                     {modalMode === 'CREATE' ? 'Initial Password' : 'Set New Password (Optional)'}
                                 </label>
                                 <div style={{ display: 'flex', gap: 12 }}>
-                                    <input 
+                                    <input id="user-password"
                                         type="text" 
                                         placeholder="e.g. password123" 
                                         value={formData.initialPassword} 

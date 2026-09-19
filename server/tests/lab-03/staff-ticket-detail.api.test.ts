@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import request from 'supertest'
 import app from '../../src/app'
 import jwt from 'jsonwebtoken'
@@ -20,6 +20,7 @@ describe('IT Staff Ticket Detail & Operations API', () => {
     let itStaffToken: string
     let requesterToken: string
     let testTicketId: number
+    let testTicketNumber: string
 
     beforeAll(async () => {
         // Find users
@@ -32,13 +33,18 @@ describe('IT Staff Ticket Detail & Operations API', () => {
             throw new Error('Seed data missing for tests')
         }
 
+        await prisma.user.updateMany({
+            where: { id: { in: [itStaff.id, requester.id] } },
+            data: { mustChangePassword: false }
+        })
+
         itStaffToken = generateToken(itStaff.id, itStaff.role)
         requesterToken = generateToken(requester.id, requester.role)
 
         // Create a test ticket
         const ticket = await prisma.ticket.create({
             data: {
-                ticketNumber: 'TEST-001',
+                ticketNumber: `TEST-STD-${Date.now()}`,
                 summary: 'Test ticket for operations',
                 description: 'Test desc',
                 requestedPriority: 'LOW',
@@ -49,6 +55,14 @@ describe('IT Staff Ticket Detail & Operations API', () => {
             }
         })
         testTicketId = ticket.id
+        testTicketNumber = ticket.ticketNumber
+    })
+
+    afterAll(async () => {
+        if (testTicketNumber) {
+            await prisma.ticket.deleteMany({ where: { ticketNumber: testTicketNumber } })
+        }
+        await prisma.$disconnect()
     })
 
     describe('PATCH /api/tickets/:id/status', () => {

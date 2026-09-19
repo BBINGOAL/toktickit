@@ -316,7 +316,7 @@ export default function MyTicketsPage() {
                                         <td style={{ padding: '10px 14px' }}><PriorityBadge value={t.requestedPriority} /></td>
                                         <td style={{ padding: '10px 14px' }}><PriorityBadge value={t.itPriority} /></td>
                                         <td style={{ padding: '10px 14px' }}><StatusBadge value={t.status} /></td>
-                                        <td style={{ padding: '10px 14px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{t.ticketOwner ?? '—'}</td>
+                                        <td style={{ padding: '10px 14px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{t.owner?.name ?? '—'}</td>
                                         <td style={{ padding: '10px 14px', whiteSpace: 'nowrap', color: 'var(--color-text-secondary)' }}>{formatDate(t.updatedAt)}</td>
                                     </tr>
                                 ))}
