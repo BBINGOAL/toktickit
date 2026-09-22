@@ -1,38 +1,80 @@
-# Reviewer Notes — Lab 3
+# Peer Review Information
 
-## Review scope
+**My Information:**
+- **Name:** [ศิวรักษ์ ฉัตรวิชัย]
+- **Student ID:** [67070501086]
+- **GitHub Username:** [github.com/BBINGOAL]
 
-This review covers the Lab 3 implementation on branch `feature6/lab3-docs`, including authentication, authorization, migration, staff ticket operations, comments/notes, administrator user management, client route guards, seed data, and automated test artifacts.
+**My Peer Reviewer (คนที่มาตรวจโค้ดให้ผม):**
+- **Name:** [อนพัช บรรเจิดศิลป์]
+- **Student ID:** [67070501049]
+- **GitHub Username:** [github.com/PpAnpt]
+- **Link to PR they reviewed for me:** 
+  - [PR #37: docs: add Lab 3 specifications, UI/API contracts, and test plan documentation](https://github.com/BBINGOAL/toktickit/pull/37)
+- **Their Review Comment:** 
+  - "ครบถ้วนเรียบร้อยคับ" (Approved)
+- **My Response:** 
+  - "ขอบคุณครับบ"
 
-## What is present
+- **Link to PR they reviewed for me:** 
+  - [PR #38: Feature2/lab3 authentication foundation migration](https://github.com/BBINGOAL/toktickit/pull/38)
+- **Their Review Comment:** 
+  - "ครบถ้วนเรียบร้อยดีครับ" (Approved)
+- **My Response:** 
+  - "ขอบคุณครับ"
 
-- Login, logout, current-user lookup, HTTP-only cookie authentication, and mandatory first-login password change.
-- Server-side role and ownership checks for requester, IT staff, and administrator operations.
-- User migration from `DevRequester`, preservation of requester/ticket relationships, and a follow-up migration for requester resolution indication.
-- Staff queue filters, sorting, pagination, status/priority/owner operations, public comments, and internal notes.
-- Administrator user list, search/filter, create, update, activate/deactivate, and reset-password flows.
-- UI role guards for requester, staff, and admin routes.
-- Lab 3 API tests, UI tests, and Playwright E2E scenario files.
+- **Link to PR they reviewed for me:** 
+  - [PR #39: Feature3/lab3 it staff ticket queue](https://github.com/BBINGOAL/toktickit/pull/39)
+- **Their Review Comment:** 
+  - "ระบบคิวของ IT Staff ใช้งานได้จริง ระบบ Access Control ของ JWT ป้องกันคนทั่วไปไม่ให้เห็น Internal Note ได้ถูกต้อง จัดการโค้ดใน ticket.routes.ts ได้คลีนมาก Approved ครับ" (Approved)
+- **My Response:** 
+  - "ขอบคุณสำหรับการreviewครับ"
 
-## Evidence collected
+- **Link to PR they reviewed for me:** 
+  - [PR #40: test: add API tests for staff ticket operations, comments, and notes](https://github.com/BBINGOAL/toktickit/pull/40)
+- **Their Review Comment:** 
+  - "ครบถ้วนเรียบร้อยดีครับ" (Approved)
+- **My Response:** 
+  - "ขอบคุณสำหรับการreviewครับ"
 
-- Server TypeScript check: passed.
-- Client TypeScript build check: passed.
-- Lab 3 UI tests: passed, 6 files and 12 tests.
-- Playwright E2E discovery: passed, 4 Lab 3 files parsed and listed.
-- API test execution: blocked because Docker Desktop/PostgreSQL was unavailable at `127.0.0.1:5434`.
+- **Link to PR they reviewed for me:** 
+  - [PR #41: Feature5/lab3 administrator user management](https://github.com/BBINGOAL/toktickit/pull/41)
+- **Their Review Comment:** 
+  - "ครบถ้วนถูกต้องครับ" (Approved)
+- **My Response:** 
+  - "ขอบคุณสำหรับการreviewครับ"
 
-See `docs/lab-03/tests.md` for the exact command and status of every planned case.
+---
 
-## Review points for the human reviewer
+**Who I Reviewed (คนที่ผมไปตรวจโค้ดให้เขา):**
+- **Name:** [อนพัช บรรเจิดศิลป์]
+- **Student ID:** [67070501049]
+- **GitHub Username:** [github.com/PpAnpt]
+- **Link to PR I reviewed for them:** 
+  - [PR #18: docs: add Lab 3 specifications, test plan, UI guidelines, and project documentation](https://github.com/PpAnpt/toktickit/pull/18)
+- **My Review Comment:** 
+  - "ครบถ้วนครับ เรียบร้อยครับ" (Approved)
+- **Link to PR I reviewed for them:** 
+  - [PR #19: Feature/lab3 2 auth foundation](https://github.com/PpAnpt/toktickit/pull/19)
+- **My Review Comment:** 
+  - "โอ้โห้ ครบถ้วนทุกส่วนเลยครับ เรียบร้อยมากครับ" (Approved)
 
-1. Start PostgreSQL/Docker, run migrations and seed, then execute all API tests.
-2. Run the client and server, configure fresh first-login accounts, and execute the four Lab 3 Playwright specs.
-3. Verify the migration on a copy of the Lab 2 database before applying it to any shared database.
-4. Confirm that the allowed status-transition matrix matches the course rubric.
-5. Confirm whether Admin should be allowed to use the staff queue; the current implementation permits Admin on staff ticket operations and restricts Admin-only user management separately.
-6. Review generated screenshots/submission artifacts after the full-stack E2E run; no new Lab 3 screenshot evidence is claimed yet.
+- **Link to PR I reviewed for them:** 
+  - [PR #20: Feature/lab3 3 staff queue](https://github.com/PpAnpt/toktickit/pull/20)
+- **My Review Comment:** 
+  - "ตรวจสอบโค้ด Staff Queue API, UI และ Unit Tests แล้ว ผ่านครบถ้วนตาม spec ครับ" (Approved)
 
-## Recommendation
+- **Link to PR I reviewed for them:** 
+  - [PR #21: Feature/lab3 4 staff operation](https://github.com/PpAnpt/toktickit/pull/21)
+- **My Review Comment:** 
+  - "Status transition matrix และ RBAC comments/notes ทำงานถูกต้องตาม spec ครับ" (Approved)
 
-The implementation is ready for integrated verification, but should not be marked fully complete until the database-backed API suite and the full-stack E2E suite have been run successfully and the migration has been checked against the actual Lab 2 data.
+- **Link to PR I reviewed for them:** 
+  - [PR #22: Feature/lab3 5 admin user management](https://github.com/PpAnpt/toktickit/pull/22)
+- **My Review Comment:** 
+  - "ถูกต้องครบถ้วน เทสผ่านหมดครับ" (Approved)
+
+- **Link to PR I reviewed for them:** 
+  - [PR #23: Feature/lab3 6 e2e regression release](https://github.com/PpAnpt/toktickit/pull/23)
+- **My Review Comment:** 
+  - "ครบถ้วนเรียบร้อยดีครับ" (Approved)
