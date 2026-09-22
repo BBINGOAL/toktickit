@@ -2,7 +2,7 @@
 
 **Project:** TokTickIT — Users, Roles, IT Staff Ticketing, and Admin Screens  
 **Sprint:** Lab 3 | Semester 1/2026  
-**Status:** Draft — Awaiting Student Review & Approval
+**Status:** Implementation baseline - updated 22 September 2026; execution evidence is recorded in tests.md. This status does not assert final submission approval.
 
 ---
 

@@ -1,22 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, login, screenshot } from '../fixtures';
 
 test.describe('E2E-01: Create Ticket Flow', () => {
-  test('Complete responsive submission flow', async ({ page }) => {
-    // Navigate to the app (assuming client runs on localhost:5173)
-    await page.goto('http://localhost:5173/');
-
-    // 1. Select a Development Requester
-    await expect(page.getByRole('heading', { name: /Development Requester Selection/i })).toBeVisible();
-    try {
-        await expect(page.locator('select')).toBeVisible({ timeout: 10000 });
-    } catch (e) {
-        console.log(await page.content());
-        throw e;
-    }
-    await page.locator('select').selectOption({ label: 'Jennifer Anderson' });
-    await page.getByRole('button', { name: /Select Requester/i }).click();
-
-    // 2. We should be redirected to Create Ticket page
+  test('Complete requester submission flow', async ({ page, accounts }) => {
+    await login(page, accounts.requester);
+    await expect(page).toHaveURL(/\/tickets$/);
+    await page.goto('/create');
     await expect(page.getByRole('heading', { name: /Create New Ticket/i })).toBeVisible();
 
     // Fill out the ticket form
@@ -33,7 +21,7 @@ test.describe('E2E-01: Create Ticket Flow', () => {
     await descriptionInput.fill('The screen flickers continuously when not plugged into power.');
 
     // Wait for a short moment to ensure form state updates
-    await page.waitForTimeout(500);
+
 
     // 3. Submit the ticket
     await page.getByRole('button', { name: /Submit Ticket/i }).click();
@@ -58,5 +46,6 @@ test.describe('E2E-01: Create Ticket Flow', () => {
         await expect(page.getByText(createdTicketNumber)).toBeVisible();
     }
     await expect(page.getByText(summaryText)).toBeVisible();
+    await screenshot(page, '10-requester-created-ticket');
   });
 });

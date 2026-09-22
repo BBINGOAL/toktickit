@@ -2,13 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import request from 'supertest'
 import app from '../../src/app'
 import jwt from 'jsonwebtoken'
-import { PrismaClient } from '../../src/generated/prisma/client'
-import { PrismaPg } from "@prisma/adapter-pg"
-import { Pool } from "pg"
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@127.0.0.1:5434/localdb' })
-const adapter = new PrismaPg(pool)
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../../src/db'
+import { createTestUser, createTestTicket, removeTestData } from './test-helpers'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'toktickit-super-secret-key'
 
@@ -20,46 +15,22 @@ describe('Ticket Collaboration APIs (Comments & Notes)', () => {
     let itStaffToken: string
     let requesterToken: string
     let testTicketId: number
-    let testTicketNumber: string
+    const userIds: number[] = []
+    let staffId: number
 
     beforeAll(async () => {
-        const itStaff = await prisma.user.findFirst({ where: { role: 'IT_STAFF', isActive: true } })
-        const requester = await prisma.user.findFirst({ where: { role: 'REQUESTER', isActive: true } })
-        const cat = await prisma.category.findFirst()
-        const sys = await prisma.relatedSystem.findFirst()
-
-        if (!itStaff || !requester || !cat || !sys) {
-            throw new Error('Seed data missing for tests')
-        }
-
-        await prisma.user.updateMany({
-            where: { id: { in: [itStaff.id, requester.id] } },
-            data: { mustChangePassword: false }
-        })
-
+        const itStaff = await createTestUser('IT_STAFF')
+        userIds.push(itStaff.id)
+        const requester = await createTestUser()
+        userIds.push(requester.id)
+        staffId = itStaff.id
         itStaffToken = generateToken(itStaff.id, itStaff.role)
         requesterToken = generateToken(requester.id, requester.role)
-
-        const ticket = await prisma.ticket.create({
-            data: {
-                ticketNumber: `TEST-CN-${Date.now()}`,
-                summary: 'Test ticket for collaboration',
-                description: 'Test desc',
-                requestedPriority: 'LOW',
-                status: 'OPEN',
-                requesterId: requester.id,
-                categoryId: cat.id,
-                relatedSystemId: sys.id
-            }
-        })
-        testTicketId = ticket.id
-        testTicketNumber = ticket.ticketNumber
+        testTicketId = (await createTestTicket(requester.id)).id
     })
 
     afterAll(async () => {
-        if (testTicketNumber) {
-            await prisma.ticket.deleteMany({ where: { ticketNumber: testTicketNumber } })
-        }
+        await removeTestData(userIds, testTicketId ? [testTicketId] : [])
         await prisma.$disconnect()
     })
 

@@ -198,6 +198,16 @@ export default function TicketDetailPage() {
         if (!e.target.files || e.target.files.length === 0 || !ticket || !user) return
         const file = e.target.files[0]
         setUploadError(null)
+        if (file.size > 5 * 1024 * 1024) {
+            setUploadError('File exceeds 5 MB limit')
+            e.target.value = ''
+            return
+        }
+        if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
+            setUploadError('File type not allowed.')
+            e.target.value = ''
+            return
+        }
         setUploading(true)
         try {
             const newAtt = await uploadAttachment(ticket.id, file)

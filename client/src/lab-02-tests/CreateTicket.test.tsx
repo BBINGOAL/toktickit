@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { RequesterProvider, useRequester } from '../context/RequesterContext'
+import { useAuth } from '../context/AuthContext'
 import CreateTicketPage from '../pages/CreateTicketPage'
 import * as api from '../api'
 
@@ -12,20 +12,20 @@ vi.mock('../api', () => ({
 }))
 
 // Mock context เพื่อจำลองว่าล็อกอินแล้ว
-vi.mock('../context/RequesterContext', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../context/RequesterContext')>()
+vi.mock('../context/AuthContext', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../context/AuthContext')>()
     return {
         ...actual,
-        useRequester: vi.fn()
+        useAuth: vi.fn()
     }
 })
 
 describe('CreateTicketPage', () => {
     beforeEach(() => {
         vi.clearAllMocks()
-        vi.mocked(useRequester).mockReturnValue({
-            requester: { id: 1, name: 'Test User', email: 'test@test.com', isActive: true },
-            setRequester: vi.fn()
+        vi.mocked(useAuth).mockReturnValue({
+            user: { id: 1, name: 'Test User', role: 'REQUESTER' },
+            setUser: vi.fn(), logout: vi.fn(), loading: false
         })
         vi.mocked(api.fetchCategories).mockResolvedValue([{ id: 1, name: 'Hardware' }])
         vi.mocked(api.fetchRelatedSystems).mockResolvedValue([{ id: 1, name: 'Laptop' }])

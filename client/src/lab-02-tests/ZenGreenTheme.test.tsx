@@ -1,18 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect } from 'vitest'
-import { RequesterProvider } from '../context/RequesterContext'
+import { describe, it, expect, vi } from 'vitest'
+vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: { id: 1, name: 'Requester', role: 'REQUESTER' }, logout: vi.fn() }) }))
 import AppShell from '../components/AppShell'
 
 describe('ZenGreenTheme', () => {
     it('STYLE-01: Zen Green primary color applied to app header', () => {
         render(
             <MemoryRouter>
-                <RequesterProvider>
+
                     <AppShell>
                         <div>Content</div>
                     </AppShell>
-                </RequesterProvider>
+
             </MemoryRouter>
         )
         

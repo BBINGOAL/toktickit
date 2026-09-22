@@ -45,15 +45,17 @@ function validContent(value: unknown): value is string {
 
 async function generateTicketNumber(tx: any) {
     const date = new Date()
-    const prefix = `TKT-${date.getFullYear()}${(date.getMonth() + 1).toString().padStart(2, '0')}`
+    const prefix = `TKT-${date.getFullYear()}-`
+    // Serialize number allocation within the transaction, including concurrent requests.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(334002)`
     const latestTicket = await tx.ticket.findFirst({
         where: { ticketNumber: { startsWith: prefix } },
         orderBy: { ticketNumber: 'desc' },
     })
-    if (!latestTicket) return `${prefix}-001`
+    if (!latestTicket) return `${prefix}000001`
     const lastSeq = parseInt(latestTicket.ticketNumber.split('-')[2])
-    const nextSeq = (lastSeq + 1).toString().padStart(3, '0')
-    return `${prefix}-${nextSeq}`
+    const nextSeq = (lastSeq + 1).toString().padStart(6, '0')
+    return `${prefix}${nextSeq}`
 }
 
 // ─── Create Ticket ─────────────────────────────────────────
@@ -64,10 +66,16 @@ router.post('/tickets', requireAppAccess, async (req: Request, res: Response) =>
         res.status(403).json({ error: 'Only requesters can create tickets' }); return;
     }
     const { categoryId, relatedSystemId, summary, description, requestedPriority } = req.body;
-    if (!categoryId || !relatedSystemId || typeof summary !== 'string' || !summary.trim() || typeof description !== 'string' || !description.trim() || !VALID_PRIORITIES.has(requestedPriority)) {
-        res.status(400).json({ error: 'Missing required fields' }); return;
-    }
+    const details: Record<string, string> = {}
+    if (!Number.isInteger(categoryId) || categoryId <= 0) details.categoryId = 'Invalid category'
+    if (!Number.isInteger(relatedSystemId) || relatedSystemId <= 0) details.relatedSystemId = 'Invalid related system'
+    if (typeof summary !== 'string' || summary.trim().length < 5 || summary.trim().length > 200) details.summary = 'Summary must be between 5 and 200 characters'
+    if (typeof description !== 'string' || description.trim().length < 10 || description.trim().length > 2000) details.description = 'Description must be between 10 and 2000 characters'
+    if (!VALID_PRIORITIES.has(requestedPriority)) details.requestedPriority = 'Invalid requested priority'
+    if (Object.keys(details).length) return res.status(400).json({ error: 'Validation failed', details })
     try {
+        if (!await prisma.category.findFirst({ where: { id: categoryId, isActive: true } })) return res.status(400).json({ error: 'Invalid category' })
+        if (!await prisma.relatedSystem.findFirst({ where: { id: relatedSystemId, isActive: true } })) return res.status(400).json({ error: 'Invalid related system' })
         const ticket = await prisma.$transaction(async (tx) => {
             const ticketNumber = await generateTicketNumber(tx)
             return tx.ticket.create({
@@ -91,8 +99,12 @@ router.get('/tickets', requireAppAccess, async (req: Request, res: Response) => 
     const status = req.query.status as string | undefined
     const sortField = (req.query.sort as string) || 'createdAt'
     const order = (req.query.order as string) || 'desc'
-    const page = parseInt((req.query.page as string) || '1')
-    const pageSize = parseInt((req.query.pageSize as string) || '10')
+    const page = Number(req.query.page || '1')
+    const pageSize = Number(req.query.pageSize || '10')
+    if (!Number.isInteger(page) || page < 1 || ![10, 25, 50].includes(pageSize)) return res.status(400).json({ error: 'Invalid pagination: page >= 1 and pageSize must be 10, 25, or 50' })
+    if (!['createdAt', 'updatedAt', 'summary', 'status', 'itPriority', 'requestedPriority', 'ticketNumber'].includes(sortField) || !['asc', 'desc'].includes(order)) return res.status(400).json({ error: 'Invalid sorting' })
+    if ((requestedPriority && !VALID_PRIORITIES.has(requestedPriority)) || (itPriority && !VALID_PRIORITIES.has(itPriority)) || (status && !VALID_STATUSES.has(status))) return res.status(400).json({ error: 'Invalid filter' })
+    if (req.query.categoryId && (!Number.isInteger(Number(req.query.categoryId)) || Number(req.query.categoryId) <= 0)) return res.status(400).json({ error: 'Invalid categoryId' })
 
     try {
         const where: Record<string, unknown> = { requesterId }
@@ -327,7 +339,8 @@ router.post('/tickets/:id/attachments', requireAppAccess, (req: Request, res: Re
 
         if (err?.message === 'INVALID_TYPE') { res.status(415).json({ error: 'File type not allowed.' }); return; }
         if (err?.code === 'LIMIT_FILE_SIZE') { res.status(413).json({ error: 'File size exceeds limit.' }); return; }
-        if (err || !req.file) { res.status(400).json({ error: 'Failed to upload attachment.' }); return; }
+        if (err) { res.status(400).json({ error: 'Failed to upload attachment.' }); return; }
+        if (!req.file) { res.status(400).json({ error: 'No file was uploaded.' }); return; }
 
         try {
             const ticket = await prisma.ticket.findUnique({ where: { id: parseInt(String(req.params.id), 10) } });
@@ -381,10 +394,11 @@ router.patch('/attachments/:id/remove', requireAppAccess, async (req: Request, r
             where: { id: parseInt(String(req.params.id), 10) },
             include: { ticket: { select: { requesterId: true } } },
         });
-        if (!attachment || attachment.isRemoved) { res.status(404).json({ error: 'Not found' }); return; }
+        if (!attachment) { res.status(404).json({ error: 'Not found' }); return; }
         if (attachment.ticket.requesterId !== userId && userRole !== 'IT_STAFF' && userRole !== 'ADMIN') {
             res.status(403).json({ error: 'Access denied.' }); return;
         }
+        if (attachment.isRemoved) return res.status(409).json({ error: 'Attachment already removed.' })
         const updated = await prisma.attachment.update({
             where: { id: attachment.id },
             data: { isRemoved: true, removedAt: new Date(), removalReason: removalReason.trim() },
