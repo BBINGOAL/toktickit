@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../../src/db'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 export const TEST_PASSWORD = 'password123'
 const JWT_SECRET = process.env.JWT_SECRET || 'toktickit-super-secret-key'
@@ -45,6 +47,13 @@ export async function createTestTicket(requesterId: number, suffix = `${Date.now
 
 export async function removeTestData(userIds: number[], ticketIds: number[] = []) {
     if (ticketIds.length) {
+        const attachments = await prisma.attachment.findMany({ where: { ticketId: { in: ticketIds } }, select: { storedFilename: true } })
+        const uploads = path.resolve(__dirname, '../../uploads')
+        for (const attachment of attachments) {
+            const target = path.resolve(uploads, attachment.storedFilename)
+            if (path.dirname(target) !== uploads) throw new Error('Unsafe test attachment path')
+            await fs.rm(target, { force: true })
+        }
         await prisma.publicComment.deleteMany({ where: { ticketId: { in: ticketIds } } })
         await prisma.internalNote.deleteMany({ where: { ticketId: { in: ticketIds } } })
         await prisma.attachment.deleteMany({ where: { ticketId: { in: ticketIds } } })
