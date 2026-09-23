@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getCurrentUser } from '../api';
 
 export type User = {
     id: number;
@@ -11,19 +12,21 @@ interface AuthContextType {
     user: User;
     setUser: (user: User) => void;
     logout: () => void;
+    loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    // In a full implementation, you would have a /api/auth/me endpoint 
-    // to fetch the current user session on load using the cookie.
-    // For this lab, we'll store user in localStorage to persist across reloads
-    // (the token is in the HttpOnly cookie, but UI state is here).
-    const [user, setUserState] = useState<User>(() => {
-        const saved = localStorage.getItem('toktickit_user');
-        return saved ? JSON.parse(saved) : null;
-    });
+    const [user, setUserState] = useState<User>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        getCurrentUser()
+            .then((currentUser) => setUser(currentUser))
+            .catch(() => setUser(null))
+            .finally(() => setLoading(false));
+    }, []);
 
     const setUser = (newUser: User) => {
         setUserState(newUser);
@@ -39,7 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, setUser, logout }}>
+        <AuthContext.Provider value={{ user, setUser, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

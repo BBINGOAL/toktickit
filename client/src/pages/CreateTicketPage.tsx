@@ -46,10 +46,10 @@ export default function CreateTicketPage() {
 
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    // Redirect if no requester
+    // The authenticated requester is the only identity used by this form.
     useEffect(() => {
-        if (!requester) navigate('/')
-    }, [requester, navigate])
+        if (!user) navigate('/')
+    }, [user, navigate])
 
     // Load categories and related systems
     useEffect(() => {
@@ -233,7 +233,7 @@ export default function CreateTicketPage() {
                             </div>
                             <div style={{ gridColumn: '1 / -1' }}>
                                 <label className="form-label">Requester</label>
-                                <input type="text" value={requester?.name ?? ''} readOnly />
+                                <input type="text" value={user?.name ?? ''} readOnly />
                             </div>
                         </div>
                     </div>

@@ -9,8 +9,17 @@ import ITStaffQueue from './pages/ITStaffQueue'
 import UserManagement from './pages/UserManagement'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-    const { user } = useAuth()
+    const { user, loading } = useAuth()
+    if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading session...</div>
     if (!user) return <Navigate to="/" replace />
+    return <>{children}</>
+}
+
+function RoleRoute({ roles, children }: { roles: string[]; children: React.ReactNode }) {
+    const { user, loading } = useAuth()
+    if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading session...</div>
+    if (!user) return <Navigate to="/" replace />
+    if (!roles.includes(user.role)) return <Navigate to="/" replace />
     return <>{children}</>
 }
 
@@ -22,17 +31,17 @@ function AppRoutes() {
                 <Route
                     path="/create"
                     element={
-                        <ProtectedRoute>
+                        <RoleRoute roles={['REQUESTER']}>
                             <CreateTicketPage />
-                        </ProtectedRoute>
+                        </RoleRoute>
                     }
                 />
                 <Route
                     path="/tickets"
                     element={
-                        <ProtectedRoute>
+                        <RoleRoute roles={['REQUESTER']}>
                             <MyTicketsPage />
-                        </ProtectedRoute>
+                        </RoleRoute>
                     }
                 />
                 <Route
@@ -46,17 +55,17 @@ function AppRoutes() {
                 <Route
                     path="/staff/tickets"
                     element={
-                        <ProtectedRoute>
+                        <RoleRoute roles={['IT_STAFF', 'ADMIN']}>
                             <ITStaffQueue />
-                        </ProtectedRoute>
+                        </RoleRoute>
                     }
                 />
                 <Route
                     path="/admin/users"
                     element={
-                        <ProtectedRoute>
+                        <RoleRoute roles={['ADMIN']}>
                             <UserManagement />
-                        </ProtectedRoute>
+                        </RoleRoute>
                     }
                 />
                 <Route path="*" element={<Navigate to="/" replace />} />

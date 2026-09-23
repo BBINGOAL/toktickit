@@ -1,15 +1,10 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import request from 'supertest'
 import app from '../../src/app'
 import jwt from 'jsonwebtoken'
-import { PrismaClient } from '../../src/generated/prisma/client'
-import { PrismaPg } from "@prisma/adapter-pg"
-import { Pool } from "pg"
+import { prisma } from '../../src/db'
+import { createTestUser, removeTestData } from './test-helpers'
 import bcrypt from 'bcryptjs'
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL || 'postgresql://postgres:password@127.0.0.1:5434/localdb' })
-const adapter = new PrismaPg(pool)
-const prisma = new PrismaClient({ adapter })
 
 const JWT_SECRET = process.env.JWT_SECRET || 'toktickit-super-secret-key'
 
@@ -21,15 +16,15 @@ describe('Admin User Management APIs', () => {
     let adminToken: string
     let itStaffToken: string
     let adminUserId: number
+    let adminEmail: string
+    const userIds: number[] = []
 
     beforeAll(async () => {
-        let admin = await prisma.user.findFirst({ where: { role: 'ADMIN', isActive: true } })
-        let itStaff = await prisma.user.findFirst({ where: { role: 'IT_STAFF', isActive: true } })
-
-        if (!admin || !itStaff) {
-            throw new Error('Seed data missing for tests')
-        }
-
+        const admin = await createTestUser('ADMIN')
+        userIds.push(admin.id)
+        const itStaff = await createTestUser('IT_STAFF')
+        userIds.push(itStaff.id)
+        adminEmail = admin.email
         adminUserId = admin.id
         adminToken = generateToken(admin.id, admin.role)
         itStaffToken = generateToken(itStaff.id, itStaff.role)
@@ -63,6 +58,7 @@ describe('Admin User Management APIs', () => {
                     role: 'REQUESTER',
                     initialPassword: 'password123'
                 })
+            if (res.body.id) userIds.push(res.body.id)
             expect(res.status).toBe(201)
             expect(res.body.name).toBe('New Test User')
             expect(res.body.isActive).toBe(true)
@@ -70,12 +66,14 @@ describe('Admin User Management APIs', () => {
 
         it('should prevent creating a user with a duplicate email', async () => {
             const email = `duplicate_${Date.now()}@kmutt.ac.th`
-            await request(app).post('/api/admin/users').set('Cookie', [`token=${adminToken}`]).send({
-                name: 'Dup 1', email, role: 'REQUESTER', initialPassword: 'pw'
+            const created = await request(app).post('/api/admin/users').set('Cookie', [`token=${adminToken}`]).send({
+                name: 'Dup 1', email, role: 'REQUESTER', initialPassword: 'password123'
             })
+            if (created.body.id) userIds.push(created.body.id)
+            expect(created.status).toBe(201)
             
             const res = await request(app).post('/api/admin/users').set('Cookie', [`token=${adminToken}`]).send({
-                name: 'Dup 2', email, role: 'REQUESTER', initialPassword: 'pw'
+                name: 'Dup 2', email, role: 'REQUESTER', initialPassword: 'password123'
             })
             expect(res.status).toBe(409)
         })
@@ -94,6 +92,7 @@ describe('Admin User Management APIs', () => {
                     isActive: true
                 }
             })
+            userIds.push(u.id)
             testUserId = u.id
         })
 
@@ -111,7 +110,7 @@ describe('Admin User Management APIs', () => {
             const res = await request(app)
                 .put(`/api/admin/users/${adminUserId}`)
                 .set('Cookie', [`token=${adminToken}`])
-                .send({ isActive: false })
+                .send({ name: 'Test Admin', email: adminEmail, role: 'ADMIN', isActive: false })
             expect(res.status).toBe(400)
             expect(res.body.error).toContain('cannot deactivate your own account')
         })
@@ -131,6 +130,7 @@ describe('Admin User Management APIs', () => {
                     isActive: true
                 }
             })
+            userIds.push(u.id)
             testUserId = u.id
         })
 
@@ -146,5 +146,10 @@ describe('Admin User Management APIs', () => {
             const isValid = await bcrypt.compare('newsecurepassword', dbUser!.passwordHash)
             expect(isValid).toBe(true)
         })
+    })
+
+    afterAll(async () => {
+        await removeTestData(userIds)
+        await prisma.$disconnect()
     })
 })

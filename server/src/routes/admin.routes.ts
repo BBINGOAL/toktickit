@@ -1,15 +1,10 @@
 import { Router, Request, Response } from 'express'
-import { PrismaClient } from '../generated/prisma/client'
-import { PrismaPg } from "@prisma/adapter-pg"
-import { Pool } from "pg"
-import { requireAuth } from '../middleware/auth.middleware'
+import { prisma } from '../db'
+import { requireAppAccess } from '../middleware/auth.middleware'
 import bcrypt from 'bcryptjs'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-const adapter = new PrismaPg(pool)
-const prisma = new PrismaClient({ adapter })
-
 const router = Router()
+const VALID_ROLES = new Set(['REQUESTER', 'IT_STAFF', 'ADMIN'])
 
 // Middleware to ensure user is an ADMIN
 const requireAdmin = (req: Request, res: Response, next: Function) => {
@@ -22,7 +17,7 @@ const requireAdmin = (req: Request, res: Response, next: Function) => {
 };
 
 // ─── Fetch All Users (with search & filter) ────────────────
-router.get('/admin/users', requireAuth, requireAdmin, async (req: Request, res: Response) => {
+router.get('/admin/users', requireAppAccess, requireAdmin, async (req: Request, res: Response) => {
     try {
         const { search, role } = req.query;
         let where: any = {};
@@ -34,6 +29,10 @@ router.get('/admin/users', requireAuth, requireAdmin, async (req: Request, res: 
             ];
         }
 
+        if (role && !VALID_ROLES.has(String(role))) {
+            res.status(400).json({ error: 'Invalid role.' });
+            return;
+        }
         if (role) {
             where.role = String(role);
         }
@@ -60,17 +59,22 @@ router.get('/admin/users', requireAuth, requireAdmin, async (req: Request, res: 
 });
 
 // ─── Create New User ─────────────────────────────────────────
-router.post('/admin/users', requireAuth, requireAdmin, async (req: Request, res: Response) => {
+router.post('/admin/users', requireAppAccess, requireAdmin, async (req: Request, res: Response) => {
     try {
         const { name, email, role, initialPassword } = req.body;
 
-        if (!name || !email || !role || !initialPassword) {
+        if (typeof name !== 'string' || !name.trim() || typeof email !== 'string' || !email.trim() || !role || typeof initialPassword !== 'string' || initialPassword.length < 6) {
             res.status(400).json({ error: 'All fields are required.' });
+            return;
+        }
+        if (!VALID_ROLES.has(role)) {
+            res.status(400).json({ error: 'Invalid role.' });
             return;
         }
 
         // Check for duplicate email
-        const existing = await prisma.user.findUnique({ where: { email } });
+        const normalizedEmail = email.trim().toLowerCase()
+        const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
         if (existing) {
             res.status(409).json({ error: 'Email already exists.' });
             return;
@@ -80,8 +84,8 @@ router.post('/admin/users', requireAuth, requireAdmin, async (req: Request, res:
 
         const newUser = await prisma.user.create({
             data: {
-                name,
-                email,
+                name: name.trim(),
+                email: normalizedEmail,
                 role,
                 passwordHash,
                 mustChangePassword: true,
@@ -97,16 +101,22 @@ router.post('/admin/users', requireAuth, requireAdmin, async (req: Request, res:
 });
 
 // ─── Update User Details ──────────────────────────────────────
-router.put('/admin/users/:id', requireAuth, requireAdmin, async (req: Request, res: Response) => {
+const updateUser = async (req: Request, res: Response) => {
     try {
-        const userIdToUpdate = parseInt(req.params.id);
+        const userIdToUpdate = Number.parseInt(String(req.params.id), 10);
         const { name, email, role, isActive } = req.body;
         const currentUserId = (req as any).user.userId;
 
+        if (!Number.isInteger(userIdToUpdate) || typeof name !== 'string' || !name.trim() || typeof email !== 'string' || !email.trim() || typeof isActive !== 'boolean' || !role || !VALID_ROLES.has(role)) {
+            res.status(400).json({ error: 'Invalid user data.' });
+            return;
+        }
+
         // Validation for duplicate email
-        if (email) {
+        const normalizedEmail = email.trim().toLowerCase()
+        if (normalizedEmail) {
             const existing = await prisma.user.findFirst({
-                where: { email, id: { not: userIdToUpdate } }
+                where: { email: normalizedEmail, id: { not: userIdToUpdate } }
             });
             if (existing) {
                 res.status(409).json({ error: 'Email already exists.' });
@@ -136,7 +146,7 @@ router.put('/admin/users/:id', requireAuth, requireAdmin, async (req: Request, r
 
         const updatedUser = await prisma.user.update({
             where: { id: userIdToUpdate },
-            data: { name, email, role, isActive },
+            data: { name: name.trim(), email: normalizedEmail, role, isActive },
             select: { id: true, name: true, email: true, role: true, isActive: true }
         });
 
@@ -144,15 +154,18 @@ router.put('/admin/users/:id', requireAuth, requireAdmin, async (req: Request, r
     } catch (error) {
         res.status(500).json({ error: 'Failed to update user.' });
     }
-});
+};
+
+router.patch('/admin/users/:id', requireAppAccess, requireAdmin, updateUser)
+router.put('/admin/users/:id', requireAppAccess, requireAdmin, updateUser)
 
 // ─── Reset Initial Password ──────────────────────────────────
-router.post('/admin/users/:id/reset-password', requireAuth, requireAdmin, async (req: Request, res: Response) => {
+router.post('/admin/users/:id/reset-password', requireAppAccess, requireAdmin, async (req: Request, res: Response) => {
     try {
-        const userIdToUpdate = parseInt(req.params.id);
+        const userIdToUpdate = parseInt(String(req.params.id), 10);
         const { newInitialPassword } = req.body;
 
-        if (!newInitialPassword) {
+        if (typeof newInitialPassword !== 'string' || newInitialPassword.length < 6) {
             res.status(400).json({ error: 'New initial password is required.' });
             return;
         }

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { 
     fetchTicketDetail, uploadAttachment, downloadAttachment, removeAttachment,
     fetchComments, addComment, fetchNotes, addNote,
-    updateTicketStatus, updateTicketPriority, updateTicketOwner
+    updateTicketStatus, updateTicketPriority, updateTicketOwner, indicateRequesterResolved
 } from '../api'
 import type { TicketDetail, Attachment, PublicComment, InternalNote } from '../api'
 
@@ -183,6 +183,7 @@ export default function TicketDetailPage() {
     const [error, setError] = useState<string | null>(null)
     const [uploadError, setUploadError] = useState<string | null>(null)
     const [uploading, setUploading] = useState(false)
+    const [resolutionSaving, setResolutionSaving] = useState(false)
 
     useEffect(() => {
         if (!user || !id) return
@@ -197,6 +198,16 @@ export default function TicketDetailPage() {
         if (!e.target.files || e.target.files.length === 0 || !ticket || !user) return
         const file = e.target.files[0]
         setUploadError(null)
+        if (file.size > 5 * 1024 * 1024) {
+            setUploadError('File exceeds 5 MB limit')
+            e.target.value = ''
+            return
+        }
+        if (!['image/jpeg', 'image/png', 'image/webp', 'application/pdf'].includes(file.type)) {
+            setUploadError('File type not allowed.')
+            e.target.value = ''
+            return
+        }
         setUploading(true)
         try {
             const newAtt = await uploadAttachment(ticket.id, file)
@@ -249,6 +260,19 @@ export default function TicketDetailPage() {
         } catch { alert('Failed to assign owner'); }
     }
 
+    async function handleRequesterResolved() {
+        if (!ticket) return
+        setResolutionSaving(true)
+        try {
+            const updated = await indicateRequesterResolved(ticket.id)
+            setTicket(prev => prev ? { ...prev, requesterResolved: updated.requesterResolved, requesterResolvedAt: updated.requesterResolvedAt } : prev)
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Failed to record resolution indication')
+        } finally {
+            setResolutionSaving(false)
+        }
+    }
+
     if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>Loading ticket...</div>
     if (error || !ticket) return <div style={{ padding: 40, textAlign: 'center', color: '#DC2626' }}>{error}</div>
 
@@ -271,11 +295,13 @@ export default function TicketDetailPage() {
                     <div>
                         <span style={{ ...labelStyle, color: '#4B5563' }}>Update Status</span>
                         <select value={ticket.status} onChange={handleStatusChange} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #9CA3AF' }}>
-                            <option value="DRAFT">DRAFT</option>
+                            <option value="NEW">NEW</option>
                             <option value="OPEN">OPEN</option>
                             <option value="IN_PROGRESS">IN_PROGRESS</option>
+                            <option value="WAITING_FOR_REQUESTER">WAITING_FOR_REQUESTER</option>
                             <option value="RESOLVED">RESOLVED</option>
                             <option value="CLOSED">CLOSED</option>
+                            <option value="REOPENED">REOPENED</option>
                             <option value="CANCELLED">CANCELLED</option>
                         </select>
                     </div>
@@ -337,6 +363,13 @@ export default function TicketDetailPage() {
                     <div><span style={labelStyle}>Description</span><div style={{ ...fieldStyle, whiteSpace: 'pre-wrap', minHeight: 80 }}>{ticket.description}</div></div>
                 </div>
             </div>
+
+            {!isStaff && (
+                <div style={{ marginBottom: 20, padding: 16, background: ticket.requesterResolved ? '#ECFDF5' : '#FFFBEB', border: `1px solid ${ticket.requesterResolved ? '#A7F3D0' : '#FDE68A'}`, borderRadius: 12 }}>
+                    <strong>{ticket.requesterResolved ? 'You indicated that this problem appears resolved.' : 'Does this problem appear resolved?'}</strong>
+                    {!ticket.requesterResolved && <button onClick={handleRequesterResolved} disabled={resolutionSaving} style={{ marginLeft: 12, background: '#006B3C', color: 'white', border: 'none', borderRadius: 6, padding: '7px 12px', cursor: 'pointer' }}>{resolutionSaving ? 'Saving...' : 'Mark as resolved'}</button>}
+                </div>
+            )}
 
             <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
                 <div style={{ padding: '16px 24px', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -1,0 +1,3 @@
+ALTER TABLE "Ticket"
+  ADD COLUMN IF NOT EXISTS "requesterResolved" BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS "requesterResolvedAt" TIMESTAMP(3);

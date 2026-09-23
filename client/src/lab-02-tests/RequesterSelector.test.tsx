@@ -1,51 +1,24 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
-import { RequesterProvider } from '../context/RequesterContext'
-import RequesterSelectionPage from '../pages/RequesterSelectionPage'
-import * as api from '../api'
-
-vi.mock('../api', () => ({
-    fetchRequesters: vi.fn()
-}))
-
-describe('RequesterSelector', () => {
-    it('UI-01: Renders selector when no requester selected', async () => {
-        vi.mocked(api.fetchRequesters).mockResolvedValue([
-            { id: 1, name: 'Active User', email: 'active@test.com', isActive: true }
-        ])
-        
-        render(
-            <MemoryRouter initialEntries={['/']}>
-                <RequesterProvider>
-                    <RequesterSelectionPage />
-                </RequesterProvider>
-            </MemoryRouter>
-        )
-        
-        await waitFor(() => expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument())
-        expect(screen.getByText(/Development Requester Selection/i)).toBeInTheDocument()
-        expect(screen.getByRole('button', { name: /Select Requester/i })).toBeInTheDocument()
-    })
-
-    it('UI-02: Only shows active requesters in dropdown', async () => {
-        vi.mocked(api.fetchRequesters).mockResolvedValue([
-            { id: 1, name: 'Active User', email: 'active@test.com', isActive: true },
-            { id: 2, name: 'Inactive User', email: 'inactive@test.com', isActive: false }
-        ])
-        
-        render(
-            <MemoryRouter initialEntries={['/']}>
-                <RequesterProvider>
-                    <RequesterSelectionPage />
-                </RequesterProvider>
-            </MemoryRouter>
-        )
-        
-        await waitFor(() => {
-            const options = screen.getAllByRole('option')
-            expect(options.map(o => o.textContent)).toContain('Active User')
-            expect(options.map(o => o.textContent)).not.toContain('Inactive User')
-        })
-    })
+import Login from '../pages/Login'
+import { login } from '../api'
+vi.mock('../context/AuthContext', () => ({ useAuth: () => ({ user: null, setUser: vi.fn(), loading: false, logout: vi.fn() }) }))
+vi.mock('../api', () => ({ login: vi.fn(), changePassword: vi.fn() }))
+describe('Replacement of development requester selector', () => {
+  it('renders credential login, not an impersonation selector', () => {
+    render(<MemoryRouter><Login /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: 'Sign In' })).toBeVisible()
+    expect(screen.queryByText(/Development Requester Selection/i)).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+  })
+  it('does not admit an inactive account when API rejects login', async () => {
+    vi.mocked(login).mockRejectedValue(new Error('Invalid credentials'))
+    render(<MemoryRouter><Login /></MemoryRouter>)
+    fireEvent.change(screen.getByLabelText('Email Address'), { target: { value: 'inactive@example.test' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'password123' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }))
+    expect(await screen.findByText('Invalid credentials')).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Sign In' })).toBeVisible()
+  })
 })

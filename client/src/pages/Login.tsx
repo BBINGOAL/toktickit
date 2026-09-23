@@ -11,6 +11,7 @@ export default function Login() {
     // Change password state
     const [needsPasswordChange, setNeedsPasswordChange] = useState(false);
     const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [tempUser, setTempUser] = useState<User | null>(null);
 
     const [error, setError] = useState('');
@@ -58,10 +59,14 @@ export default function Login() {
             setError('Password must be at least 6 characters long.');
             return;
         }
+        if (newPassword !== confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+        }
 
         try {
             setLoading(true);
-            await apiChangePassword(newPassword);
+            await apiChangePassword(newPassword, confirmPassword);
             
             if (tempUser) {
                 const finalUser = { ...tempUser, mustChangePassword: false };
@@ -99,10 +104,11 @@ export default function Login() {
                 {!needsPasswordChange ? (
                     <form onSubmit={handleLoginSubmit}>
                         <div style={{ marginBottom: '16px' }}>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
+                            <label htmlFor="login-email" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
                                 Email Address
                             </label>
                             <input
+                                id="login-email"
                                 type="email"
                                 value={email}
                                 onChange={e => setEmail(e.target.value)}
@@ -113,10 +119,11 @@ export default function Login() {
                         </div>
                         
                         <div style={{ marginBottom: '24px' }}>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
+                            <label htmlFor="login-password" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
                                 Password
                             </label>
                             <input
+                                id="login-password"
                                 type="password"
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
@@ -151,14 +158,27 @@ export default function Login() {
                             <p style={{ fontSize: '14px', color: '#d97706', marginBottom: '16px', backgroundColor: '#fef3c7', padding: '12px', borderRadius: '6px' }}>
                                 For security reasons, you must change your password before continuing.
                             </p>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
+                            <label htmlFor="new-password" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
                                 New Password
                             </label>
                             <input
+                                id="new-password"
                                 type="password"
                                 value={newPassword}
                                 onChange={e => setNewPassword(e.target.value)}
                                 placeholder="Min. 6 characters"
+                                style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', boxSizing: 'border-box' }}
+                            />
+                            <label htmlFor="confirm-password" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', margin: '16px 0 8px' }}>
+                                Confirm New Password
+                            </label>
+                            <input
+                                id="confirm-password"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                                placeholder="Re-enter your new password"
+                                autoComplete="new-password"
                                 style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '6px', boxSizing: 'border-box' }}
                             />
                         </div>

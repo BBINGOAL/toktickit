@@ -26,13 +26,14 @@ describe('Admin User Management (E2E Overview in UI)', () => {
         vi.mocked(api.fetchAdminUsers).mockResolvedValue(mockUsers)
     })
 
-    it('should deny access if user is not an admin', () => {
+    it('should deny access if user is not an admin', async () => {
         vi.spyOn(authContext, 'useAuth').mockReturnValue({ 
             user: { userId: 2, name: 'Staff One', role: 'IT_STAFF' },
             login: vi.fn(), logout: vi.fn(), changePassword: vi.fn(), loading: false
         })
         render(<UserManagement />)
         expect(screen.getByText(/Access Denied/i)).toBeInTheDocument()
+        await waitFor(() => expect(api.fetchAdminUsers).toHaveBeenCalled())
     })
 
     it('should load and display users', async () => {
@@ -61,6 +62,7 @@ describe('Admin User Management (E2E Overview in UI)', () => {
         const roleSelect = screen.getByRole('combobox')
         fireEvent.change(roleSelect, { target: { value: 'IT_STAFF' } })
         expect(api.fetchAdminUsers).toHaveBeenCalledWith('Staff', 'IT_STAFF')
+        await waitFor(() => expect(screen.queryByText('Loading users...')).not.toBeInTheDocument())
     })
 
     it('should open modal and create a new user', async () => {

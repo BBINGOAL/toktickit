@@ -1,9 +1,6 @@
 import "dotenv/config"
 import express from 'express'
 import cors from 'cors'
-import { Pool } from "pg"
-import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient } from "./generated/prisma/client"
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
@@ -11,6 +8,7 @@ import cookieParser from 'cookie-parser'
 import authRoutes from './routes/auth.routes'
 import ticketRoutes from './routes/ticket.routes'
 import adminRoutes from './routes/admin.routes'
+import { prisma } from './db'
 
 // ─── Upload Config ────────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, '..', 'uploads')
@@ -36,9 +34,7 @@ export const upload = multer({
     },
 })
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
-const adapter = new PrismaPg(pool)
-export const prisma = new PrismaClient({ adapter })
+export { prisma }
 const app = express()
 app.use(cors({
     origin: 'http://localhost:5173', // เปลี่ยนพอร์ตถ้า Frontend ของคุณไม่ได้รันที่ 5173

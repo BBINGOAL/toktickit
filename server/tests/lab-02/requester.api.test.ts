@@ -41,26 +41,14 @@ describe('GET /api/related-systems', () => {
     })
 })
 
-describe('GET /api/requesters', () => {
-    it('should return only active dev requesters', async () => {
-        const res = await request(app).get('/api/requesters')
-        expect(res.status).toBe(200)
-        expect(Array.isArray(res.body)).toBe(true)
-        expect(res.body.length).toBeGreaterThanOrEqual(4)
+describe('Removed development authentication', () => {
+    it('does not expose the old requester directory', async () => {
+        expect((await request(app).get('/api/requesters')).status).toBe(404)
     })
-
-    it('should not include inactive requester', async () => {
-        const res = await request(app).get('/api/requesters')
-        const emails = res.body.map((r: { email: string }) => r.email)
-        expect(emails).not.toContain('inactive.user@kmutt.ac.th')
+    it('does not accept an impersonated requester header', async () => {
+        expect((await request(app).get('/api/tickets').set('X-Requester-Id', '1')).status).toBe(401)
     })
-
-    it('each requester should have id, name, and email', async () => {
-        const res = await request(app).get('/api/requesters')
-        res.body.forEach((r: { id: number; name: string; email: string }) => {
-            expect(r).toHaveProperty('id')
-            expect(r).toHaveProperty('name')
-            expect(r).toHaveProperty('email')
-        })
+    it('requires a session for current-user identity', async () => {
+        expect((await request(app).get('/api/auth/me')).status).toBe(401)
     })
 })

@@ -17,15 +17,21 @@ export async function login(payload: any) {
     return res.json()
 }
 
+export async function getCurrentUser() {
+    const res = await apiFetch(`${BASE_URL}/api/auth/me`)
+    if (!res.ok) throw new Error('Not authenticated')
+    return res.json()
+}
+
 export async function logout() {
     await apiFetch(`${BASE_URL}/api/auth/logout`, { method: 'POST' })
 }
 
-export async function changePassword(newPassword: string) {
+export async function changePassword(newPassword: string, confirmPassword = newPassword) {
     const res = await apiFetch(`${BASE_URL}/api/auth/change-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ newPassword })
+        body: JSON.stringify({ newPassword, confirmPassword })
     })
     if (!res.ok) {
         const err = await res.json()
@@ -60,6 +66,8 @@ export interface TicketListItem {
     requestedPriority: string
     itPriority?: string | null
     status: string
+    requesterResolved?: boolean
+    requesterResolvedAt?: string | null
     owner?: { id: number; name: string } | null
     createdAt: string
     updatedAt: string
@@ -370,6 +378,15 @@ export async function resetAdminUserPassword(id: number, newInitialPassword: str
     if (!res.ok) {
         const err = await res.json()
         throw new Error(err.error || 'Failed to reset password')
+    }
+    return res.json()
+}
+
+export async function indicateRequesterResolved(ticketId: number): Promise<any> {
+    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/requester-resolved`, { method: 'POST' })
+    if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to record resolution indication')
     }
     return res.json()
 }

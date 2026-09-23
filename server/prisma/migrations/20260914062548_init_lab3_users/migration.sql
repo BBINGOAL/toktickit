@@ -1,9 +1,6 @@
 /*
   Warnings:
 
-  - You are about to drop the column `ticketOwner` on the `Ticket` table. All the data in the column will be lost.
-  - You are about to drop the `DevRequester` table. If the table is not empty, all the data it contains will be lost.
-
 */
 -- CreateEnum
 CREATE TYPE "Role" AS ENUM ('REQUESTER', 'IT_STAFF', 'ADMIN');
@@ -24,22 +21,10 @@ ALTER TYPE "TicketStatus" ADD VALUE 'CLOSED';
 ALTER TYPE "TicketStatus" ADD VALUE 'REOPENED';
 ALTER TYPE "TicketStatus" ADD VALUE 'CANCELLED';
 
--- DropForeignKey
-ALTER TABLE "Attachment" DROP CONSTRAINT "Attachment_uploadedById_fkey";
-
--- DropForeignKey
-ALTER TABLE "Ticket" DROP CONSTRAINT "Ticket_requesterId_fkey";
-
--- AlterTable
-ALTER TABLE "Ticket" DROP COLUMN "ticketOwner",
-ADD COLUMN     "ownerId" INTEGER;
-
--- DropTable
-DROP TABLE "DevRequester";
-
--- CreateTable
+-- Create the real user table before removing the Lab 2 requester table.
+-- Existing ids are preserved so Ticket and Attachment foreign keys remain valid.
 CREATE TABLE "User" (
-    "id" SERIAL NOT NULL,
+    "id" INTEGER NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
@@ -47,10 +32,39 @@ CREATE TABLE "User" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "mustChangePassword" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
+
+CREATE SEQUENCE "User_id_seq" OWNED BY "User"."id";
+ALTER TABLE "User" ALTER COLUMN "id" SET DEFAULT nextval('"User_id_seq"');
+
+INSERT INTO "User" ("id", "name", "email", "passwordHash", "role", "isActive", "mustChangePassword", "createdAt", "updatedAt")
+SELECT "id", "name", "email", '$2b$10$sOoLkyTZxn7tHidGLR6QveENF9YQKxM2OnIwM03e8PZLfd4JwbPVm', 'REQUESTER', "isActive", true, "createdAt", CURRENT_TIMESTAMP
+FROM "DevRequester";
+
+SELECT setval(pg_get_serial_sequence('"User"', 'id'), COALESCE((SELECT MAX("id") FROM "User"), 1), true);
+
+-- DropForeignKey
+ALTER TABLE "Attachment" DROP CONSTRAINT "Attachment_uploadedById_fkey";
+
+-- DropForeignKey
+ALTER TABLE "Ticket" DROP CONSTRAINT "Ticket_requesterId_fkey";
+
+-- AlterTable
+ALTER TABLE "Ticket" ADD COLUMN     "ownerId" INTEGER;
+
+-- Preserve any Lab 2 textual owner when it matches a migrated user.
+UPDATE "Ticket" t
+SET "ownerId" = u."id"
+FROM "User" u
+WHERE t."ticketOwner" IS NOT NULL
+  AND (t."ticketOwner" = u."name" OR t."ticketOwner" = u."email");
+
+ALTER TABLE "Ticket" DROP COLUMN "ticketOwner";
+
+-- DropTable
+DROP TABLE "DevRequester";
 
 -- CreateTable
 CREATE TABLE "PublicComment" (
