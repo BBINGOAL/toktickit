@@ -2,13 +2,14 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import request from 'supertest'
 import app from '../../src/app'
 
-const VALID_REQUESTER_ID = '1'
+import { requesterFixture } from './fixtures'
+const fixture = requesterFixture()
 let createdTicketId: number
 
 const validTicketBody = {
-    categoryId: 1,
-    relatedSystemId: 1,
-    summary: 'GET Ticket Test',
+    get categoryId() { return fixture.categoryId },
+    get relatedSystemId() { return fixture.relatedSystemId },
+    summary: 'GET laptop Ticket Test',
     description: 'Testing retrieving tickets via GET.',
     requestedPriority: 'LOW',
 }
@@ -18,41 +19,42 @@ describe('Ticket GET APIs', () => {
         // Create a ticket to test GET /api/tickets/:id
         const res = await request(app)
             .post('/api/tickets')
-            .set('X-Requester-Id', VALID_REQUESTER_ID)
+            .set('Cookie', fixture.cookie)
             .send(validTicketBody)
         createdTicketId = res.body.id
     })
 
     describe('GET /api/tickets', () => {
-        it('should return 400 if X-Requester-Id is missing', async () => {
+        it('should return 401 if session cookie is missing', async () => {
             const res = await request(app).get('/api/tickets')
-            expect(res.status).toBe(400)
+            expect(res.status).toBe(401)
         })
 
         it('should return paginated tickets for the requester', async () => {
             const res = await request(app)
                 .get('/api/tickets')
-                .set('X-Requester-Id', VALID_REQUESTER_ID)
+                .set('Cookie', fixture.cookie)
             expect(res.status).toBe(200)
             expect(res.body).toHaveProperty('data')
-            expect(res.body).toHaveProperty('pagination')
+            expect(res.body).toHaveProperty('meta')
             expect(Array.isArray(res.body.data)).toBe(true)
-            expect(res.body.pagination).toHaveProperty('totalItems')
-            expect(res.body.pagination).toHaveProperty('totalPages')
+            expect(res.body.meta).toHaveProperty('totalItems')
+            expect(res.body.meta).toHaveProperty('totalPages')
         })
 
         it('should return 400 for invalid pageSize', async () => {
             const res = await request(app)
                 .get('/api/tickets?pageSize=99')
-                .set('X-Requester-Id', VALID_REQUESTER_ID)
+                .set('Cookie', fixture.cookie)
             expect(res.status).toBe(400)
         })
 
         it('should filter by search keyword', async () => {
             const res = await request(app)
                 .get('/api/tickets?search=laptop')
-                .set('X-Requester-Id', VALID_REQUESTER_ID)
+                .set('Cookie', fixture.cookie)
             expect(res.status).toBe(200)
+            expect(res.body.data.length).toBeGreaterThan(0)
             res.body.data.forEach((t: { summary: string; ticketNumber: string }) => {
                 const match = t.summary.toLowerCase().includes('laptop') ||
                     t.ticketNumber.toLowerCase().includes('laptop')
@@ -65,7 +67,7 @@ describe('Ticket GET APIs', () => {
         it('should return full ticket detail with attachments array', async () => {
             const res = await request(app)
                 .get(`/api/tickets/${createdTicketId}`)
-                .set('X-Requester-Id', VALID_REQUESTER_ID)
+                .set('Cookie', fixture.cookie)
             expect(res.status).toBe(200)
             expect(res.body).toHaveProperty('attachments')
             expect(Array.isArray(res.body.attachments)).toBe(true)
@@ -76,14 +78,14 @@ describe('Ticket GET APIs', () => {
         it('should return 404 for non-existent ticket', async () => {
             const res = await request(app)
                 .get('/api/tickets/999999')
-                .set('X-Requester-Id', VALID_REQUESTER_ID)
+                .set('Cookie', fixture.cookie)
             expect(res.status).toBe(404)
         })
 
         it('should return 403 for another requester\'s ticket', async () => {
             const res = await request(app)
                 .get(`/api/tickets/${createdTicketId}`)
-                .set('X-Requester-Id', '2')
+                .set('Cookie', fixture.otherCookie)
             expect(res.status).toBe(403)
         })
     })

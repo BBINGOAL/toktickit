@@ -1,15 +1,25 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { RequesterProvider } from './context/RequesterContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import AppShell from './components/AppShell'
-import RequesterSelectionPage from './pages/RequesterSelectionPage'
+import Login from './pages/Login'
 import CreateTicketPage from './pages/CreateTicketPage'
 import MyTicketsPage from './pages/MyTicketsPage'
 import TicketDetailPage from './pages/TicketDetailPage'
-import { useRequester } from './context/RequesterContext'
+import ITStaffQueue from './pages/ITStaffQueue'
+import UserManagement from './pages/UserManagement'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-    const { requester } = useRequester()
-    if (!requester) return <Navigate to="/" replace />
+    const { user, loading } = useAuth()
+    if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading session...</div>
+    if (!user) return <Navigate to="/" replace />
+    return <>{children}</>
+}
+
+function RoleRoute({ roles, children }: { roles: string[]; children: React.ReactNode }) {
+    const { user, loading } = useAuth()
+    if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading session...</div>
+    if (!user) return <Navigate to="/" replace />
+    if (!roles.includes(user.role)) return <Navigate to="/" replace />
     return <>{children}</>
 }
 
@@ -17,21 +27,21 @@ function AppRoutes() {
     return (
         <AppShell>
             <Routes>
-                <Route path="/" element={<RequesterSelectionPage />} />
+                <Route path="/" element={<Login />} />
                 <Route
                     path="/create"
                     element={
-                        <ProtectedRoute>
+                        <RoleRoute roles={['REQUESTER']}>
                             <CreateTicketPage />
-                        </ProtectedRoute>
+                        </RoleRoute>
                     }
                 />
                 <Route
                     path="/tickets"
                     element={
-                        <ProtectedRoute>
+                        <RoleRoute roles={['REQUESTER']}>
                             <MyTicketsPage />
-                        </ProtectedRoute>
+                        </RoleRoute>
                     }
                 />
                 <Route
@@ -40,6 +50,22 @@ function AppRoutes() {
                         <ProtectedRoute>
                             <TicketDetailPage />
                         </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/staff/tickets"
+                    element={
+                        <RoleRoute roles={['IT_STAFF', 'ADMIN']}>
+                            <ITStaffQueue />
+                        </RoleRoute>
+                    }
+                />
+                <Route
+                    path="/admin/users"
+                    element={
+                        <RoleRoute roles={['ADMIN']}>
+                            <UserManagement />
+                        </RoleRoute>
                     }
                 />
                 <Route path="*" element={<Navigate to="/" replace />} />
@@ -51,9 +77,9 @@ function AppRoutes() {
 export default function App() {
     return (
         <BrowserRouter>
-            <RequesterProvider>
+            <AuthProvider>
                 <AppRoutes />
-            </RequesterProvider>
+            </AuthProvider>
         </BrowserRouter>
     )
 }

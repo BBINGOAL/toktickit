@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchTickets, fetchCategories } from '../api'
 import type { TicketListItem, Category } from '../api'
-import { useRequester } from '../context/RequesterContext'
+import { useAuth } from '../context/AuthContext'
 
 const PRIORITY_COLORS: Record<string, { bg: string; color: string }> = {
     LOW: { bg: '#EAF6EF', color: '#006B3C' },
@@ -45,7 +45,7 @@ function formatDate(iso: string) {
 }
 
 export default function MyTicketsPage() {
-    const { requester } = useRequester()
+    const { user } = useAuth()
 
     // filter / sort / pagination state
     const [search, setSearch] = useState('')
@@ -71,11 +71,11 @@ export default function MyTicketsPage() {
     }, [])
 
     const load = useCallback(async () => {
-        if (!requester) return
+        if (!user) return
         setLoading(true)
         setError(null)
         try {
-            const res = await fetchTickets(requester.id, {
+            const res = await fetchTickets({
                 search: search || undefined,
                 categoryId: categoryId ? Number(categoryId) : undefined,
                 requestedPriority: priority || undefined,
@@ -85,14 +85,14 @@ export default function MyTicketsPage() {
                 pageSize,
             })
             setTickets(res.data)
-            setTotalPages(res.pagination.totalPages)
-            setTotalItems(res.pagination.totalItems)
+            setTotalPages(res.meta.totalPages)
+            setTotalItems(res.meta.totalItems)
         } catch {
             setError('Failed to load tickets. Please try again.')
         } finally {
             setLoading(false)
         }
-    }, [requester, search, categoryId, priority, sort, order, page, pageSize])
+    }, [user, search, categoryId, priority, sort, order, page, pageSize])
 
     useEffect(() => { load() }, [load])
 
@@ -316,7 +316,7 @@ export default function MyTicketsPage() {
                                         <td style={{ padding: '10px 14px' }}><PriorityBadge value={t.requestedPriority} /></td>
                                         <td style={{ padding: '10px 14px' }}><PriorityBadge value={t.itPriority} /></td>
                                         <td style={{ padding: '10px 14px' }}><StatusBadge value={t.status} /></td>
-                                        <td style={{ padding: '10px 14px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{t.ticketOwner ?? '—'}</td>
+                                        <td style={{ padding: '10px 14px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{t.owner?.name ?? '—'}</td>
                                         <td style={{ padding: '10px 14px', whiteSpace: 'nowrap', color: 'var(--color-text-secondary)' }}>{formatDate(t.updatedAt)}</td>
                                     </tr>
                                 ))}

@@ -1,28 +1,29 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useRequester } from '../context/RequesterContext'
+import { useAuth } from '../context/AuthContext'
 import TicketDetailPage from '../pages/TicketDetailPage'
 import * as api from '../api'
 
 vi.mock('../api', () => ({
+    fetchComments: vi.fn().mockResolvedValue([]),
     fetchTicketDetail: vi.fn(),
     uploadAttachment: vi.fn(),
     removeAttachment: vi.fn(),
     downloadAttachment: vi.fn()
 }))
 
-vi.mock('../context/RequesterContext', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('../context/RequesterContext')>()
-    return { ...actual, useRequester: vi.fn() }
+vi.mock('../context/AuthContext', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('../context/AuthContext')>()
+    return { ...actual, useAuth: vi.fn() }
 })
 
 describe('AttachmentSection', () => {
     beforeEach(() => {
         vi.clearAllMocks()
-        vi.mocked(useRequester).mockReturnValue({
-            requester: { id: 1, name: 'Test User', email: 'test@test.com', isActive: true },
-            setRequester: vi.fn()
+        vi.mocked(useAuth).mockReturnValue({
+            user: { id: 1, name: 'Test User', role: 'REQUESTER' },
+            setUser: vi.fn(), logout: vi.fn(), loading: false
         })
     })
 
@@ -88,7 +89,7 @@ describe('AttachmentSection', () => {
         expect(confirmBtn).toBeDisabled() // ตอนแรกต้องกดไม่ได้เพราะยังไม่ได้ใส่เหตุผล
         
         // ใส่เหตุผล
-        fireEvent.change(screen.getByPlaceholderText(/Enter reason/i), { target: { value: 'Wrong file' } })
+        fireEvent.change(screen.getByPlaceholderText('e.g. Uploaded wrong file'), { target: { value: 'Wrong file' } })
         expect(confirmBtn).not.toBeDisabled()
         
         // กดยืนยัน
@@ -96,6 +97,6 @@ describe('AttachmentSection', () => {
         fireEvent.click(confirmBtn)
         
         // ตรวจสอบว่า API ถูกเรียกไป
-        expect(api.removeAttachment).toHaveBeenCalledWith(1, 1, 'Wrong file')
+        await waitFor(() => expect(api.removeAttachment).toHaveBeenCalledWith(1, 'Wrong file'))
     })
 })
