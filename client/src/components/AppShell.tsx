@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { logout as apiLogout } from '../api'
+import './AppShell.css'
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
     const { user, logout } = useAuth()
@@ -19,25 +20,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             {/* ─── Nav Bar ─── */}
-            <nav style={{
+            <nav className="app-nav" style={{
                 background: 'var(--color-primary)',
-                height: 56,
-                display: 'flex',
-                alignItems: 'center',
-                padding: '0 var(--space-6)',
-                gap: 'var(--space-6)',
                 position: 'sticky',
                 top: 0,
                 zIndex: 100,
             }}>
                 {/* Logo */}
-                <span style={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem', marginRight: 'auto' }}>
+                <span className="app-nav-brand" style={{ color: '#fff', fontWeight: 700, fontSize: '1.1rem', marginRight: 'auto' }}>
                     TokTickIT
                 </span>
 
                 {/* Nav links */}
                 {user && (
-                    <div style={{ display: 'flex', gap: 'var(--space-4)' }}>
+                    <div className="app-nav-links">
                         {user.role === 'REQUESTER' && (
                             <>
                                 <NavLink
@@ -95,7 +91,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
                 {/* User info */}
                 {user ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                    <div className="app-nav-user">
                         <span style={{ 
                             background: '#7b9c7b', 
                             color: '#fff', 
@@ -106,7 +102,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                         }}>
                             {user.role}
                         </span>
-                        <span style={{ color: '#fff', fontSize: 14 }}>{user.name}</span>
+                        <span className="app-nav-name" style={{ color: '#fff', fontSize: 14 }}>{user.name}</span>
                         <button
                             onClick={handleLogout}
                             style={{
@@ -123,7 +119,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                         </button>
                     </div>
                 ) : (
-                    <span style={{ color: '#fff', fontSize: 14 }}>Not logged in</span>
+                    <span className="app-nav-guest" style={{ color: '#fff', fontSize: 14 }}>Not logged in</span>
                 )}
             </nav>
 
