@@ -22,11 +22,11 @@ Use unset-priority label rather than a blank badge. Urgent indicates HIGH IT pri
 
 ## Actions Taken on Ticket Detail
 
-Add a clearly labeled shared section separate from Public Comments and private Internal Notes. List shows date/time, description, result, performer, assignee, status, follow-up flag/note, attachment notes and work cycle. Order matches API; paginate, retain selected action across refresh where possible. Show zero state and no Requester mutation controls. Multiple staff and multiple actions can be displayed without implying they replaced Ticket owner.
+Add a clearly labeled shared section separate from Public Comments and private Internal Notes. List shows work date/time (actionDateTime), description, result, performer, assignee, status, follow-up flag/note, attachment notes and work cycle. Primary order is actionDateTime ASC,id ASC; createdAt appears separately as Recorded at in details/audit and does not reorder the action list. Paginate, retain selected action across refresh where possible. Show zero state and no Requester mutation controls. Multiple staff and multiple actions can be displayed without implying they replaced Ticket owner.
 
 Staff/Admin can open an accessible create/edit dialog. Fields: action date/time, description, result, active assignee selection, follow-up checkbox, conditional required note, attachment notes, optional predecessor choice for a follow-up. Actor, Ticket and work cycle are read-only server values. Initial state PLANNED; action state controls offer only permitted transitions. Completion requires result. Cancellation requires confirmation plus reason. COMPLETED/CANCELLED records have read-only detail/history; new linked follow-up records resolve earlier follow-up requirements.
 
-Render history chronologically with actor/time/change descriptions. History and action fields use plain text, no unsanitized HTML. Attachment Notes identify existing files and do not create a new upload interface. Retain existing Ticket attachments interface.
+Render history chronologically by createdAt ASC,id ASC with actor/time/change descriptions. Start is offered for PLANNED; Complete is offered only for IN_PROGRESS. Starting then completing requires two successful versioned requests, with no direct PLANNED-to-COMPLETED shortcut. History and action fields use plain text, no unsanitized HTML. Attachment Notes identify existing files and do not create a new upload interface. Retain existing Ticket attachments interface.
 
 Create/save/start/complete/cancel disables while pending. A submission intent keeps one idempotency key through retry; create a new key after successful save or deliberately abandoning/restarting the form. On recoverable failure retain all fields. Conflict displays current version, lets user load current values, and preserves draft for comparison; never silently retry an old overwrite. Inactive assignee error stays near selector and refreshes choices.
 
@@ -47,7 +47,7 @@ Queue and My Tickets consume dashboard URLs and show current filters. Staff sort
 | Validation | Field-level errors connected by aria-describedby plus focusable summary. |
 | Success | Concise live announcement and refreshed authoritative state; no duplicated events. |
 | Forbidden | Clear role/ownership denial and permitted navigation, no leaked partial content. |
-| Not found | Ticket/action missing message, return link; no indefinitely spinning state. |
+| Not found | Same generic Ticket/action unavailable message for missing and non-owned resources, with return link; no ownership/existence hint or indefinitely spinning state. |
 | Conflict | Visible explanation/current version, reload option and preserved draft. |
 | Safe API failure | Retry control, safe text, existing/draft data retained and no false success. |
 

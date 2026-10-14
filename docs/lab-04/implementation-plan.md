@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: plan accepted by the student; engineering contract awaiting peer review. Application implementation has not started.
+Status: plan accepted by the student; PpAnpt approved the initial contract on 2026-10-14 and clarifications await confirmation. Application implementation has not started.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -25,7 +25,22 @@ Create subsequent feature branches from the latest integrated staging commit. Ru
 | 7 | Lab4 Final Regression and Product Hardening | `feature7/lab4-final-hardening-regression` | Labs 1-3 regression, Staff Queue sorting/pagination, stable ordering, retry/double-submit, security, accessibility, responsive/style inspection, performance smoke and failure states. |
 | 8 | Lab4 Documentation Evidence and Release Integration | `feature8/lab4-docs-release` | README, actual test traceability, real review records and AI reflection, screenshots, concise MD/PDF Answer Part 1-9, staging release checks and post-merge main evidence. |
 
-Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires acceptance tests and reviewed integration. Release issue stays open until final main verification succeeds. Issues are created in BBINGOAL/toktickit; adding them to private Project 4 requires GitHub Projects permission, which the current CLI token lacks. Do not mark issues Done merely because a PR is open.
+Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires acceptance tests and reviewed integration. Release issue stays open until final main verification succeeds. All issues #44-#51 are on the existing private Project 4; #44 is In review and #45-#51 are Backlog. PR #52 is linked to #44. Projects permission has been granted. Do not mark issues Done merely because a PR is open.
+
+## Must-have versus stretch and complexity limits
+
+The eight issues are reviewable work packages, not a promise that every package is small. Lab 4 is the authority for new requirements; Lab 3 supplies preservation/security constraints. Review highlighted complexity added by our own design choices. Distinguish required product outcomes from the minimal mechanisms selected by this contract:
+
+| Area | Must-have delivery / minimum selected mechanism | Owner issue | Stretch: not required or scheduled |
+|---|---|---|---|
+| Retry protection | One persistent unique-key response record for action creation and Ticket status requests; no generic platform | #45 foundation, #47 workflow | Global middleware for all APIs, key-expiry workers, distributed cache/queue |
+| Concurrency | Version check and one parent-Ticket transaction; short User eligibility locks coordinated with admin changes; safe bounded conflict handling | #45 foundation, #47 workflow; relevant admin regression in #50 | Application-wide lock framework, distributed locks or automatic merge of drafts |
+| Follow-up | Existing same-Ticket/cycle predecessor relation and a small cycle-safe completion predicate | #45 data/validation, #47 gate | Graph editor, dependencies across Tickets, scheduler/notifications or assignment engine |
+| Reopening | Integer workCycle to ensure old completed work cannot silently satisfy a new resolution | #45 field, #47 behavior | Parallel work branches, configurable cycle engine or historical snapshot browser |
+| Append-only evidence | Two small immutable event models and paginated read-only history endpoints; plain list UI | #45 action history, #47 Ticket history | Event-sourcing architecture, replay/rebuild engine, export/report builder |
+| Dashboards | Exact counts, bounded previews, matching drill-down, Requester/Staff role checks | #48, #49 | Extra Admin account cards, charts, custom reporting or advanced BI |
+
+These mechanisms are **contract design choices**, not claims that the handout mandates those exact tables/locks/fields. They remain in the current acceptance contract so documents/API/tests do not contradict each other. If implementation shows they are disproportionate, propose a simpler mechanism and update affected BR/API/AC/test rows for peer review before changing the scope. Never silently demote duplicate prevention, stale-write safety, historical attribution or required rubric evidence to stretch. Optional items above must not delay required delivery.
 
 ## Existing implementation and work to preserve
 
@@ -43,7 +58,7 @@ The handout lists simple action fields in sections 4/8 but its submission rubric
 1. Action Taken: ticketId, actionDateTime, description, result, performedById (authenticated actor), assigneeId (separate active IT Staff/Admin), followUpRequired, followUpNote, attachmentNotes, status, createdAt, updatedAt and integer version. Proposed states: PLANNED, IN_PROGRESS, COMPLETED, CANCELLED. The final spec defines required fields and allowed transitions for each state.
 2. Requesters see every Action Taken on their own tickets, read-only. Staff/Admin can work on accessible tickets without being the primary Ticket Owner. Backend rejects requester writes, cross-owner reads and inactive/non-staff assignment.
 3. Keep action records; no hard-delete endpoint. Record edits and transitions in append-only audit events with actor and before/after state. Order actions deterministically by actionDateTime and id; history by timestamp and id. Current editable state and immutable history are distinct.
-4. Resolution gate: active Staff/Admin Ticket owner, nonblank summary, completed action/result and no unfinished work or unresolved follow-up in the current work cycle. Reopen starts a new cycle. Linked completed follow-up actions resolve earlier follow-up requirements. Cancelled actions do not qualify. Legacy Tickets remain readable; apply the gate to new transitions. Exact approved behavior is in specification.md.
+4. Resolution gate: active Staff/Admin Ticket owner, nonblank summary, completed action/result and no unfinished work or unresolved follow-up in the current work cycle. Reopen starts a new cycle. Linked completed follow-up actions resolve earlier follow-up requirements. Cancelled actions do not qualify. Requiring at least one completed action is our stricter product choice: legacy active zero-action Tickets need documented work before a new resolution; old resolved/closed records stay valid without fake backfill actions. See specification.md sections 7/11 and updated regression fixtures.
 5. Start from the Lab 3 transition matrix and document every role and transition, including reopening closed/cancelled tickets. Clear stale advisory resolution flags when work is reopened. Final approval of these product choices belongs in the contract.
 6. Use atomic version comparisons and transactions for workflow/action changes and append-only events; return 409 on stale updates with refresh/retry guidance. Use request idempotency keys for action creation so retried requests cannot create duplicate actions.
 7. Store timestamps in UTC; interpret displayed dates and dashboard windows in Asia/Bangkok. Define a seven-calendar-day recent window, exact boundaries, asOf timestamp, small bounded recent lists, and deterministic tie-break ordering.

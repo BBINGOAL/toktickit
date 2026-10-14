@@ -1,6 +1,6 @@
 # Lab 4 Specification: Actions Taken, Dashboards and Final Regression
 
-Status: engineering contract submitted for peer review before implementation.
+Status: PpAnpt approved commit 02420fc on 2026-10-14; review clarifications below await confirmation before staging integration.
 Baseline: Lab 3 `main` commit `2b8531b`. Source: SE Lab 4 handout, sections 1-14.
 This document specifies intended behavior; it does not assert that features or tests already pass.
 
@@ -47,12 +47,12 @@ Excluded: SLA clocks/escalation, external notifications, inventory/purchasing/co
 |---|---|
 | BR-01 | Each Action Taken belongs to exactly one Ticket; ticketId cannot be moved after creation. |
 | BR-02 | Ticket owner coordinates the Ticket; action assignee/performer may be another active IT_STAFF or ADMIN. |
-| BR-03 | All writes require authenticated, active Staff/Admin who completed required password change. Owned-ticket Requester reads are enforced by backend. |
+| BR-03 | All writes require authenticated, active Staff/Admin who completed required password change. Owned-ticket Requester reads are enforced by backend. On read routes the role otherwise permits, access by a non-owner Requester returns the same 404/code/message as a missing resource, including Ticket, action/history, comment and attachment URLs. Role-level denial (including Staff-only notes) returns 403 before resource lookup regardless of ID existence. |
 | BR-04 | `performedById` is the authenticated creator and immutable. `assigneeId` is the person currently responsible; events identify each later editor/completer. Client cannot spoof actor fields. |
 | BR-05 | Action date/time is required, offset-qualified, not in the future at validation time and not earlier than Ticket creation. Server stores UTC. |
 | BR-06 | Trim description (1-2000 chars), result (0-2000), follow-up note (0-2000) and attachment notes (0-1000). Required follow-up implies a nonblank follow-up note. Completion also requires nonblank result. |
 | BR-07 | Assignee defaults to the creator and must be active Staff/Admin on create, reassignment or start/complete. Never erase historical actors when a user becomes inactive. |
-| BR-08 | Action states: PLANNED -> IN_PROGRESS or CANCELLED; IN_PROGRESS -> COMPLETED or CANCELLED. COMPLETED/CANCELLED are terminal and read-only. Cancellation needs a trimmed reason (1-1000 chars). |
+| BR-08 | Action states: PLANNED -> IN_PROGRESS or CANCELLED; IN_PROGRESS -> COMPLETED or CANCELLED. Each request may traverse only one edge: PLANNED -> COMPLETED is rejected even with a result. Starting and completing require separate successful requests with refreshed versions. COMPLETED/CANCELLED are terminal and read-only. Cancellation needs a trimmed reason (1-1000 chars). |
 | BR-09 | New/edited actions require a Ticket in NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER or REOPENED. Resolve/close/cancel locks actions; reopen the Ticket before recording new work. |
 | BR-10 | No action hard-delete API. All creates, edits, assignments and state changes append immutable audit events with actor/time and before/after values. Public action history never exposes Internal Notes, credentials or idempotency records. |
 | BR-11 | All Staff/Admin can edit a nonterminal accessible action, including one assigned to another staff member; auto actor/audit and concurrency checks prevent silent attribution or overwrite. |
@@ -85,7 +85,13 @@ The matrix retains the existing Lab 3 transitions. Only active Staff/Admin may m
 
 ### 5.3 Dashboard definitions
 
-All metrics use one server `asOf` and a repeatable-read snapshot. `ACTIVE` = NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, REOPENED. Recent window is local midnight six days before the Asia/Bangkok date of asOf through asOf (seven calendar dates); timestamps are UTC in API responses. A metric counts distinct Tickets, never action-join duplicates. These rules are BR-20.
+| ID | Rule |
+|---|---|
+| BR-20 | All metrics use one server asOf and a repeatable-read snapshot. ACTIVE = NEW, OPEN, IN_PROGRESS, WAITING_FOR_REQUESTER, REOPENED. Recent window is local midnight six days before the Asia/Bangkok date of asOf through asOf (seven calendar dates); timestamps are UTC in API responses. Count distinct Tickets, never action-join duplicates. |
+| BR-21 | Requester recent list: owned Tickets ordered updatedAt DESC,id DESC; attention list: owned WAITING_FOR_REQUESTER with same ordering. Staff recent list: all accessible Tickets with same ordering; urgent list: ACTIVE with itPriority=HIGH, ordered updatedAt DESC,id DESC. Each preview is capped at five items, with a matching view-all filter. |
+| BR-22 | Staff My Actions preview returns five items with action links, ordered updatedAt DESC,id DESC; paged view-all supports pageSize 10/25/50. Administrator reuses Staff Dashboard; no optional user metrics in this sprint. |
+| BR-23 | Empty counts are 0, empty lists [], status/priority groups include zero-valued keys. Drill-down carries scope, filters, sort, page=1 and date bounds. Backend reapplies current role/ownership. Passing another requesterId is rejected. |
+| BR-24 | resolvedAt is set on successful formal resolution and preserved on close; cleared on reopen. Legacy RESOLVED/CLOSED records receive updatedAt as an explicitly documented approximate backfill, not a fabricated historical event. |
 
 | Role / key | Exact predicate / calculation | Drill-down |
 |---|---|---|
@@ -98,11 +104,6 @@ All metrics use one server `asOf` and a repeatable-read snapshot. `ACTIVE` = NEW
 | Staff `byStatus` | all accessible Tickets grouped by each of eight statuses | Queue, status filter |
 | Staff `activeByPriority` | ACTIVE Tickets grouped by itPriority LOW/MEDIUM/HIGH/UNSET | Queue, scope=active,priority filter |
 | Staff `myPendingActions` | ACTIVE parent AND assignee=current user AND state PLANNED/IN_PROGRESS | Dashboard paged My Actions list linking to Ticket/action |
-
-- BR-21: Requester recent list: owned Tickets ordered updatedAt DESC,id DESC; attention list: owned WAITING_FOR_REQUESTER with same ordering. Staff recent list: all accessible Tickets with same ordering; urgent list: ACTIVE with itPriority=HIGH, ordered updatedAt DESC,id DESC. Each preview is capped at five items, with a matching view-all filter.
-- BR-22: Staff My Actions preview returns five items with action links, ordered updatedAt DESC,id DESC; paged view-all supports pageSize 10/25/50. Administrator reuses Staff Dashboard; no optional user metrics in this sprint.
-- BR-23: Empty counts are 0, empty lists [], status/priority groups include zero-valued keys. Drill-down carries scope, filters, sort, page=1 and date bounds. Backend reapplies current role/ownership. Passing another requesterId is rejected.
-- BR-24: `resolvedAt` is set on successful formal resolution and preserved on close; cleared on reopen. Legacy RESOLVED/CLOSED records receive updatedAt as an explicitly documented approximate backfill, not a fabricated historical event.
 
 ## 6. UI Specification Summary
 
@@ -125,6 +126,8 @@ Migration is additive; existing versions/cycles use defaults and old Tickets hav
 Design decisions: (1) separate Ticket owner from action actor/assignee to preserve coordination and attribution; (2) integer versions plus parent locking and immutable event records make concurrent changes detectable while permitting audit; (3) UTC storage with explicit local-date bounds avoids client-dependent dashboards.
 
 Seed inserts missing demo records with deterministic keys and never updates existing passwords, roles, names, statuses or activity. Include all eight Ticket statuses, priorities including unset, assigned/unassigned owners, zero/one/many actions, multiple performers, pending/completed/cancelled/follow-up examples and a Requester with zero metrics. Repeated execution must preserve exact existing values and counts.
+
+Resolution-gate seed/regression impact: keep at least one legacy active Ticket with zero actions to demonstrate a 409 resolution rejection. New resolve-positive fixtures must explicitly create and start/complete a valid action in the current cycle, assign an eligible owner and provide a resolution summary. Do not insert fake work into old Tickets merely to make earlier tests pass; update the test setup for the new contract. Previously RESOLVED/CLOSED zero-action Tickets remain readable and can close if already RESOLVED, but after reopening must satisfy the new cycle's gate.
 
 Before upgrade, backup the source DB using pg_dump. Rehearse recovery by restoring the backup to a separate disposable DB and starting baseline Lab 3 code. Do not drop new tables as an automatic rollback or reset localdb. Production-scale recovery is excluded, but this local recovery demonstration is required. Migration tests compare legacy content/relations/counts before and after and document snapshot limitations.
 
@@ -173,5 +176,9 @@ Every AC is mapped in [tests.md](tests.md).
 ## 11. Assumptions and Decisions
 
 The handout's Part 6 rubric requires assignment/lifecycle even though its opening field list describes recorded actions only. This contract includes both. Append-only means preserving immutable history and action existence, while permitting audited edits to nonterminal action state. Assignee and immutable performer are distinct. Following up completed work uses a new linked action instead of rewriting terminal records. These choices require peer review; they are not claims of requirements verbatim from the handout.
+
+BR-13's requirement for at least one COMPLETED action is a deliberate Sprint 4 product decision, not an explicit handout mandate or an already-implemented Lab 3 rule. Lab 3 section 4 defers incomplete-action resolution blocking to Lab 4. Merely having no incomplete actions would allow a zero-action Ticket to resolve; this contract instead requires documented completed work for new resolution transitions. The preservation and fixture consequences are stated in section 7. Lab 4 requirements govern new behavior; earlier handouts are used only to preserve prior capabilities and security obligations.
+
+The primary action-list date shown to users and used for its ASC ordering is actionDateTime (date/time work occurred), with id as tie-break. createdAt is the server record-creation timestamp, shown separately in details/audit. History uses server createdAt and id; dashboard recent actions use updatedAt and id as explicitly specified in BR-22. These timestamps are not interchangeable.
 
 Version-required workflow writes intentionally replace the old unversioned mutation contract. Existing clients/tests are updated together; unversioned writes return validation error rather than silently bypassing concurrency safety. Preserve earlier user capabilities, not unsafe stale-write behavior. No application implementation or final test results are delivered in this contract-only PR.
