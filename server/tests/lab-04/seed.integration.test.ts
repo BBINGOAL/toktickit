@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { prisma } from '../../src/db'
-import { seed } from '../../prisma/seed'
+import { seed } from '../../prisma/seed.ts'
 import { requireLab4Database } from './fixtures'
 
 describe('repeat-safe Lab 4 seed', () => {

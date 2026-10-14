@@ -11,13 +11,13 @@ export async function seedLab4(prisma: PrismaClient, passwordHash: string) {
     prisma.relatedSystem.findUnique({ where: { name: 'VPN' } }),
   ])
   // Preserve operator changes: do not create new assignments to accounts they deactivated/demoted.
-  if (!requester || !staff?.isActive || !colleague?.isActive || !['IT_STAFF', 'ADMIN'].includes(staff.role) || !['IT_STAFF', 'ADMIN'].includes(colleague.role) || !category || !system) return
+  if (!requester?.isActive || requester.role !== 'REQUESTER' || !staff?.isActive || !colleague?.isActive || !['IT_STAFF', 'ADMIN'].includes(staff.role) || !['IT_STAFF', 'ADMIN'].includes(colleague.role) || !category || !system) return
   const statuses: TicketStatus[] = ['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'RESOLVED', 'CLOSED', 'REOPENED', 'CANCELLED']
   for (const [index, status] of statuses.entries()) {
     const ticketNumber = `LAB4-DEMO-${String(index + 1).padStart(3, '0')}`
     await prisma.$transaction(async tx => {
       // Serialize repeat/concurrent seed executions for this deterministic Ticket key.
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ticketNumber}))`
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${ticketNumber}))::text`
       if (await tx.ticket.findUnique({ where: { ticketNumber } })) return
       const createdAt = new Date(Date.now() - 2 * 86400000)
       const actionDateTime = new Date(createdAt.getTime() + 3600000)

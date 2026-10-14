@@ -110,7 +110,7 @@ export async function seed(prisma: PrismaClient) {
   const hardware = await prisma.category.findUnique({ where: { name: "Hardware" } });
   const vpn = await prisma.relatedSystem.findUnique({ where: { name: "VPN" } });
   const wifi = await prisma.relatedSystem.findUnique({ where: { name: "Campus Wi-Fi" } });
-  const requesters = await prisma.user.findMany({ where: { role: "REQUESTER", isActive: true }, orderBy: { id: "asc" }, take: 4 });
+  const requesters = (await Promise.all(activeRequesters.map(r => prisma.user.findUnique({ where: { email: r.email } })))).filter(u => u !== null);
   const staff = await prisma.user.findUnique({ where: { email: "it1@kmutt.ac.th" } });
 
   if (network && hardware && vpn && wifi && requesters.length >= 4 && staff) {

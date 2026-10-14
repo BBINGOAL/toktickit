@@ -68,7 +68,7 @@ model User {
   isActive           Boolean  @default(true)
   mustChangePassword Boolean  @default(true) // บังคับเปลี่ยนรหัสผ่านครั้งแรก
   createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  updatedAt          DateTime @default(now()) @updatedAt
 
   // Relations
   ticketsOwned    Ticket[]        @relation("TicketRequester")
