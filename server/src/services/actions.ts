@@ -84,7 +84,9 @@ export async function mutateAction(ticketId: number, actionId: number | undefine
     if (current && ['COMPLETED', 'CANCELLED'].includes(current.status)) throw new ActionError(409, 'INVALID_TRANSITION', 'Completed and cancelled actions are read-only')
     if (current && data.status) transition(current.status, data.status)
     const merged: Record<string, any> = { ...(current || { status: 'PLANNED' }), ...data }
-    await lockEligibleUsers(tx, actorId, merged.assigneeId)
+    const needsEligibleAssignee = create || 'assigneeId' in data || ['IN_PROGRESS', 'COMPLETED'].includes(data.status)
+    await lockEligibleUsers(tx, actorId, merged.assigneeId, needsEligibleAssignee)
+    if ('cancellationReason' in data && merged.status !== 'CANCELLED') invalid('cancellationReason', 'Only supply a cancellation reason when cancelling')
     validateMerged(merged, ticket.createdAt)
     if (create && data.followsUpActionId !== null) {
       const predecessor = await tx.actionTaken.findFirst({ where: { id: data.followsUpActionId, ticketId, workCycle: ticket.workCycle, status: 'COMPLETED', followUpRequired: true } })

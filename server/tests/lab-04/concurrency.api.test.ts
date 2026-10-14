@@ -69,11 +69,28 @@ describe('Actions Taken concurrent writes, retries and failure safety', () => {
     expect((await create(f.body({ description: '' }), k)).status).toBe(400)
     expect((await create(f.body(), k)).status).toBe(201)
   })
+  it('scopes the same idempotency key to each authenticated user', async () => {
+    const k = key(), first = await create(f.body(), k)
+    const second = await request(app).post(`/api/tickets/${f.ticket.id}/actions`).set('Cookie', f.cookie(f.colleague)).set('Idempotency-Key', k).send(f.body({ expectedTicketVersion: 1 }))
+    expect(first.status).toBe(201); expect(second.status).toBe(201)
+    expect(second.body.data.id).not.toBe(first.body.data.id)
+    expect(second.body.data.performedBy.id).toBe(f.colleague.id)
+    expect(await prisma.mutationRequest.count({ where: { userId: { in: [f.staff.id, f.colleague.id] }, key: k } })).toBe(2)
+  })
   it('does not disclose replay data to an inactive actor', async () => {
     const k = key(), body = f.body()
     await create(body, k)
     await prisma.user.update({ where: { id: f.staff.id }, data: { isActive: false } })
     expect((await create(body, k)).status).toBe(401)
+  })
+  it('rechecks actor eligibility if deactivated after middleware authentication', async () => {
+    const original = prisma.$transaction.bind(prisma)
+    vi.spyOn(prisma, '$transaction').mockImplementationOnce((async (callback: any, options: any) => {
+      await prisma.user.update({ where: { id: f.staff.id }, data: { isActive: false } })
+      return original(callback, options)
+    }) as any)
+    expect((await create(f.body())).status).toBe(401)
+    expect(await prisma.actionTaken.count({ where: { ticketId: f.ticket.id } })).toBe(0)
   })
   it('rolls back state, event, version and key on transaction failure and returns a safe error', async () => {
     const original = prisma.$transaction.bind(prisma)

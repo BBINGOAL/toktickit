@@ -88,6 +88,26 @@ describe('Lab 4 Actions Taken API', () => {
     expect(r.status).toBe(200)
     expect(r.body.data.cancellationReason).toBe('Duplicate investigation')
     expect(await prisma.actionTaken.count({ where: { ticketId: f.ticket.id } })).toBe(1)
+    expect((await patch(c.body.data.id, { expectedVersion: 1, expectedTicketVersion: 2, description: 'Overwrite cancelled work' })).status).toBe(409)
+  })
+  it('can cancel historical assignment after assignee deactivation but cannot start it', async () => {
+    const c = await create(f.body({ assigneeId: f.colleague.id }))
+    await prisma.user.update({ where: { id: f.colleague.id }, data: { isActive: false } })
+    const base = { expectedVersion: 0, expectedTicketVersion: 1 }
+    expect((await patch(c.body.data.id, { ...base, status: 'IN_PROGRESS' })).status).toBe(400)
+    expect((await patch(c.body.data.id, { ...base, status: 'CANCELLED', cancellationReason: 'Replan after staff departure' })).status).toBe(200)
+  })
+  it('rejects a cancellation reason on an ordinary edit', async () => {
+    const c = await create()
+    expect((await patch(c.body.data.id, { expectedVersion: 0, expectedTicketVersion: 1, cancellationReason: 'Not cancelled' })).status).toBe(400)
+  })
+  it('enforces first-login gate and denies cross-owner action history without existence leakage', async () => {
+    const c = await create()
+    const existing = await request(app).get(`/api/tickets/${f.ticket.id}/actions/${c.body.data.id}/history`).set('Cookie', f.cookie(f.other))
+    const missing = await request(app).get(`/api/tickets/${f.ticket.id}/actions/2147483647/history`).set('Cookie', f.cookie(f.other))
+    expect(existing.status).toBe(404); expect(missing.status).toBe(404); expect(existing.body).toEqual(missing.body)
+    await prisma.user.update({ where: { id: f.staff.id }, data: { mustChangePassword: true } })
+    expect((await create(f.body({ expectedTicketVersion: 1 }))).status).toBe(403)
   })
   it('validates linked follow-up and returns chronological public actions independent of creation time', async () => {
     const c = await create(f.body({ followUpRequired: true, followUpNote: 'Verify tomorrow' }))
@@ -108,6 +128,26 @@ describe('Lab 4 Actions Taken API', () => {
       expect((await request(app).get(`${url}?${query}`).set('Cookie', f.cookie())).status).toBe(400)
     }
     expect((await request(app).get('/api/tickets/1abc/actions').set('Cookie', f.cookie())).status).toBe(400)
+  })
+  it('orders equal recorded-time history by id and never returns private Ticket notes', async () => {
+    const c = await create()
+    await prisma.internalNote.create({ data: { ticketId: f.ticket.id, authorId: f.staff.id, content: 'PRIVATE_NOTE_SENTINEL' } })
+    // Own fixture-only event insertion gives an exact timestamp tie without changing real audit rows.
+    const time = new Date('2020-01-01T00:00:00Z')
+    await prisma.actionTakenEvent.createMany({ data: ['FIXTURE_A', 'FIXTURE_B'].map(kind => ({ actionId: c.body.data.id, actorId: f.staff.id, kind, after: { description: 'Public fixture data' }, createdAt: time })) })
+    const r = await request(app).get(`/api/tickets/${f.ticket.id}/actions/${c.body.data.id}/history`).set('Cookie', f.cookie(f.requester))
+    expect(r.status).toBe(200)
+    expect(r.body.data.slice(0, 2).map((e: any) => e.kind)).toEqual(['FIXTURE_A', 'FIXTURE_B'])
+    expect(r.body.data[0].id).toBeLessThan(r.body.data[1].id)
+    expect(JSON.stringify(r.body)).not.toMatch(/PRIVATE_NOTE_SENTINEL|passwordHash|payloadDigest/)
+  })
+  it('returns a safe query-failure response without losing existing actions', async () => {
+    await create()
+    vi.spyOn(prisma, '$transaction').mockRejectedValueOnce(new Error('SECRET_QUERY_DETAILS'))
+    const r = await request(app).get(`/api/tickets/${f.ticket.id}/actions`).set('Cookie', f.cookie())
+    expect(r.status).toBe(500)
+    expect(JSON.stringify(r.body)).not.toMatch(/SECRET_QUERY_DETAILS|stack/)
+    expect(await prisma.actionTaken.count({ where: { ticketId: f.ticket.id } })).toBe(1)
   })
   it('lists only active staff/admin assignees with pagination and role restriction', async () => {
     await prisma.user.update({ where: { id: f.colleague.id }, data: { isActive: false } })
