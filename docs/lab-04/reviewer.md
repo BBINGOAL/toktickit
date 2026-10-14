@@ -15,9 +15,12 @@
 
 | Issue / scope | PR | Reviewer request | Actual comments / responses | Approval |
 |---|---|---|---|---|
-| [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised clarification confirmation pending |
+| [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised PR merged as 7922e0e on 2026-10-14 (no separate later review recorded) |
+| [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14; verified in GitHub metadata | No review received yet; backend 124/124 and earlier UI 31/31 passing on feature branch | Pending |
 
 Record the exact PR/review/comment URLs, reviewer identity, feedback and author response after they occur. A request to review is not approval. Do not start issue #45 until this contract receives peer approval and is integrated into lab4-staging.
+
+Issue #45 is now In review on Project 4 with PR #53 linked. Wait for PpAnpt review and staging integration before starting issue #46. No auto-merge is enabled.
 
 ### PR #52 feedback and response
 
@@ -36,7 +39,7 @@ Reviewer: PpAnpt. GitHub state: APPROVED, submitted 2026-10-14 at 10:50 Asia/Ban
 
 Author response: [PR comment addressing all review points](https://github.com/BBINGOAL/toktickit/pull/52#issuecomment-6160807329), posted 2026-10-14 after clarification commit 1c7b55e was pushed.
 
-Revisions are on the same PR for PpAnpt to confirm. Initial approval is recorded accurately; it is not presented as approval of later commits. No merge or next-issue implementation is performed as part of these clarifications.
+The student subsequently confirmed that the friend merged the revised PR; GitHub reports merge 7922e0e on 2026-10-14. Initial approval is recorded accurately and is not presented as a separate approval of later commits. Issue #45 began only after that integration and the student's instruction to continue.
 
 ## Reviews I performed
 

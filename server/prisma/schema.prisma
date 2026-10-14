@@ -34,6 +34,13 @@ enum TicketStatus {
   CANCELLED
 }
 
+enum ActionStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 // ─── Reference Tables ─────────────────────────────────────
 model Category {
   id        Int      @id @default(autoincrement())
@@ -61,7 +68,7 @@ model User {
   isActive           Boolean  @default(true)
   mustChangePassword Boolean  @default(true) // บังคับเปลี่ยนรหัสผ่านครั้งแรก
   createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  updatedAt          DateTime @default(now()) @updatedAt
 
   // Relations
   ticketsOwned    Ticket[]        @relation("TicketRequester")
@@ -69,6 +76,11 @@ model User {
   attachments     Attachment[]
   publicComments  PublicComment[]
   internalNotes   InternalNote[]
+  actionsPerformed ActionTaken[] @relation("ActionPerformer")
+  actionsAssigned ActionTaken[] @relation("ActionAssignee")
+  actionEvents ActionTakenEvent[]
+  workflowEvents TicketWorkflowEvent[]
+  mutationRequests MutationRequest[]
 }
 
 // ─── Ticket ───────────────────────────────────────────────
@@ -89,6 +101,10 @@ model Ticket {
   requesterResolvedAt DateTime?
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
+  version             Int             @default(0)
+  workCycle           Int             @default(1)
+  resolvedAt          DateTime?
+  cancelledReason     String?
   // Relations
   requester           User            @relation("TicketRequester", fields: [requesterId], references: [id])
   owner               User?           @relation("TicketOwner", fields: [ownerId], references: [id])
@@ -97,11 +113,87 @@ model Ticket {
   attachments         Attachment[]
   comments            PublicComment[]
   notes               InternalNote[]
+  actions             ActionTaken[]
+  workflowEvents      TicketWorkflowEvent[]
 
   @@index([requesterId])
   @@index([ownerId])
   @@index([createdAt])
   @@index([status])
+  @@index([requesterId, status])
+  @@index([ownerId, status])
+  @@index([itPriority, status])
+  @@index([updatedAt, id])
+  @@index([resolvedAt])
+}
+
+model ActionTaken {
+  id Int @id @default(autoincrement())
+  ticketId Int
+  workCycle Int
+  actionDateTime DateTime
+  description String
+  result String @default("")
+  performedById Int
+  assigneeId Int
+  followUpRequired Boolean @default(false)
+  followUpNote String @default("")
+  attachmentNotes String @default("")
+  followsUpActionId Int?
+  status ActionStatus @default(PLANNED)
+  cancellationReason String?
+  version Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  performedBy User @relation("ActionPerformer", fields: [performedById], references: [id], onDelete: Restrict)
+  assignee User @relation("ActionAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  followsUpAction ActionTaken? @relation("ActionFollowUp", fields: [followsUpActionId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  followUps ActionTaken[] @relation("ActionFollowUp")
+  events ActionTakenEvent[]
+  @@index([ticketId, workCycle, actionDateTime, id])
+  @@index([assigneeId, status, updatedAt, id])
+  @@index([followsUpActionId])
+}
+
+model ActionTakenEvent {
+  id Int @id @default(autoincrement())
+  actionId Int
+  actorId Int
+  kind String
+  before Json?
+  after Json
+  createdAt DateTime @default(now())
+  action ActionTaken @relation(fields: [actionId], references: [id], onDelete: Restrict)
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  @@index([actionId, createdAt, id])
+}
+
+model TicketWorkflowEvent {
+  id Int @id @default(autoincrement())
+  ticketId Int
+  actorId Int
+  kind String
+  before Json?
+  after Json
+  workCycle Int
+  createdAt DateTime @default(now())
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  @@index([ticketId, createdAt, id])
+}
+
+model MutationRequest {
+  id Int @id @default(autoincrement())
+  userId Int
+  scope String
+  key String
+  payloadDigest String
+  responseStatus Int
+  response Json
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  @@unique([userId, scope, key])
 }
 
 model PublicComment {
