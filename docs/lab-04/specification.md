@@ -1,6 +1,6 @@
 # Lab 4 Specification: Actions Taken, Dashboards and Final Regression
 
-Status: PpAnpt approved commit 02420fc on 2026-10-14; review clarifications below await confirmation before staging integration.
+Status: PpAnpt approved commit 02420fc on 2026-10-14; the revised contract was merged through PR #52 into lab4-staging at 7922e0e. Implementation and final-main verification follow the staged issue plan.
 Baseline: Lab 3 `main` commit `2b8531b`. Source: SE Lab 4 handout, sections 1-14.
 This document specifies intended behavior; it does not assert that features or tests already pass.
 
