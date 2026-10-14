@@ -16,8 +16,11 @@
 | Issue / scope | PR | Reviewer request | Actual comments / responses | Approval |
 |---|---|---|---|---|
 | [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised PR merged as 7922e0e on 2026-10-14 (no separate later review recorded) |
+| [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14; verified in GitHub metadata | No review received yet; backend 124/124 and earlier UI 31/31 passing on feature branch | Pending |
 
 Record the exact PR/review/comment URLs, reviewer identity, feedback and author response after they occur. A request to review is not approval. Do not start issue #45 until this contract receives peer approval and is integrated into lab4-staging.
+
+Issue #45 is now In review on Project 4 with PR #53 linked. Wait for PpAnpt review and staging integration before starting issue #46. No auto-merge is enabled.
 
 ### PR #52 feedback and response
 

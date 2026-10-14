@@ -1,6 +1,6 @@
 # Issue #45 Foundation Verification
 
-Status: issue #45 foundation verified on its feature branch and ready for peer review. Await review and staging integration before issue #46. This is not final-main or complete Lab 4 verification.
+Status: issue #45 foundation verified on its feature branch and submitted in [PR #53](https://github.com/BBINGOAL/toktickit/pull/53). PpAnpt review requested; await review and staging integration before issue #46. This is not final-main or complete Lab 4 verification.
 
 ## Implemented so far
 
