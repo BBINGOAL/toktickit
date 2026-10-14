@@ -3,12 +3,9 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import bcrypt from 'bcryptjs';
+import { seedLab4 } from './seed-lab4';
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
-
-async function main() {
+export async function seed(prisma: PrismaClient) {
   console.log("🌱 Starting seed...");
 
   const defaultPassword = bcrypt.hashSync('password123', 10);
@@ -23,7 +20,7 @@ async function main() {
   for (const name of categories) {
     await prisma.category.upsert({
       where: { name },
-      update: { isActive: true },
+      update: {},
       create: { name, isActive: true },
     });
   }
@@ -42,7 +39,7 @@ async function main() {
   for (const name of relatedSystems) {
     await prisma.relatedSystem.upsert({
       where: { name },
-      update: { isActive: true },
+      update: {},
       create: { name, isActive: true },
     });
   }
@@ -58,7 +55,7 @@ async function main() {
   for (const r of activeRequesters) {
     await prisma.user.upsert({
       where: { email: r.email },
-      update: { name: r.name, isActive: true, passwordHash: defaultPassword },
+      update: {},
       create: { ...r, passwordHash: defaultPassword, isActive: true, mustChangePassword: true },
     });
   }
@@ -74,7 +71,7 @@ async function main() {
   for (const u of staffAndAdmin) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: { name: u.name, isActive: true, passwordHash: defaultPassword },
+      update: {},
       create: { ...u, passwordHash: defaultPassword, isActive: true, mustChangePassword: true },
     });
   }
@@ -83,7 +80,7 @@ async function main() {
   // ─── Inactive User ────────────────────────────────────────
   await prisma.user.upsert({
     where: { email: "inactive.user@kmutt.ac.th" },
-    update: { isActive: false },
+    update: {},
     create: {
       name: "Inactive User",
       email: "inactive.user@kmutt.ac.th",
@@ -98,7 +95,7 @@ async function main() {
   console.log("🎉 Seeding finished successfully!");
   await prisma.user.upsert({
     where: { email: "inactive.staff@kmutt.ac.th" },
-    update: { isActive: false, role: "IT_STAFF" },
+    update: {},
     create: {
       name: "Inactive IT Staff",
       email: "inactive.staff@kmutt.ac.th",
@@ -128,7 +125,7 @@ async function main() {
     for (const t of tickets) {
       await prisma.ticket.upsert({
         where: { ticketNumber: t.number },
-        update: { requesterId: t.requesterId, categoryId: t.categoryId, relatedSystemId: t.relatedSystemId, summary: t.summary, requestedPriority: t.priority, itPriority: t.priority, status: t.status, ownerId: t.ownerId },
+        update: {},
         create: { ticketNumber: t.number, requesterId: t.requesterId, categoryId: t.categoryId, relatedSystemId: t.relatedSystemId, summary: t.summary, description: `Seeded ticket for ${t.summary}`, requestedPriority: t.priority, itPriority: t.priority, status: t.status, ownerId: t.ownerId },
       });
     }
@@ -137,16 +134,21 @@ async function main() {
     if (firstTicket) {
       const commentContent = "I am still unable to connect from the library.";
       const noteContent = "Check access point logs before contacting the requester.";
-      if (!await prisma.publicComment.findFirst({ where: { ticketId: firstTicket.id, authorId: requesters[0].id, content: commentContent } })) {
-        await prisma.publicComment.create({ data: { ticketId: firstTicket.id, authorId: requesters[0].id, content: commentContent } });
+      if (!await prisma.publicComment.findFirst({ where: { ticketId: firstTicket.id, authorId: firstTicket.requesterId, content: commentContent } })) {
+        await prisma.publicComment.create({ data: { ticketId: firstTicket.id, authorId: firstTicket.requesterId, content: commentContent } });
       }
       if (!await prisma.internalNote.findFirst({ where: { ticketId: firstTicket.id, authorId: staff.id, content: noteContent } })) {
         await prisma.internalNote.create({ data: { ticketId: firstTicket.id, authorId: staff.id, content: noteContent } });
       }
     }
   }
+  await seedLab4(prisma, defaultPassword);
 }
 
-main()
-  .catch((e) => { console.error(e); process.exit(1); })
-  .finally(async () => { await prisma.$disconnect(); });
+if (require.main === module) {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+  seed(prisma)
+    .catch((e) => { console.error(e); process.exitCode = 1; })
+    .finally(async () => { await prisma.$disconnect(); await pool.end(); });
+}
