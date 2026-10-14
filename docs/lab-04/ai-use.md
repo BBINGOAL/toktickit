@@ -15,8 +15,11 @@ These are excerpts from real student requests in this conversation, not invented
 | 1 | "อย่างเเรกลองอ่านไฟล์ md ที่ชื่อ SE+Lab+4.md ว่าแลปนี้ต้องทำไร คุณลองทำ implementation plan มาให้ผมดูก่อน" | Read the handout, inspect baseline code, propose eight issues and one branch per issue. |
 | 2 | "commit ทีละสเตปนะ พอเสดเเล้ว issueนึงให้ไปสร้าง PR พร้อมทั้งเขียน Discription ... request บัญชีเพื่อนที่ชื่อ PpAnpt มารีวิว ... รอเพื่อนรีวิวก่อนค่อยทำต่อ" | Adopt incremental commits, one issue/PR at a time and a peer-review gate before the next issue. |
 | 3 | "อย่าไปcommit พวกที่เป็นรูปของเอกสารตอนจะส่งlab พวกรูปรายงาน" | Commit an explicit documentation allowlist and keep report/capture assets local. |
+| 4 | "เพื่อนรีวืวมาเเล้ว ... คุณลองอ่านเเละดูหน่อยเเต่มันขึ้นสถานะ approve นะ" | Read actual GitHub review, verify APPROVED status and distinguish suggestions from completed work. |
+| 5 | "คือผมเเค่งงว่าทำไมถุึงมาอ้างอิงจากlab3" | Explain that Lab 4 governs new functionality while earlier labs supply preservation/security constraints; identify the completed-action minimum as our added design decision. |
+| 6 | "เเก้ไขตามที่เพื่อน review มาก่อนมะ หรือสามารถ ให้เพื่อนmerged ให้ได้เลย" | Clarify the reviewed contract in the same PR and request confirmation before staging integration. |
 
-The handout requires 6-10 selected prompts in the final submission. Only three actual excerpts are available at this initial stage; record additional real prompts when they occur rather than invent them.
+The handout requires 6-10 selected prompts in the final submission. Six actual excerpts are recorded; revise the selection later if coding-agent prompts better demonstrate the final work.
 
 ## Decisions AI helped expose
 
@@ -24,6 +27,7 @@ The handout requires 6-10 selected prompts in the final submission. Only three a
 - Current seed rewrites passwords/activity on repeat execution; final seed must preserve existing users.
 - Current Ticket status changes have no versioned atomic resolution gate. Action writes and Ticket transitions need shared parent locking and audit events.
 - Staff Queue currently fixes page 1/pageSize 50. Dashboard drill-down needs filters/sorting/pagination that expose the full matching collection.
+- Actual peer review exposed ownership error-message leakage, ambiguous action transition wording and missing direct FR-04 traceability. Contract revisions address those issues and document legacy zero-action behavior plus must-have/stretch boundaries. Approval of the initial commit does not automatically approve later revisions.
 
 ## My Reflection
 
