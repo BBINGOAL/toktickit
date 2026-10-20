@@ -9,6 +9,18 @@ const migrations = path.resolve(__dirname, '../../prisma/migrations')
 const increment = '20261014050000_lab4_actions_foundation'
 const ownedDatabases: string[] = []
 let admin: Pool | undefined
+function pgTool(tool: 'pg_dump' | 'pg_restore', args: string[], input?: Buffer) {
+  // Optional installed PostgreSQL tools let isolated tests run without Docker.
+  // No shell interpolation; connect to exactly the guarded test server.
+  if (process.env.LAB4_PG_BIN) {
+    requireLab4Database()
+    const url = new URL(process.env.DATABASE_URL!)
+    return spawnSync(path.join(process.env.LAB4_PG_BIN, `${tool}${process.platform === 'win32' ? '.exe' : ''}`),
+      ['-h', url.hostname, '-p', url.port || '5432', '-U', decodeURIComponent(url.username), ...args],
+      { input, env: { ...process.env, PGPASSWORD: decodeURIComponent(url.password) }, maxBuffer: 16 * 1024 * 1024, timeout: 30000 })
+  }
+  return spawnSync('docker', ['exec', ...(input ? ['-i'] : []), 'local-postgres', tool, '-U', 'postgres', ...args], { input, maxBuffer: 16 * 1024 * 1024, timeout: 30000 })
+}
 async function database() {
   requireLab4Database()
   const url = new URL(process.env.DATABASE_URL!)
@@ -86,11 +98,11 @@ describe('Lab 3 -> Lab 4 preserved-data migration and recovery', () => {
     try {
       await baseline(source.pool)
       const before = await snapshot(source.pool)
-      // Use PostgreSQL tools inside the existing local container, not a host package install.
-      const dump = spawnSync('docker', ['exec', 'local-postgres', 'pg_dump', '-U', 'postgres', '-Fc', source.name], { maxBuffer: 16 * 1024 * 1024, timeout: 30000 })
+      // Default to the existing container; LAB4_PG_BIN supports an installed toolchain.
+      const dump = pgTool('pg_dump', ['-Fc', source.name])
       if (dump.status !== 0) throw new Error(`pg_dump failed: ${dump.stderr?.toString() || dump.error}`)
       await source.pool.query(await readFile(path.join(migrations, increment, 'migration.sql'), 'utf8'))
-      const restore = spawnSync('docker', ['exec', '-i', 'local-postgres', 'pg_restore', '-U', 'postgres', '--exit-on-error', '-d', recovery.name], { input: dump.stdout, maxBuffer: 16 * 1024 * 1024, timeout: 30000 })
+      const restore = pgTool('pg_restore', ['--exit-on-error', '-d', recovery.name], dump.stdout)
       if (restore.status !== 0) throw new Error(`pg_restore failed: ${restore.stderr?.toString() || restore.error}`)
       expectPreserved(before, await snapshot(recovery.pool))
       const columns = (await recovery.pool.query(`SELECT column_name FROM information_schema.columns WHERE table_name='Ticket'`)).rows.map(r => r.column_name)

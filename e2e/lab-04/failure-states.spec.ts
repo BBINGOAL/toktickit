@@ -35,3 +35,39 @@ test('stale create preserves draft, explicitly reloads versions and saves on del
   await expect(page.getByRole('dialog')).toHaveCount(0)
   expect(await prisma.actionTaken.count({ where: { ticketId: work.ticket.id } })).toBe(1)
 })
+
+test('assignee deactivation shows a field error and preserves draft until an eligible choice is selected', async ({ page, work }) => {
+  await signIn(page, work.staff); await openTicket(page, work.ticket.id)
+  await page.getByRole('button', { name: 'New action', exact: true }).click()
+  await page.getByLabel('Action description', { exact: true }).fill('Retain draft on inactive assignment')
+  await page.getByLabel('Find active assignee by name').fill(work.colleague.name)
+  await expect(page.getByLabel('Assignee', { exact: true }).getByRole('option', { name: `${work.colleague.name} (IT_STAFF)`, exact: true })).toHaveCount(1)
+  await page.getByLabel('Assignee', { exact: true }).selectOption(String(work.colleague.id))
+  await prisma.user.update({ where: { id: work.colleague.id }, data: { isActive: false } })
+  await page.getByRole('button', { name: 'Create action', exact: true }).click()
+  await expect(page.getByLabel('Assignee', { exact: true })).toHaveAttribute('aria-invalid', 'true')
+  await expect(page.getByLabel('Action description', { exact: true })).toHaveValue('Retain draft on inactive assignment')
+  expect(await prisma.actionTaken.count({ where: { ticketId: work.ticket.id } })).toBe(0)
+  await page.getByLabel('Find active assignee by name').fill(work.staff.name)
+  await expect(page.getByLabel('Assignee', { exact: true }).getByRole('option', { name: `${work.staff.name} (IT_STAFF)`, exact: true })).toHaveCount(1)
+  await page.getByLabel('Assignee', { exact: true }).selectOption(String(work.staff.id))
+  await page.getByRole('button', { name: 'Create action', exact: true }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+})
+
+test('injected list outage displays safe retry without a false empty or leaked server error', async ({ page, work }) => {
+  await signIn(page, work.staff)
+  let outage = true
+  await page.route(`**/api/tickets/${work.ticket.id}/actions?*`, async route => {
+    if (outage) return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'SELECT secret passwordHash stacktrace' }) })
+    return route.continue()
+  })
+  await openTicket(page, work.ticket.id)
+  const section = page.getByRole('region', { name: 'Actions Taken', exact: true })
+  await expect(section.getByRole('alert')).toContainText('Please retry')
+  await expect(section).not.toContainText('passwordHash')
+  await expect(section.getByText('No Actions Taken yet.', { exact: true })).toHaveCount(0)
+  outage = false
+  await section.getByRole('button', { name: 'Retry actions', exact: true }).click()
+  await expect(section.getByText('No Actions Taken yet.', { exact: true })).toBeVisible()
+})

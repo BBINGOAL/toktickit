@@ -3,7 +3,13 @@ import { fixture } from '../../server/tests/lab-04/fixtures'
 import { prisma } from '../../server/src/db'
 import { TEST_PASSWORD } from '../../server/tests/lab-03/test-helpers'
 
-export const test = base.extend<{ work: Awaited<ReturnType<typeof fixture>> }>({
+export const test = base.extend<{ work: Awaited<ReturnType<typeof fixture>>; runtimeErrors: void }>({
+  runtimeErrors: [async ({ page }, use) => {
+    const errors: string[] = []
+    page.on('pageerror', error => errors.push(error.message))
+    await use()
+    expect(errors, 'No uncaught application errors').toEqual([])
+  }, { auto: true }],
   work: async ({}, use) => {
     const work = await fixture()
     try {
