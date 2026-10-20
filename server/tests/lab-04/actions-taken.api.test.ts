@@ -150,8 +150,10 @@ describe('Lab 4 Actions Taken API', () => {
     expect(await prisma.actionTaken.count({ where: { ticketId: f.ticket.id } })).toBe(1)
   })
   it('lists only active staff/admin assignees with pagination and role restriction', async () => {
-    await prisma.user.update({ where: { id: f.colleague.id }, data: { isActive: false } })
-    const r = await request(app).get('/api/staff/action-assignees?pageSize=50').set('Cookie', f.cookie())
+    // Match all three owned fixtures without depending on the first global 50 users.
+    await prisma.user.update({ where: { id: f.colleague.id }, data: { isActive: false, name: `${f.staff.name} inactive` } })
+    await prisma.user.update({ where: { id: f.requester.id }, data: { name: `${f.staff.name} requester` } })
+    const r = await request(app).get('/api/staff/action-assignees').query({ pageSize: 50, search: f.staff.name }).set('Cookie', f.cookie())
     expect(r.status).toBe(200)
     expect(r.body.data.some((u: any) => u.id === f.staff.id)).toBe(true)
     expect(r.body.data.some((u: any) => [f.colleague.id, f.requester.id].includes(u.id))).toBe(false)
