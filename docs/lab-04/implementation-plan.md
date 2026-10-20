@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: issue #44 integrated through PR #52 (merge 7922e0e, 2026-10-14). Issue #45 foundation is implemented and verified on its feature branch, awaiting peer review and staging integration; later issues have not started.
+Status: #44 integrated through PR #52 (7922e0e). #45 approved by PpAnpt and integrated through PR #53 (3465088, 2026-10-20). #46 Actions Taken UI is in progress on feature3/lab4-actions-taken-ui from that staging merge; #47-#51 have not started. Current UI verification and environment blocker: ui-verification.md.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -48,7 +48,7 @@ These mechanisms are **contract design choices**, not claims that the handout ma
 - TicketStatus already contains all eight required values. Existing backend transition checks are a starting point; current status update reads then writes without a version check and has no Actions Taken resolution gate.
 - Actions Taken and dashboards do not exist yet. Requester resolution indication already exists and must remain advisory.
 - Staff Queue currently fetches page 1 with pageSize 50; add sorting/pagination so dashboard drill-down can expose all matching data.
-- Existing seed upserts reset passwords and reactivate accounts. Change repeat-run behavior to preserve existing user credentials, roles and activity state; create demo records only when absent.
+- Issue #45 changed seed upserts to update: {}: repeat seed preserves existing user credentials, roles, activity, names and Tickets, and creates demo records only when absent. Rerunning seed is not a demo-password/account reset operation. Use authorized account-management operations to change credentials.
 - Existing E2E database guard accepts Lab 3 verification names only. Extend test configuration safely to explicitly allow isolated Lab 4 verification databases and ensure API/tests use the same DB.
 
 ## Proposed contract decisions to finalize in issue 1

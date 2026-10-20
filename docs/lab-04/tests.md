@@ -2,6 +2,8 @@
 
 Status: test plan created before implementation, now updated with issue #45 branch results. Branch pass is not a final-main pass; Partial identifies coverage spanning later issues. Not run paths remain planned until implemented. See [foundation verification](foundation-verification.md) for actual commands/counts and stage boundaries.
 
+Issue #46 checkpoint (2026-10-20): Actions Taken component/transport checks pass 19/19; all client tests pass 50/50 in 15 files using one worker. Typecheck and production client build pass. Seven new E2E tests are discoverable but **not run**: C: has 0 free bytes and Docker/PostgreSQL diagnostics stopped responding. Backend fixture-test change has not been rerun. See [UI verification](ui-verification.md); these are feature-branch results, not final-main evidence.
+
 ## Coverage and traceability
 
 | Test ID | Type | FR / AC | What is tested | Expected result | Planned test file | Final |
@@ -26,8 +28,8 @@ Status: test plan created before implementation, now updated with issue #45 bran
 | MIG-01 | Migration | FR-12 / AC-12 | Upgrade disposable Lab 3 DB including active and already RESOLVED/CLOSED zero-action Tickets | Exact legacy data/relations preserved; no fake actions inserted; old RESOLVED can close but reopened/active zero-action Tickets cannot newly resolve; approximate resolvedAt documented | server/tests/lab-04/migration.integration.test.ts | Partial: legacy fields/FKs/defaults preserved; resolution gate in #47 |
 | MIG-02 | Recovery | FR-12 / AC-12 | Dump before migration; restore separate DB; run Lab 3 checks | Counts/content match backup and baseline remains runnable | server/tests/lab-04/migration.integration.test.ts | Partial: pg_dump/restore and baseline SQL pass; baseline app startup in release |
 | SEED-01 | Integration | FR-12 / AC-13 | Seed twice over custom password/role/inactive/status data | No reset/duplication, required representative data present | server/tests/lab-04/seed.integration.test.ts | Branch pass; final main pending |
-| UI-01 | Component | FR-01, FR-02 / AC-01, AC-03, AC-14 | Action list/create/edit, auto actor, active options and conditional required fields | Correct modes and field feedback | client/src/lab-04-tests/ActionsTaken.test.tsx | Not run |
-| UI-02 | Component | FR-03, FR-07, FR-08 / AC-02, AC-05, AC-09, AC-14 | Requester read-only/terminal display, duplicate click, 409/500 and draft recovery | No forbidden controls/duplicate requests; input retained | client/src/lab-04-tests/ActionsTaken.test.tsx | Not run |
+| UI-01 | Component | FR-01, FR-02 / AC-01, AC-03, AC-14 | Action list/create/edit, auto actor, active options and conditional required fields | Correct modes and field feedback | client/src/lab-04-tests/ActionsTaken.test.tsx | Branch pass; runtime/E2E pending |
+| UI-02 | Component | FR-03, FR-07, FR-08 / AC-02, AC-05, AC-09, AC-14 | Requester read-only/terminal display, duplicate click, 409/500 and draft recovery | No forbidden controls/duplicate requests; input retained | client/src/lab-04-tests/ActionsTaken.test.tsx; client/src/lab-04-tests/ActionsApi.test.ts | Branch pass; runtime/E2E pending |
 | UI-03 | Component | FR-05, FR-06 / AC-06, AC-07, AC-14 | Allowed transitions, gate, summary/reason, advisory and conflict refresh | Controls match API, state refresh and advisory wording correct | client/src/lab-04-tests/TicketWorkflow.test.tsx | Not run |
 | UI-04 | Component | FR-09, FR-11 / AC-10, AC-14 | Requester cards/links, window, previews and loading/zero/403/500 | Bounded API values displayed; correct URLs; no false zero during load | client/src/lab-04-tests/RequesterDashboard.test.tsx | Not run |
 | UI-05 | Component | FR-10, FR-11 / AC-11, AC-14 | Staff/Admin cards/groups/My Actions pagination and all feedback | Current-user actions/filters/zero labels and safe retry | client/src/lab-04-tests/StaffDashboard.test.tsx | Not run |

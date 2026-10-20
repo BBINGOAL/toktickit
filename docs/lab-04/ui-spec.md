@@ -1,6 +1,6 @@
 # Lab 4 UI Specification
 
-Status: intended UI contract for peer review, before implementation.
+Status: reviewed intended UI contract. Issue #46 implements Actions Taken with component checks passing; runtime/E2E and visual verification are pending because C: is full and Docker/PostgreSQL is unresponsive. Dashboards and formal Ticket workflow remain future issues. See ui-verification.md; do not interpret this contract as completed product evidence.
 
 ## Application shell and routes
 
