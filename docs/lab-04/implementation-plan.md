@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: #44 integrated through PR #52 (7922e0e). #45 approved by PpAnpt and integrated through PR #53 (3465088, 2026-10-20). #46 Actions Taken UI is in progress on feature3/lab4-actions-taken-ui from that staging merge; #47-#51 have not started. Current UI verification and environment blocker: ui-verification.md.
+Status: #44 integrated through PR #52 (7922e0e). #45 approved by PpAnpt and integrated through PR #53 (3465088, 2026-10-20). #46 Actions Taken UI is implemented/verified on feature3/lab4-actions-taken-ui and prepared for peer review; #47-#51 have not started. See ui-verification.md: 124 backend, 53 UI and 9 Actions E2E pass using isolated native PostgreSQL 18.1, not a Docker recovery claim.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal

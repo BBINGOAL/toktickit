@@ -20,7 +20,7 @@
 
 Record the exact PR/review/comment URLs, reviewer identity, feedback and author response after they occur. A request to review is not approval. Do not start issue #45 until this contract receives peer approval and is integrated into lab4-staging.
 
-Issue #45 is Done on Project 4 after PR #53 integration. Issue #46 started on 2026-10-20 only after the student confirmed the merge and GitHub verified it; branch feature3/lab4-actions-taken-ui starts at 3465088. Its UI/API transport tests and E2E work are in progress; no approval or completed PR is claimed for it.
+Issue #45 is Done on Project 4 after PR #53 integration. Issue #46 started on 2026-10-20 only after the student confirmed the merge and GitHub verified it; branch feature3/lab4-actions-taken-ui starts at 3465088. Backend 124/124, UI 53/53 and Actions E2E 9/9 pass using isolated native PostgreSQL 18.1. Peer approval and integration remain pending; see ui-verification.md.
 
 ### PR #53 feedback and follow-up
 
@@ -28,7 +28,7 @@ Reviewer: PpAnpt, APPROVED on 2026-10-19 at 14:27 Asia/Bangkok, for the latest h
 
 | Suggestion | Follow-up status |
 |---|---|
-| Assignee test depends on the fixture user appearing in the first 50 global matches | Issue #46 changes the query to search the fixture's unique staff name. Backend rerun is pending because Docker/PostgreSQL stopped responding while C: had 0 free bytes; do not count this change as verified yet. |
+| Assignee test depends on the fixture user appearing in the first 50 global matches | Issue #46 searches its unique staff name with matching inactive/Requester control prefixes, retaining meaningful exclusion assertions. Changed test passes in the 124/124 native PostgreSQL 18.1 rerun on 2026-10-20. |
 | Repeat seed uses update: {} and no longer resets Lab 3 demo accounts | Documented explicitly in implementation-plan.md and ui-verification.md; keep current credentials/roles/activity and do not use repeat seed as a password reset. README consolidation remains #51. |
 | Demo Tickets have version 0 despite actions; OPEN sample has no owner but assigned actions | Recorded for seed/workflow consistency review in #47. No existing user data or demo records were rewritten in #46. Ticket owner and action assignee remain separate relationships; any changed demo-state assumptions must be documented and tested. |
 | Consider DB CHECK constraints and remove redundant single-column requesterId/ownerId indexes | Recorded for measured schema/index review in #50; not silently added to the UI change and not claimed completed. |
