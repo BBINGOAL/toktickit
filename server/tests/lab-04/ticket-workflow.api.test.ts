@@ -44,6 +44,12 @@ describe('versioned Ticket workflow',()=>{
     await prepare();await prisma.user.update({where:{id:f.staff.id},data:{isActive:false}})
     expect((await patch('status',{status:'RESOLVED',expectedVersion:0,resolutionSummary:'Verified'},f.admin)).body.code).toBe('RESOLUTION_GATE')
   })
+  it('can close a legacy resolved zero-action Ticket without fabricating completed work',async()=>{
+    await prisma.ticket.update({where:{id:f.ticket.id},data:{status:'RESOLVED',resolutionSummary:'Legacy summary',resolvedAt:f.ticket.createdAt}})
+    const r=await patch('status',{status:'CLOSED',expectedVersion:0})
+    expect(r.status).toBe(200);expect(r.body.resolutionSummary).toBe('Legacy summary')
+    expect(await prisma.actionTaken.count({where:{ticketId:f.ticket.id}})).toBe(0)
+  })
   it('resolves, closes and reopens into a fresh cycle without qualifying old work',async()=>{
     await prepare()
     const r=await patch('status',{status:'RESOLVED',expectedVersion:0,resolutionSummary:' Repaired VPN '})
@@ -119,6 +125,15 @@ describe('versioned Ticket workflow',()=>{
     expect(JSON.stringify(r.body)).not.toMatch(/PRIVATE_SENTINEL|passwordHash|email/)
     expect((await request(app).get(path('workflow-history')+'?pageSize=7').set('Cookie',f.cookie())).status).toBe(400)
     expect((await request(app).delete(path('workflow-history')).set('Cookie',f.cookie())).status).toBe(405)
+  })
+  it('paginates tied workflow event timestamps deterministically by ID',async()=>{
+    await prisma.ticketWorkflowEvent.createMany({data:Array.from({length:27},()=>({ticketId:f.ticket.id,actorId:f.staff.id,kind:'FIXTURE',workCycle:1,createdAt:f.ticket.createdAt,after:{status:'OPEN'}}))})
+    const get=(page:number)=>request(app).get(path('workflow-history')).query({page,pageSize:25}).set('Cookie',f.cookie(f.requester))
+    const a=await get(1),b=await get(2)
+    expect(a.body.meta).toMatchObject({totalItems:27,totalPages:2})
+    expect(a.body.data).toHaveLength(25);expect(b.body.data).toHaveLength(2)
+    const ids=[...a.body.data,...b.body.data].map(e=>e.id)
+    expect(ids).toEqual([...ids].sort((x,y)=>x-y));expect(new Set(ids).size).toBe(27)
   })
   it('rolls back state and action cancellation when workflow event insertion fails',async()=>{
     await prepare()
