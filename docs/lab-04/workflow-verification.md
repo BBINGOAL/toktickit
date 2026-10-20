@@ -2,6 +2,8 @@
 
 Date: 2026-10-20 (Asia/Bangkok). Branch: `feature4/lab4-ticket-workflow-resolution`, from merged PR #54 at `10dd684`. Implementation follows BR-13–19 and the reviewed transition matrix. Feature-branch evidence only; not final main.
 
+[PR #55](https://github.com/BBINGOAL/toktickit/pull/55) is open into lab4-staging, linked to issue #47 through GitHub Development references, PpAnpt requested and Project 4 In review. No auto-merge; wait for actual review and integration before #48. The temporary PostgreSQL test cluster was stopped cleanly after testing.
+
 ## Delivered
 
 - Strictly versioned status/owner/priority/advisory APIs, public Ticket detail with allowed next statuses/gate summary, and read-only paginated workflow history. Obsolete unversioned backend handlers and client helpers removed, not bypassed for older callers.

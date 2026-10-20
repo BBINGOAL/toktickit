@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: #44/#45/#46 integrated through reviewed PRs #52/#53/#54; latest staging merge 10dd684. #47 Ticket Workflow is implemented on feature4/lab4-ticket-workflow-resolution and prepared for review after backend 209/209, UI 61/61 and Actions/workflow E2E 13/13. #48-#51 have not started. See workflow-verification.md for isolated native PostgreSQL 18.1 results; Docker recovery is not claimed.
+Status: #44/#45/#46 integrated through reviewed PRs #52/#53/#54; latest staging merge 10dd684. #47 Ticket Workflow is In review through PR #55 from feature4/lab4-ticket-workflow-resolution; PpAnpt requested after backend 209/209, UI 61/61 and Actions/workflow E2E 13/13. #48-#51 have not started. See workflow-verification.md for isolated native PostgreSQL 18.1 results; Docker recovery is not claimed.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -25,7 +25,7 @@ Create subsequent feature branches from the latest integrated staging commit. Ru
 | 7 | Lab4 Final Regression and Product Hardening | `feature7/lab4-final-hardening-regression` | Labs 1-3 regression, Staff Queue sorting/pagination, stable ordering, retry/double-submit, security, accessibility, responsive/style inspection, performance smoke and failure states. |
 | 8 | Lab4 Documentation Evidence and Release Integration | `feature8/lab4-docs-release` | README, actual test traceability, real review records and AI reflection, screenshots, concise MD/PDF Answer Part 1-9, staging release checks and post-merge main evidence. |
 
-Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires acceptance tests and reviewed integration. Release issue stays open until final main verification succeeds. All issues #44-#51 are on the existing private Project 4: #44/#45/#46 Done; #47 In progress until its review PR is opened; #48-#51 Backlog. Projects permission has been granted. Do not mark issues Done merely because a PR is open.
+Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires acceptance tests and reviewed integration. Release issue stays open until final main verification succeeds. All issues #44-#51 are on the existing private Project 4: #44/#45/#46 Done; #47 In review linked to PR #55; #48-#51 Backlog. Projects permission has been granted. Do not mark issues Done merely because a PR is open.
 
 ## Must-have versus stretch and complexity limits
 
