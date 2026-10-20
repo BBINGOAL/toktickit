@@ -47,6 +47,11 @@ export async function createTestTicket(requesterId: number, suffix = `${Date.now
 
 export async function removeTestData(userIds: number[], ticketIds: number[] = []) {
     if (ticketIds.length) {
+        const work = await prisma.actionTaken.findMany({ where: { ticketId: { in: ticketIds } }, select: { id: true } })
+        await prisma.actionTakenEvent.deleteMany({ where: { actionId: { in: work.map(a => a.id) } } })
+        await prisma.actionTaken.updateMany({ where: { ticketId: { in: ticketIds } }, data: { followsUpActionId: null } })
+        await prisma.actionTaken.deleteMany({ where: { ticketId: { in: ticketIds } } })
+        await prisma.ticketWorkflowEvent.deleteMany({ where: { ticketId: { in: ticketIds } } })
         const attachments = await prisma.attachment.findMany({ where: { ticketId: { in: ticketIds } }, select: { storedFilename: true } })
         const uploads = path.resolve(__dirname, '../../uploads')
         for (const attachment of attachments) {
@@ -59,5 +64,8 @@ export async function removeTestData(userIds: number[], ticketIds: number[] = []
         await prisma.attachment.deleteMany({ where: { ticketId: { in: ticketIds } } })
         await prisma.ticket.deleteMany({ where: { id: { in: ticketIds } } })
     }
-    if (userIds.length) await prisma.user.deleteMany({ where: { id: { in: userIds } } })
+    if (userIds.length) {
+        await prisma.mutationRequest.deleteMany({ where: { userId: { in: userIds } } })
+        await prisma.user.deleteMany({ where: { id: { in: userIds } } })
+    }
 }
