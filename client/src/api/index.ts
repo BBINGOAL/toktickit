@@ -1,6 +1,6 @@
-const BASE_URL = 'http://localhost:4000'
+export const BASE_URL = 'http://localhost:4000'
 
-async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
+export async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
     return fetch(input, { ...init, credentials: 'include' })
 }
 
@@ -74,6 +74,8 @@ export interface TicketListItem {
 }
 
 export interface TicketDetail extends TicketListItem {
+    version?: number
+    workCycle?: number
     description: string
     requester: { id: number; name: string }
     attachments: Attachment[]
