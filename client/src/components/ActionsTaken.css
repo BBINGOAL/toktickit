@@ -16,6 +16,8 @@
 .action-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; margin: 12px 0; }
 .action-field input:not([type=checkbox]), .action-field select, .action-field textarea, .assignee-search { border: 1px solid var(--color-border); border-radius: 6px; padding: 10px; width: 100%; min-width: 0; color: var(--color-text-primary); background: white; }
 .action-field textarea { min-height: 80px; resize: vertical; }
+.action-field label:has(input[type=checkbox]) { display: inline-flex; align-items: center; gap: 8px; }
+.action-field input[type=checkbox] { display: inline-block; width: 18px; height: 18px; min-height: 0; padding: 0; margin: 0; flex-shrink: 0; accent-color: var(--color-primary); }
 .action-field small { color: var(--color-error); }
 .action-details { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; margin: 16px 0; }
 .action-details dt { font-weight: 600; }

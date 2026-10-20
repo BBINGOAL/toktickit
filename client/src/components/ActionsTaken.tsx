@@ -30,6 +30,10 @@ function Modal({ title, children, onClose, busy }: { title: string; children: Re
     if (event.key !== 'Tab') return
     const nodes = Array.from(panel.current!.querySelectorAll<HTMLElement>('button, input, textarea, select, a[href], summary, [tabindex]'))
       .filter(node => !node.hasAttribute('disabled') && node.tabIndex >= 0 && !node.closest('[hidden]'))
+      .filter(node => {
+        const details = node.closest('details')
+        return !details || details.open || (node.tagName === 'SUMMARY' && node.parentElement === details)
+      })
     event.preventDefault()
     if (!nodes.length) return
     const index = nodes.indexOf(document.activeElement as HTMLElement)
@@ -54,13 +58,20 @@ function History({ ticketId, actionId }: { ticketId: number; actionId: number })
     fetchActionHistory(ticketId, actionId, page).then(result => { if (live) setData(result) }).catch(e => { if (live) setError(message(e)) })
     return () => { live = false }
   }, [ticketId, actionId, page, retry])
-  const fields = ['description', 'result', 'assigneeId', 'status', 'followUpRequired', 'followUpNote', 'attachmentNotes', 'cancellationReason', 'actionDateTime']
+  const fields = ['description', 'result', 'assignee', 'status', 'followUpRequired', 'followUpNote', 'attachmentNotes', 'cancellationReason', 'actionDateTime']
+  const historyValue = (key: string, value: unknown): string => {
+    if (value === undefined) return 'Not recorded'
+    if (value === null) return 'None'
+    if (key === 'assignee' && typeof value === 'object' && 'name' in value) return String(value.name)
+    if (key === 'actionDateTime' && typeof value === 'string') return formatTime(value)
+    return String(value)
+  }
   return <section aria-label="Action history"><h3>History (read-only)</h3>
     {error ? <div role="alert" className="action-error">{error}<button onClick={() => setRetry(n => n + 1)}>Retry history</button></div> : !data ? <p role="status">Loading history...</p> : <>
       {!data.data.length && <p>No history yet.</p>}
       <ol className="action-history">{data.data.map(event => <li key={event.id}>
         <strong>{event.kind}</strong> · {event.actor.name} · {formatTime(event.createdAt)}
-        <ul>{fields.filter(key => event.after?.[key] !== undefined && JSON.stringify(event.before?.[key]) !== JSON.stringify(event.after[key])).map(key => <li key={key}>{key}: {event.before?.[key] === undefined ? 'Not recorded' : String(event.before[key] ?? 'None')} → {String(event.after[key] ?? 'None')}</li>)}</ul>
+        <ul>{fields.filter(key => event.after?.[key] !== undefined && JSON.stringify(event.before?.[key]) !== JSON.stringify(event.after[key])).map(key => <li key={key}>{key}: {historyValue(key, event.before?.[key])} → {historyValue(key, event.after[key])}</li>)}</ul>
       </li>)}</ol><Pager meta={data.meta} change={setPage} label="History pages" />
     </>}
   </section>
@@ -87,6 +98,7 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
   const initial = (): Draft => ({ actionDateTime: localTime(action?.actionDateTime ?? new Date().toISOString()), description: action?.description ?? '', result: action?.result ?? '',
     assigneeId: String(action?.assignee.id ?? actor.id), followUpRequired: action?.followUpRequired ?? false, followUpNote: action?.followUpNote ?? '', attachmentNotes: action?.attachmentNotes ?? '', cancellationReason: '' })
   const [draft, setDraft] = useState<Draft>(initial)
+  const [comparisonDraft, setComparisonDraft] = useState<Draft | null>(null)
   const [dirty, setDirty] = useState(false)
   const [pending, setPending] = useState(false)
   const lock = useRef(false)
@@ -151,7 +163,11 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
       // Explicit whitelist: cancellationReason must never leak into a create/ordinary edit payload.
       const { actionDateTime, description, result, assigneeId, followUpRequired, followUpNote, attachmentNotes } = fields
       const common = { actionDateTime, description: description.trim(), result: result.trim(), assigneeId, followUpRequired, followUpNote: followUpNote.trim(), attachmentNotes: attachmentNotes.trim(), expectedTicketVersion: version }
-      const body = current ? { ...common, expectedVersion: current.version, ...(status ? { status } : {}), ...(status === 'CANCELLED' ? { cancellationReason: draft.cancellationReason.trim() } : {}) } : { ...common, followsUpActionId: predecessor?.id ?? null }
+      const body: CreateAction | UpdateAction = current ? { ...common, expectedVersion: current.version, ...(status ? { status } : {}), ...(status === 'CANCELLED' ? { cancellationReason: draft.cancellationReason.trim() } : {}) } : { ...common, followsUpActionId: predecessor?.id ?? null }
+      // Historical inactive assignments may still be edited/cancelled. Only an
+      // intentional reassignment should send assigneeId; Start/Complete eligibility
+      // is always rechecked by the server regardless of this omission.
+      if (current && body.assigneeId === current.assignee.id) delete (body as UpdateAction).assigneeId
       intent.current = { key: crypto.randomUUID(), body }
     }
     lock.current = true; setPending(true)
@@ -181,7 +197,16 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
     {error && <div ref={summary} tabIndex={-1} role="alert" className="action-error">{error}{conflict && <p>Current server version: {conflictVersion ?? 'reload to inspect'}. Your draft has been kept.</p>}</div>}
     {conflict && <button disabled={pending} onClick={reload}>Reload current state (keep draft)</button>}
     {blocked && <p>This action is no longer editable or accessible. Your unsaved draft is shown below.</p>}
-    {current && <details><summary>Compare with current saved action</summary><ActionDetails action={current} /></details>}
+    {current && <details><summary>Compare with current saved action</summary><ActionDetails action={current} />
+      <button type="button" disabled={frozen} onClick={() => {
+        if (!window.confirm('Load the saved action into the form? Your previous draft will remain available for comparison.')) return
+        setComparisonDraft({ ...draft })
+        setDraft({ actionDateTime: localTime(current.actionDateTime), description: current.description, result: current.result, assigneeId: String(current.assignee.id), followUpRequired: current.followUpRequired, followUpNote: current.followUpNote, attachmentNotes: current.attachmentNotes, cancellationReason: '' })
+        selectedName.current = { id: String(current.assignee.id), name: current.assignee.name }
+        setDirty(true); setErrors({})
+      }}>Load saved values into form</button>
+    </details>}
+    {comparisonDraft && <details><summary>Previous unsaved draft (kept for comparison)</summary><dl className="action-details">{Object.entries(comparisonDraft).map(([key, value]) => <div style={{ display: 'contents' }} key={key}><dt>{key}</dt><dd>{String(value)}</dd></div>)}</dl><button type="button" disabled={frozen} onClick={() => { setDraft({ ...comparisonDraft }); setDirty(true) }}>Restore previous draft</button></details>}
     <form noValidate onSubmit={(event: FormEvent) => { event.preventDefault(); void submit() }}>
       <div className="action-form-grid">
         {field('actionDateTime', 'Action date/time (your local timezone)', <input type="datetime-local" step="0.001" {...accessibility('actionDateTime')} value={draft.actionDateTime} onChange={e => change('actionDateTime', e.target.value)} />)}

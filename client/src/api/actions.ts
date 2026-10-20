@@ -20,7 +20,7 @@ export interface ActionFields {
   followUpRequired: boolean; followUpNote: string; attachmentNotes: string
 }
 export interface CreateAction extends ActionFields { expectedTicketVersion: number; followsUpActionId: number | null }
-export interface UpdateAction extends ActionFields {
+export interface UpdateAction extends Partial<ActionFields> {
   expectedVersion: number; expectedTicketVersion: number; status?: ActionStatus; cancellationReason?: string
 }
 export class ActionApiError extends Error {
