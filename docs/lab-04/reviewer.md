@@ -18,9 +18,11 @@
 | [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised PR merged as 7922e0e on 2026-10-14 (no separate later review recorded) |
 | [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/53#pullrequestreview-5568221570), 2026-10-19; four nonblocking suggestions below | APPROVED for f6bae9e; merged as 3465088 on 2026-10-20 |
 
-Record the exact PR/review/comment URLs, reviewer identity, feedback and author response after they occur. A request to review is not approval. Do not start issue #45 until this contract receives peer approval and is integrated into lab4-staging.
+| [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20; verified in GitHub metadata | Backend 124/124, UI 53/53, Actions E2E 9/9 on isolated native PostgreSQL 18.1; no review received at submission | Pending |
 
-Issue #45 is Done on Project 4 after PR #53 integration. Issue #46 started on 2026-10-20 only after the student confirmed the merge and GitHub verified it; branch feature3/lab4-actions-taken-ui starts at 3465088. Backend 124/124, UI 53/53 and Actions E2E 9/9 pass using isolated native PostgreSQL 18.1. Peer approval and integration remain pending; see ui-verification.md.
+Record exact PR/review/comment URLs, reviewer identity, feedback and author response only after they occur. A review request is not approval. Wait for peer review and staging integration before starting each next issue.
+
+Issue #45 is Done on Project 4 after PR #53 integration. Issue #46 started on 2026-10-20 only after the student confirmed the merge and GitHub verified it; branch feature3/lab4-actions-taken-ui starts at 3465088. PR #54 is open, linked to #46 through GitHub Development references and In review on Project 4. PpAnpt review and integration remain pending; no auto-merge. See ui-verification.md. Issue #47 has not started.
 
 ### PR #53 feedback and follow-up
 

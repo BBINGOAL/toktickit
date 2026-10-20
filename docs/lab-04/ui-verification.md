@@ -2,6 +2,8 @@
 
 Date: 2026-10-20, Asia/Bangkok. Branch: `feature3/lab4-actions-taken-ui`, based on staging merge 3465088 (PR #53). Prepared for peer review after feature-branch verification; not final main. Wait for review and integration before #47.
 
+[PR #54](https://github.com/BBINGOAL/toktickit/pull/54) is open into lab4-staging, linked to issue #46, with PpAnpt requested and Project 4 In review. Approval/integration are pending. The temporary PostgreSQL cluster was stopped cleanly after testing; Docker recovery remains unconfirmed.
+
 ## Implemented
 
 Typed list/create/update/history/assignee APIs and a shared paginated Ticket Detail section. Separate actor/assignee/work cycle/work time/recorded time; read-only chronological history. Staff/Admin create/edit/reassignment, separate Start/Complete, result validation, cancellation reason/confirmation, and linked follow-up. Requester and terminal records are read-only; no delete. Earlier attachments/comments/private notes remain.
