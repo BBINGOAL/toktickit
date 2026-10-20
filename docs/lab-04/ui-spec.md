@@ -1,6 +1,6 @@
 # Lab 4 UI Specification
 
-Status: reviewed intended UI contract. Issue #46 Actions Taken is implemented with UI 53/53 and Actions E2E 9/9 passing, including four widths, keyboard and local image inspection. Verification used isolated native PostgreSQL 18.1 because Docker remained stopping; see ui-verification.md. Dashboards, formal Ticket workflow and whole-product visual/contrast/200% zoom checks remain future issues. This is not completed final-main product evidence.
+Status: reviewed intended UI contract. #46 Actions Taken is integrated and #47 Ticket workflow is implemented on its feature branch: UI 61/61 and combined Actions/workflow E2E 13/13 pass, including four widths/keyboard checks. See workflow-verification.md for isolated native PostgreSQL 18.1 results. Dashboards and whole-product visual/contrast/200% zoom checks remain future issues. These are not final-main product results.
 
 ## Application shell and routes
 
@@ -31,6 +31,8 @@ Render history chronologically by createdAt ASC,id ASC with actor/time/change de
 Create/save/start/complete/cancel disables while pending. A submission intent keeps one idempotency key through retry; create a new key after successful save or deliberately abandoning/restarting the form. On recoverable failure retain all fields. Conflict displays current version, lets user load current values, and preserves draft for comparison; never silently retry an old overwrite. Inactive assignee error stays near selector and refreshes choices.
 
 ## Ticket workflow
+
+Issue #47 implementation: `TicketWorkflow` renders separately from Actions Taken. A status selection is intentional draft state; use Apply status to submit. RESOLVED reveals a required resolution summary and CANCELLED a required reason/confirmation. Owner and nullable priority changes use the current version and their own exact-intent key. Workflow history is paginated read-only. A stale reload retains summary/reason drafts without automatically resending. See workflow-verification.md for feature-branch results, not final-main evidence.
 
 Show only API allowedNextStatuses for Staff/Admin plus current read-only status. Formal Resolve opens/uses resolution summary input and displays unmet gate reasons. Cancellation collects a reason. Submit current expectedVersion and a workflow idempotency key; on success refresh Ticket/action summaries, new versions and history. On stale state, explain another change occurred and reload before another intentional change.
 

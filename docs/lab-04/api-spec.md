@@ -53,7 +53,7 @@ Staff/Admin only. Search optional trimmed <=100 chars, page/pageSize 10/25/50. R
 
 ## Ticket workflow increments
 
-GET `/tickets/:id` adds `version`, `workCycle`, `resolvedAt`, `allowedNextStatuses` (empty for Requester), and a concise public resolution-gate summary. Existing requester/attachments/owner fields remain.
+GET `/tickets/:id` adds `version`, `workCycle`, `resolvedAt`, `allowedNextStatuses` (empty for Requester), `canIndicateResolved`, and `resolutionGate: {canResolve,reasons,workCycle,summaryRequired}`. Existing requester/attachments/owner fields remain. Allowed next statuses express the role/state matrix; RESOLVED may be offered while the separately displayed gate is unmet, but the backend rejects that mutation with 409 RESOLUTION_GATE. Missing/non-owned Requester reads share `{error:"Resource not found",code:"NOT_FOUND"}` with 404.
 
 PATCH `/tickets/:id/status`: Staff/Admin, Idempotency-Key required.
 
@@ -64,6 +64,8 @@ PATCH `/tickets/:id/status`: Staff/Admin, Idempotency-Key required.
 For CANCELLED require `cancellationReason`; other statuses reject unrelated summary/reason fields. Backend enforces full matrix/gate atomically. Return updated Ticket including version/allowedNextStatuses. Reject missing expectedVersion (400). Simultaneous action insertion, follow-up changes or another Ticket write invalidate stale version.
 
 PATCH `/tickets/:id/owner` adds required expectedVersion; body `{ownerId:null|positiveId,expectedVersion}`. Non-null target must be active Staff/Admin. PATCH `/tickets/:id/priority` adds expectedVersion; body `{itPriority:null|LOW|MEDIUM|HIGH,expectedVersion}`. Both increment Ticket version, record public events and compare parent lock/version. Direct unversioned legacy callers must be updated; no compatibility bypass.
+
+Owner/priority mutations accept an optional Idempotency-Key with the same scoped exact-response replay semantics; the current client supplies it to keep uncertain retries safe. No-op owner/priority patches return 400 without extra events. Successful workflow mutations return the authoritative Ticket detail shape, including gate/allowed-next metadata. Public history kinds are STATUS, OWNER, PRIORITY and REQUESTER_RESOLVED; snapshot fields are public status/ownerId/itPriority/resolution/advisory/cycle/version only, never Internal Notes or credentials. Ticket cancellation also appends CANCELLED_BY_TICKET action events atomically.
 
 POST `/tickets/:id/requester-resolved` remains Requester-only owned-ticket advisory action. Accept `{expectedVersion}`; first change increments parent version and records an advisory event, repeated already-true call returns current flag/time without duplicate event. Allowed statuses follow BR-15. Version check before first mutation; optional Idempotency-Key for replay.
 
