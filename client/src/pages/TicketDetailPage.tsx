@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import ActionsTaken from '../components/ActionsTaken'
 import { 
     fetchTicketDetail, uploadAttachment, downloadAttachment, removeAttachment,
     fetchComments, addComment, fetchNotes, addNote,
@@ -392,6 +393,8 @@ export default function TicketDetailPage() {
                 </div>
             </div>
 
+            <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.status} ticketCreatedAt={ticket.createdAt} workCycle={ticket.workCycle}
+                onChanged={() => { fetchTicketDetail(ticket.id).then(setTicket).catch(() => { /* The saved action is authoritative; existing Ticket content stays visible. */ }) }} />
             <CommentSection ticketId={ticket.id} />
             {isStaff && <NoteSection ticketId={ticket.id} />}
         </div>

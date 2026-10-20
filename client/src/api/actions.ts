@@ -24,8 +24,14 @@ export interface UpdateAction extends ActionFields {
   expectedVersion: number; expectedTicketVersion: number; status?: ActionStatus; cancellationReason?: string
 }
 export class ActionApiError extends Error {
-  constructor(public status: number, public code: string, message: string,
-    public fieldErrors: Record<string, string> = {}, public currentVersion?: number) { super(message) }
+  status: number
+  code: string
+  fieldErrors: Record<string, string>
+  currentVersion?: number
+  constructor(status: number, code: string, message: string,
+    fieldErrors: Record<string, string> = {}, currentVersion?: number) {
+    super(message); this.status = status; this.code = code; this.fieldErrors = fieldErrors; this.currentVersion = currentVersion
+  }
 }
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await apiFetch(`${BASE_URL}/api${path}`, init)
