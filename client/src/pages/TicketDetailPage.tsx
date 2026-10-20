@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import ActionsTaken from '../components/ActionsTaken'
+import TicketWorkflow from '../components/TicketWorkflow'
 import { 
     fetchTicketDetail, uploadAttachment, downloadAttachment, removeAttachment,
     fetchComments, addComment, fetchNotes, addNote,
-    updateTicketStatus, updateTicketPriority, updateTicketOwner, indicateRequesterResolved
 } from '../api'
 import type { TicketDetail, Attachment, PublicComment, InternalNote } from '../api'
 
@@ -184,7 +184,6 @@ export default function TicketDetailPage() {
     const [error, setError] = useState<string | null>(null)
     const [uploadError, setUploadError] = useState<string | null>(null)
     const [uploading, setUploading] = useState(false)
-    const [resolutionSaving, setResolutionSaving] = useState(false)
 
     useEffect(() => {
         if (!user || !id) return
@@ -235,45 +234,6 @@ export default function TicketDetailPage() {
         } catch { alert('Failed to download file.') }
     }
 
-    async function handleStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
-        if (!ticket) return;
-        const newStatus = e.target.value;
-        try {
-            await updateTicketStatus(ticket.id, newStatus);
-            setTicket({ ...ticket, status: newStatus });
-        } catch { alert('Failed to update status'); }
-    }
-
-    async function handlePriorityChange(e: React.ChangeEvent<HTMLSelectElement>) {
-        if (!ticket) return;
-        const newPri = e.target.value;
-        try {
-            await updateTicketPriority(ticket.id, newPri);
-            setTicket({ ...ticket, itPriority: newPri });
-        } catch { alert('Failed to update priority'); }
-    }
-
-    async function handleAssignToMe() {
-        if (!ticket || !user) return;
-        try {
-            await updateTicketOwner(ticket.id, user.id);
-            setTicket({ ...ticket, owner: { id: user.id, name: user.name } });
-        } catch { alert('Failed to assign owner'); }
-    }
-
-    async function handleRequesterResolved() {
-        if (!ticket) return
-        setResolutionSaving(true)
-        try {
-            const updated = await indicateRequesterResolved(ticket.id)
-            setTicket(prev => prev ? { ...prev, requesterResolved: updated.requesterResolved, requesterResolvedAt: updated.requesterResolvedAt } : prev)
-        } catch (err) {
-            alert(err instanceof Error ? err.message : 'Failed to record resolution indication')
-        } finally {
-            setResolutionSaving(false)
-        }
-    }
-
     if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>Loading ticket...</div>
     if (error || !ticket) return <div style={{ padding: 40, textAlign: 'center', color: '#DC2626' }}>{error}</div>
 
@@ -291,45 +251,7 @@ export default function TicketDetailPage() {
                 <span>Ticket Detail</span>
             </div>
 
-            {isStaff && (
-                <div style={{ background: '#F3F4F6', border: '1px solid #D1D5DB', borderRadius: 12, padding: '16px 24px', marginBottom: 20, display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'center' }}>
-                    <div>
-                        <span style={{ ...labelStyle, color: '#4B5563' }}>Update Status</span>
-                        <select value={ticket.status} onChange={handleStatusChange} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #9CA3AF' }}>
-                            <option value="NEW">NEW</option>
-                            <option value="OPEN">OPEN</option>
-                            <option value="IN_PROGRESS">IN_PROGRESS</option>
-                            <option value="WAITING_FOR_REQUESTER">WAITING_FOR_REQUESTER</option>
-                            <option value="RESOLVED">RESOLVED</option>
-                            <option value="CLOSED">CLOSED</option>
-                            <option value="REOPENED">REOPENED</option>
-                            <option value="CANCELLED">CANCELLED</option>
-                        </select>
-                    </div>
-                    <div>
-                        <span style={{ ...labelStyle, color: '#4B5563' }}>IT Priority</span>
-                        <select value={ticket.itPriority || ''} onChange={handlePriorityChange} style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #9CA3AF' }}>
-                            <option value="">Unassigned</option>
-                            <option value="LOW">LOW</option>
-                            <option value="MEDIUM">MEDIUM</option>
-                            <option value="HIGH">HIGH</option>
-                        </select>
-                    </div>
-                    <div style={{ marginLeft: 'auto' }}>
-                        <span style={{ ...labelStyle, color: '#4B5563' }}>Owner</span>
-                        {ticket.owner ? (
-                            <div style={{ fontWeight: 600, color: '#111827', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                {ticket.owner.name}
-                                {ticket.owner.id !== user.id && (
-                                    <button onClick={handleAssignToMe} style={{ fontSize: '0.75rem', padding: '4px 8px', borderRadius: 4, cursor: 'pointer' }}>Take Over</button>
-                                )}
-                            </div>
-                        ) : (
-                            <button onClick={handleAssignToMe} style={{ background: '#006B3C', color: 'white', border: 'none', padding: '6px 16px', borderRadius: 6, fontWeight: 600, cursor: 'pointer' }}>Assign to me</button>
-                        )}
-                    </div>
-                </div>
-            )}
+            <TicketWorkflow ticket={ticket} onChanged={setTicket} />
 
             <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden', marginBottom: 20 }}>
                 <div style={{ background: '#006B3C', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
@@ -365,13 +287,6 @@ export default function TicketDetailPage() {
                 </div>
             </div>
 
-            {!isStaff && (
-                <div style={{ marginBottom: 20, padding: 16, background: ticket.requesterResolved ? '#ECFDF5' : '#FFFBEB', border: `1px solid ${ticket.requesterResolved ? '#A7F3D0' : '#FDE68A'}`, borderRadius: 12 }}>
-                    <strong>{ticket.requesterResolved ? 'You indicated that this problem appears resolved.' : 'Does this problem appear resolved?'}</strong>
-                    {!ticket.requesterResolved && <button onClick={handleRequesterResolved} disabled={resolutionSaving} style={{ marginLeft: 12, background: '#006B3C', color: 'white', border: 'none', borderRadius: 6, padding: '7px 12px', cursor: 'pointer' }}>{resolutionSaving ? 'Saving...' : 'Mark as resolved'}</button>}
-                </div>
-            )}
-
             <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
                 <div style={{ padding: '16px 24px', borderBottom: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#111827' }}>Attachments <span style={{ marginLeft: 8, background: '#F3F4F6', color: '#6B7280', fontSize: '0.75rem', padding: '2px 8px', borderRadius: 999 }}>{activeAttachments.length}/5 active</span></h3>
@@ -393,7 +308,7 @@ export default function TicketDetailPage() {
                 </div>
             </div>
 
-            <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.status} ticketCreatedAt={ticket.createdAt} workCycle={ticket.workCycle}
+            <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.status} ticketCreatedAt={ticket.createdAt} workCycle={ticket.workCycle} ticketVersion={ticket.version}
                 onChanged={() => { fetchTicketDetail(ticket.id).then(setTicket).catch(() => { /* The saved action is authoritative; existing Ticket content stays visible. */ }) }} />
             <CommentSection ticketId={ticket.id} />
             {isStaff && <NoteSection ticketId={ticket.id} />}

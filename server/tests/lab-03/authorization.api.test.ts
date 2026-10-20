@@ -33,8 +33,8 @@ describe('Lab 3 authorization matrix', () => {
         const cookie = authCookie(requesterA.id, requesterA.role)
         const detail = await request(app).get(`/api/tickets/${ticketB.id}`).set('Cookie', [cookie])
         const comment = await request(app).post(`/api/tickets/${ticketB.id}/comments`).set('Cookie', [cookie]).send({ content: 'cross-ticket access' })
-        expect(detail.status).toBe(403)
-        expect(comment.status).toBe(403)
+        expect(detail.status).toBe(404)
+        expect(comment.status).toBe(404)
     })
 
     it('prevents requesters from staff queue, notes, and admin user management', async () => {

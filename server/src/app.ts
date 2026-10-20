@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.routes'
 import ticketRoutes from './routes/ticket.routes'
 import adminRoutes from './routes/admin.routes'
 import actionRoutes from './routes/action.routes'
+import workflowRoutes from './routes/workflow.routes'
 import { prisma } from './db'
 
 // ─── Upload Config ────────────────────────────────────────
@@ -47,6 +48,7 @@ app.use(cookieParser())
 // ─── Auth Routes ──────────────────────────────────────────────
 app.use('/api/auth', authRoutes)
 app.use('/api', actionRoutes)
+app.use('/api', workflowRoutes)
 app.use('/api', ticketRoutes)
 app.use('/api', adminRoutes)
 

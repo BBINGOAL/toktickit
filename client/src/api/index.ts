@@ -74,6 +74,12 @@ export interface TicketListItem {
 }
 
 export interface TicketDetail extends TicketListItem {
+    allowedNextStatuses?: string[]
+    resolutionSummary?: string | null
+    resolvedAt?: string | null
+    cancelledReason?: string | null
+    canIndicateResolved?: boolean
+    resolutionGate?: { canResolve: boolean; reasons: string[]; workCycle: number; summaryRequired: boolean }
     version?: number
     workCycle?: number
     description: string
@@ -218,35 +224,6 @@ export async function fetchStaffTickets(query: StaffTicketQuery = {}): Promise<T
     return res.json()
 }
 
-export async function updateTicketStatus(ticketId: number, status: string): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-    });
-    if (!res.ok) throw new Error('Failed to update status');
-    return res.json();
-}
-
-export async function updateTicketOwner(ticketId: number, ownerId: number | null): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/owner`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ownerId })
-    });
-    if (!res.ok) throw new Error('Failed to update owner');
-    return res.json();
-}
-
-export async function updateTicketPriority(ticketId: number, itPriority: string): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/priority`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itPriority })
-    });
-    if (!res.ok) throw new Error('Failed to update priority');
-    return res.json();
-}
 
 // ─── Collaboration ────────────────────────────────────────
 
@@ -384,11 +361,3 @@ export async function resetAdminUserPassword(id: number, newInitialPassword: str
     return res.json()
 }
 
-export async function indicateRequesterResolved(ticketId: number): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/requester-resolved`, { method: 'POST' })
-    if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to record resolution indication')
-    }
-    return res.json()
-}

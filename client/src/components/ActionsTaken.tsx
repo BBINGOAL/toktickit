@@ -90,7 +90,7 @@ interface Draft extends Omit<ActionFields, 'assigneeId'> { assigneeId: string; c
 interface EditorProps {
   ticketId: number; ticketCreatedAt: string; ticketVersion: number; workCycle?: number
   action?: ActionTaken; predecessor?: ActionTaken; actor: { id: number; name: string }
-  onClose: () => void; onSaved: () => void
+  onClose: (uncertain?: boolean) => void; onSaved: () => void
 }
 function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, predecessor, actor, onClose, onSaved }: EditorProps) {
   const [current, setCurrent] = useState(action)
@@ -102,7 +102,7 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
   const [dirty, setDirty] = useState(false)
   const [pending, setPending] = useState(false)
   const lock = useRef(false)
-  const intent = useRef<{ key: string; body: CreateAction | UpdateAction } | null>(null)
+  const [intent, setIntent] = useState<{ key: string; body: CreateAction | UpdateAction } | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
   const [conflict, setConflict] = useState(false)
@@ -122,9 +122,13 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
     }, 150)
     return () => { live = false; window.clearTimeout(timer) }
   }, [search, assigneePage, choiceRetry])
-  const dismiss = () => { if (!lock.current && (!dirty || window.confirm('Discard this unsaved action draft?'))) onClose() }
+  const dismiss = () => {
+    if (lock.current) return
+    const warning = intent ? 'The previous request may already have succeeded. Close this draft and refresh the action list?' : 'Discard this unsaved action draft?'
+    if ((!dirty && !intent) || window.confirm(warning)) onClose(Boolean(intent))
+  }
   const change = <K extends keyof Draft>(key: K, value: Draft[K]) => { setDraft(d => ({ ...d, [key]: value })); setDirty(true) }
-  const frozen = pending || Boolean(intent.current) || blocked || conflict
+  const frozen = pending || Boolean(intent) || blocked || conflict
   async function reload() {
     if (lock.current) return
     lock.current = true; setPending(true)
@@ -140,7 +144,7 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
         setCurrent(found)
         setBlocked(terminal(found))
       }
-      setVersion(response.ticketVersion); intent.current = null; setConflict(false); setError(''); setErrors({})
+      setVersion(response.ticketVersion); setIntent(null); setConflict(false); setError(''); setErrors({})
       setChoiceRetry(n => n + 1)
     } catch (e) { setError(message(e)) }
     finally { lock.current = false; setPending(false) }
@@ -157,7 +161,8 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
     if (status === 'CANCELLED' && !draft.cancellationReason.trim()) fieldErrors.cancellationReason = 'Enter a cancellation reason.'
     setErrors(fieldErrors); setError('')
     if (Object.keys(fieldErrors).length) { setError('Check the action fields below.'); queueMicrotask(() => summary.current?.focus()); return }
-    if (!intent.current) {
+    let request = intent
+    if (!request) {
       if (status === 'CANCELLED' && !window.confirm('Cancel this action? Its record and history will be kept.')) return
       const fields: ActionFields = { ...draft, actionDateTime: date.toISOString(), assigneeId: Number(draft.assigneeId) }
       // Explicit whitelist: cancellationReason must never leak into a create/ordinary edit payload.
@@ -168,20 +173,20 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
       // intentional reassignment should send assigneeId; Start/Complete eligibility
       // is always rechecked by the server regardless of this omission.
       if (current && body.assigneeId === current.assignee.id) delete (body as UpdateAction).assigneeId
-      intent.current = { key: crypto.randomUUID(), body }
+      request = { key: crypto.randomUUID(), body }
+      setIntent(request)
     }
     lock.current = true; setPending(true)
     try {
-      const request = intent.current
       if (current) await updateAction(ticketId, current.id, request.body as UpdateAction, request.key)
       else await createAction(ticketId, request.body as CreateAction, request.key)
-      intent.current = null; setDirty(false); onSaved()
+      setIntent(null); setDirty(false); onSaved()
     } catch (e) {
       setError(message(e))
       if (e instanceof ActionApiError) {
         setErrors(e.fieldErrors)
-        if (e.status === 409) { setConflict(true); setConflictVersion(e.currentVersion); intent.current = null }
-        else if (e.status < 500) intent.current = null
+        if (e.status === 409) { setConflict(true); setConflictVersion(e.currentVersion); setIntent(null) }
+        else if (e.status < 500) setIntent(null)
         if ([401, 403, 404].includes(e.status)) setBlocked(true)
         if (e.fieldErrors.assigneeId) setChoiceRetry(n => n + 1)
       }
@@ -208,6 +213,7 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
     </details>}
     {comparisonDraft && <details><summary>Previous unsaved draft (kept for comparison)</summary><dl className="action-details">{Object.entries(comparisonDraft).map(([key, value]) => <div style={{ display: 'contents' }} key={key}><dt>{key}</dt><dd>{String(value)}</dd></div>)}</dl><button type="button" disabled={frozen} onClick={() => { setDraft({ ...comparisonDraft }); setDirty(true) }}>Restore previous draft</button></details>}
     <form noValidate onSubmit={(event: FormEvent) => { event.preventDefault(); void submit() }}>
+      <p id="action-timezone">Input timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}. Work records are displayed in Asia/Bangkok.</p>
       <div className="action-form-grid">
         {field('actionDateTime', 'Action date/time (your local timezone)', <input type="datetime-local" step="0.001" {...accessibility('actionDateTime')} value={draft.actionDateTime} onChange={e => change('actionDateTime', e.target.value)} />)}
         <div className="action-field"><label htmlFor="assignee-search">Find active assignee by name</label><input className="assignee-search" id="assignee-search" disabled={pending} value={search} maxLength={100} onChange={e => { setSearch(e.target.value); setAssigneePage(1) }} />
@@ -229,8 +235,8 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
       {field('attachmentNotes', 'Attachment notes (existing Ticket files)', <textarea {...accessibility('attachmentNotes')} maxLength={1000} value={draft.attachmentNotes} onChange={e => change('attachmentNotes', e.target.value)} />)}
       {current && field('cancellationReason', 'Cancellation reason (required to cancel)', <textarea {...accessibility('cancellationReason')} maxLength={1000} value={draft.cancellationReason} onChange={e => change('cancellationReason', e.target.value)} />)}
       <div className="actions-toolbar">
-        {intent.current ? <><button type="button" className="primary" disabled={pending} onClick={() => void submit()}>Retry same submission</button><button type="button" disabled={pending} onClick={() => {
-          if (window.confirm('The previous request may have succeeded. Reload and check the action list before starting a new intent. Keep this draft?')) { intent.current = null; setConflict(true); setError('Reload current state and check for previously saved work before submitting a new intent.') }
+        {intent ? <><button type="button" className="primary" disabled={pending} onClick={() => void submit()}>Retry same submission</button><button type="button" disabled={pending} onClick={() => {
+          if (window.confirm('The previous request may have succeeded. Reload and check the action list before starting a new intent. Keep this draft?')) { setIntent(null); setConflict(true); setError('Reload current state and check for previously saved work before submitting a new intent.') }
         }}>Review uncertain submission</button></> : <>
           <button type="submit" className="primary" disabled={frozen}>{pending ? 'Saving...' : current ? 'Save changes' : 'Create action'}</button>
           {current?.status === 'PLANNED' && <button type="button" disabled={frozen} onClick={() => void submit('IN_PROGRESS')}>Start action</button>}
@@ -242,8 +248,8 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
   </Modal>
 }
 
-export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, workCycle, onChanged }: {
-  ticketId: number; ticketStatus: string; ticketCreatedAt: string; workCycle?: number; onChanged: () => void
+export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, workCycle, ticketVersion, onChanged }: {
+  ticketId: number; ticketStatus: string; ticketCreatedAt: string; workCycle?: number; ticketVersion?: number; onChanged: () => void
 }) {
   const { user } = useAuth()
   const [data, setData] = useState<ActionPage | null>(null)
@@ -255,8 +261,13 @@ export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, 
   const [notice, setNotice] = useState('')
   const [editor, setEditor] = useState<{ action?: ActionTaken; predecessor?: ActionTaken } | null>(null)
   const [view, setView] = useState<ActionTaken | null>(null)
+  const newActionButton = useRef<HTMLButtonElement>(null)
+  const restoreFocusAfterReload = useRef(false)
   const staff = user?.role === 'IT_STAFF' || user?.role === 'ADMIN'
   const writable = staff && active.includes(ticketStatus)
+  useEffect(() => {
+    if (!loading && restoreFocusAfterReload.current) { newActionButton.current?.focus(); restoreFocusAfterReload.current = false }
+  }, [loading])
   useEffect(() => {
     let live = true; setLoading(true); setError('')
     fetchActions(ticketId, page, size).then(result => {
@@ -269,10 +280,10 @@ export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, 
       if (e instanceof ActionApiError && [401, 403, 404].includes(e.status)) { setData(null); setEditor(null); setView(null) }
     }).finally(() => { if (live) setLoading(false) })
     return () => { live = false }
-  }, [ticketId, ticketStatus, page, size, revision])
+  }, [ticketId, ticketStatus, ticketVersion, page, size, revision])
   return <section className="actions-section" aria-labelledby="actions-title" aria-busy={loading}>
     <div className="actions-toolbar"><h2 id="actions-title">Actions Taken</h2><button disabled={loading || Boolean(editor)} onClick={() => setRevision(n => n + 1)}>Refresh actions</button>
-      {writable && <button className="primary" disabled={loading || !data || Boolean(error)} onClick={() => setEditor({})}>New action</button>}</div>
+      {writable && <button ref={newActionButton} className="primary" disabled={loading || !data || Boolean(error)} onClick={() => setEditor({})}>New action</button>}</div>
     <p>Shared work records · Times shown in Asia/Bangkok · Ordered by work date/time, then ID.</p>
     {!staff && <p>Read-only: IT Staff record the work on your Ticket.</p>}
     {staff && !writable && <p>This Ticket is terminal. Actions and history remain read-only.</p>}
@@ -296,6 +307,6 @@ export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, 
       <Pager meta={data.meta} change={setPage} disabled={loading} label="Actions pages" />
     </>}
     {view && <Modal title={`Action #${view.id}`} onClose={() => setView(null)} busy={false}><ActionDetails action={view} /><History ticketId={ticketId} actionId={view.id} /></Modal>}
-    {editor && data && user && <Editor {...editor} actor={user} ticketId={ticketId} ticketCreatedAt={ticketCreatedAt} ticketVersion={data.ticketVersion} workCycle={workCycle} onClose={() => setEditor(null)} onSaved={() => { setEditor(null); setNotice('Action saved.'); setRevision(n => n + 1); onChanged() }} />}
+    {editor && data && user && <Editor {...editor} actor={user} ticketId={ticketId} ticketCreatedAt={ticketCreatedAt} ticketVersion={data.ticketVersion} workCycle={workCycle} onClose={uncertain => { setEditor(null); if (uncertain) { restoreFocusAfterReload.current = true; setRevision(n => n + 1); onChanged() } }} onSaved={() => { setEditor(null); restoreFocusAfterReload.current = true; setNotice('Action saved.'); setRevision(n => n + 1); onChanged() }} />}
   </section>
 }
