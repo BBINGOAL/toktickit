@@ -16,11 +16,25 @@
 | Issue / scope | PR | Reviewer request | Actual comments / responses | Approval |
 |---|---|---|---|---|
 | [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised PR merged as 7922e0e on 2026-10-14 (no separate later review recorded) |
-| [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14; verified in GitHub metadata | No review received yet; backend 124/124 and earlier UI 31/31 passing on feature branch | Pending |
+| [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/53#pullrequestreview-5568221570), 2026-10-19; four nonblocking suggestions below | APPROVED for f6bae9e; merged as 3465088 on 2026-10-20 |
+| [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20; verified in GitHub metadata | Backend 124/124, UI 53/53, Actions E2E 9/9 on isolated native PostgreSQL 18.1; no review received at submission | Pending |
 
-Record the exact PR/review/comment URLs, reviewer identity, feedback and author response after they occur. A request to review is not approval. Do not start issue #45 until this contract receives peer approval and is integrated into lab4-staging.
+Record exact PR/review/comment URLs, reviewer identity, feedback and author response only after they occur. A review request is not approval. Wait for peer review and staging integration before starting each next issue.
 
-Issue #45 is now In review on Project 4 with PR #53 linked. Wait for PpAnpt review and staging integration before starting issue #46. No auto-merge is enabled.
+Issue #45 is Done on Project 4 after PR #53 integration. Issue #46 started on 2026-10-20 only after the student confirmed the merge and GitHub verified it; branch feature3/lab4-actions-taken-ui starts at 3465088. PR #54 is open, linked to #46 through GitHub Development references and In review on Project 4. PpAnpt review and integration remain pending; no auto-merge. See ui-verification.md. Issue #47 has not started.
+
+### PR #53 feedback and follow-up
+
+Reviewer: PpAnpt, APPROVED on 2026-10-19 at 14:27 Asia/Bangkok, for the latest head f6bae9e. The reviewer reports 124/124 tests twice on a newly migrated/seeded isolated database and no Prisma schema drift. This is the reviewer's reported verification, not a new author rerun. All four suggestions were explicitly nonblocking. GitHub merge is 3465088cd7f38bca224b5a99ce86fc19da929d61 into lab4-staging on 2026-10-20.
+
+| Suggestion | Follow-up status |
+|---|---|
+| Assignee test depends on the fixture user appearing in the first 50 global matches | Issue #46 searches its unique staff name with matching inactive/Requester control prefixes, retaining meaningful exclusion assertions. Changed test passes in the 124/124 native PostgreSQL 18.1 rerun on 2026-10-20. |
+| Repeat seed uses update: {} and no longer resets Lab 3 demo accounts | Documented explicitly in implementation-plan.md and ui-verification.md; keep current credentials/roles/activity and do not use repeat seed as a password reset. README consolidation remains #51. |
+| Demo Tickets have version 0 despite actions; OPEN sample has no owner but assigned actions | Recorded for seed/workflow consistency review in #47. No existing user data or demo records were rewritten in #46. Ticket owner and action assignee remain separate relationships; any changed demo-state assumptions must be documented and tested. |
+| Consider DB CHECK constraints and remove redundant single-column requesterId/ownerId indexes | Recorded for measured schema/index review in #50; not silently added to the UI change and not claimed completed. |
+
+Positive review notes: Ticket-before-User lock ordering, idempotency scope/payload digest, concurrency tests, and non-owner Requester 404. Reviewer's AI-tool usage cannot be verified from GitHub metadata.
 
 ### PR #52 feedback and response
 

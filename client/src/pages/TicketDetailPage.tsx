@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import ActionsTaken from '../components/ActionsTaken'
 import { 
     fetchTicketDetail, uploadAttachment, downloadAttachment, removeAttachment,
     fetchComments, addComment, fetchNotes, addNote,
@@ -331,10 +332,10 @@ export default function TicketDetailPage() {
             )}
 
             <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden', marginBottom: 20 }}>
-                <div style={{ background: '#006B3C', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
+                <div style={{ background: '#006B3C', padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                    <div style={{ minWidth: 0, flex: '1 1 180px' }}>
                         <div style={{ color: '#A7F3D0', fontSize: '0.75rem', fontWeight: 600, marginBottom: 4 }}>TICKET DETAIL</div>
-                        <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem' }}>{ticket.ticketNumber}</div>
+                        <div style={{ color: 'white', fontWeight: 800, fontSize: '1.25rem', overflowWrap: 'anywhere' }}>{ticket.ticketNumber}</div>
                     </div>
                     <span style={{ background: '#EAF6EF', color: '#006B3C', padding: '4px 16px', borderRadius: 999, fontWeight: 700, fontSize: '0.8rem' }}>{ticket.status}</span>
                 </div>
@@ -392,6 +393,8 @@ export default function TicketDetailPage() {
                 </div>
             </div>
 
+            <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.status} ticketCreatedAt={ticket.createdAt} workCycle={ticket.workCycle}
+                onChanged={() => { fetchTicketDetail(ticket.id).then(setTicket).catch(() => { /* The saved action is authoritative; existing Ticket content stays visible. */ }) }} />
             <CommentSection ticketId={ticket.id} />
             {isStaff && <NoteSection ticketId={ticket.id} />}
         </div>

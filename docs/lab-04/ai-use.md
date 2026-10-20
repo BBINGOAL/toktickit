@@ -37,4 +37,6 @@ Student-authored reflection is pending. The final reflection should discuss whic
 
 ## Verification boundaries
 
+Issue #46 began after the student's actual merge confirmation and verification of PR #53 as 3465088 on 2026-10-20. Coding-agent work added the typed action transport, shared list/history, accessible work dialog, one-edge transitions, exact-intent retry and draft comparison/recovery. Tests and image inspection exposed timestamp precision, focus-selection, unchanged-assignee PATCH, history-name and checkbox/long-header issues; these were fixed. Latest results: UI 53/53, backend 124/124, Actions E2E 9/9, schema drift none, client/server typechecks/builds pass. Docker remained stopping after C: filled; verification used a new isolated native PostgreSQL 18.1 cluster on B: at 127.0.0.1:55434, not localdb or Docker. Real screenshots were inspected and remain uncommitted. No approval, final-main result or student reflection was fabricated. Details: ui-verification.md.
+
 PR #52 delivered the contract. Issue #45 delivers the verified backend foundation described in foundation-verification.md; Ticket resolution/dashboard/UI increments and E2E/final-main checks remain pending. Peer review approval for each PR is recorded only from the actual GitHub review. Report images/PDF are deliberately excluded from commits at the student's request.
