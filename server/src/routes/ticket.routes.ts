@@ -9,16 +9,6 @@ const router = Router();
 const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
 const VALID_PRIORITIES = new Set(['LOW', 'MEDIUM', 'HIGH']);
 const VALID_STATUSES = new Set(['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'RESOLVED', 'CLOSED', 'REOPENED', 'CANCELLED']);
-const STATUS_TRANSITIONS: Record<string, Set<string>> = {
-    NEW: new Set(['OPEN', 'CANCELLED']),
-    OPEN: new Set(['IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'CANCELLED']),
-    IN_PROGRESS: new Set(['WAITING_FOR_REQUESTER', 'RESOLVED', 'CANCELLED']),
-    WAITING_FOR_REQUESTER: new Set(['IN_PROGRESS', 'RESOLVED', 'CANCELLED']),
-    RESOLVED: new Set(['CLOSED', 'REOPENED']),
-    CLOSED: new Set(['REOPENED']),
-    REOPENED: new Set(['IN_PROGRESS', 'CANCELLED']),
-    CANCELLED: new Set(['REOPENED']),
-};
 
 async function getAccessibleTicket(req: Request, res: Response) {
     const id = Number.parseInt(String(req.params.id), 10)
