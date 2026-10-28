@@ -158,6 +158,15 @@ export interface TicketQuery {
 }
 
 export interface StaffTicketQuery {
+    scope?: string
+    owner?: string
+    sort?: string
+    order?: string
+    categoryId?: number
+    updatedSince?: string
+    updatedUntil?: string
+    resolvedSince?: string
+    resolvedUntil?: string
     search?: string
     status?: string
     priority?: string
@@ -219,6 +228,7 @@ export async function fetchTicketDetail(ticketId: number): Promise<TicketDetail>
 
 export async function fetchStaffTickets(query: StaffTicketQuery = {}): Promise<TicketsResponse> {
     const params = new URLSearchParams()
+    for (const key of ['scope','owner','sort','order','categoryId','updatedSince','updatedUntil','resolvedSince','resolvedUntil'] as const) if (query[key] !== undefined) params.set(key, String(query[key]))
     if (query.search) params.set('search', query.search)
     if (query.status) params.set('status', query.status)
     if (query.priority) params.set('priority', query.priority)

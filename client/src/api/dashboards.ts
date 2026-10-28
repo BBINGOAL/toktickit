@@ -22,3 +22,23 @@ export async function fetchRequesterDashboard(): Promise<RequesterDashboardData>
   if (!response.ok) throw new DashboardError(response.status)
   return response.json()
 }
+
+export interface PendingActionPreview {
+  id: number; ticketId: number; ticketNumber: string; description: string; status: string; updatedAt: string; detailUrl: string
+}
+export interface StaffDashboardData {
+  asOf: string; windowStart: string; timezone: string
+  metrics: { unassignedActive: number; myActiveTickets: number; myPendingActions: number; byStatus: Record<string, number>; activeByPriority: Record<string, number> }
+  recentTickets: TicketPreview[]; urgentTickets: TicketPreview[]; myActions: PendingActionPreview[]
+  drillDown: { unassignedActive: string; myActiveTickets: string; myPendingActions: string; byStatus: Record<string, string>; activeByPriority: Record<string, string>; recentTickets: string; urgentTickets: string }
+}
+export interface PendingActionPage {
+  data: PendingActionPreview[]; meta: { page: number; pageSize: number; totalItems: number; totalPages: number }
+}
+async function staffRequest<T>(path: string): Promise<T> {
+  const response = await apiFetch(`${BASE_URL}/api${path}`)
+  if (!response.ok) throw new DashboardError(response.status)
+  return response.json()
+}
+export const fetchStaffDashboard = () => staffRequest<StaffDashboardData>('/dashboards/staff')
+export const fetchMyActions = (query = '') => staffRequest<PendingActionPage>('/staff/actions?' + query)

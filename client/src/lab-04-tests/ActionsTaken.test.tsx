@@ -6,7 +6,7 @@ import * as api from '../api/actions'
 import type { ActionTaken } from '../api/actions'
 import { useAuth } from '../context/AuthContext'
 
-vi.mock('../api/actions', async original => ({ ...await original<typeof import('../api/actions')>(), fetchActions: vi.fn(), fetchActionHistory: vi.fn(), fetchAssignees: vi.fn(), createAction: vi.fn(), updateAction: vi.fn() }))
+vi.mock('../api/actions', async original => ({ ...await original<typeof import('../api/actions')>(), fetchActions: vi.fn(), fetchActionById: vi.fn(), fetchActionHistory: vi.fn(), fetchAssignees: vi.fn(), createAction: vi.fn(), updateAction: vi.fn() }))
 vi.mock('../context/AuthContext', () => ({ useAuth: vi.fn() }))
 const staff = { id: 2, name: 'Staff One', role: 'IT_STAFF' }
 const date = new Date(Date.now() - 3600000).toISOString()
@@ -24,6 +24,21 @@ beforeEach(() => {
   vi.spyOn(window, 'confirm').mockReturnValue(true)
 })
 describe('Actions Taken interface', () => {
+  it('opens linked action details/history independently of the current list page and focuses the dialog',async()=>{
+    vi.mocked(api.fetchActionById).mockResolvedValue({data:action,ticketVersion:4})
+    render(<ActionsTaken ticketId={7} ticketStatus="OPEN" ticketCreatedAt={date} linkedActionId="12" onChanged={changed} />)
+    const dialog=await screen.findByRole('dialog',{name:'Action #12'})
+    expect(dialog).toHaveFocus(); expect(within(dialog).getByText('Inspect VPN')).toBeVisible()
+    expect(api.fetchActionById).toHaveBeenCalledWith(7,'12')
+  })
+  it('keeps inaccessible linked actions generic and permits an explicit retry',async()=>{
+    vi.mocked(api.fetchActionById).mockRejectedValueOnce(new api.ActionApiError(404,'NOT_FOUND','Ticket or action unavailable.')).mockResolvedValueOnce({data:action,ticketVersion:4})
+    render(<ActionsTaken ticketId={7} ticketStatus="OPEN" ticketCreatedAt={date} linkedActionId="12" onChanged={changed} />)
+    expect(await screen.findByRole('alert')).toHaveTextContent('Linked action unavailable')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button',{name:'Retry linked action'}))
+    expect(await screen.findByRole('dialog',{name:'Action #12'})).toBeVisible()
+  })
   it('distinguishes loading and empty states', async () => {
     setup(); expect(screen.getByText('Loading actions...')).toBeInTheDocument()
     await screen.findByText('No Actions Taken yet.')

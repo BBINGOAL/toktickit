@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import ActionsTaken from '../components/ActionsTaken'
 import TicketWorkflow from '../components/TicketWorkflow'
@@ -178,6 +178,7 @@ function NoteSection({ ticketId }: { ticketId: number }) {
 
 export default function TicketDetailPage() {
     const { id } = useParams()
+    const [searchParams] = useSearchParams()
     const { user } = useAuth()
     const [ticket, setTicket] = useState<TicketDetail | null>(null)
     const [loading, setLoading] = useState(true)
@@ -308,7 +309,7 @@ export default function TicketDetailPage() {
                 </div>
             </div>
 
-            <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.status} ticketCreatedAt={ticket.createdAt} workCycle={ticket.workCycle} ticketVersion={ticket.version}
+            <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.status} ticketCreatedAt={ticket.createdAt} workCycle={ticket.workCycle} ticketVersion={ticket.version} linkedActionId={searchParams.get('actionId') || undefined}
                 onChanged={() => { fetchTicketDetail(ticket.id).then(setTicket).catch(() => { /* The saved action is authoritative; existing Ticket content stays visible. */ }) }} />
             <CommentSection ticketId={ticket.id} />
             {isStaff && <NoteSection ticketId={ticket.id} />}

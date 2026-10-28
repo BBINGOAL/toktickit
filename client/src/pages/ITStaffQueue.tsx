@@ -1,181 +1,62 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { fetchStaffTickets } from '../api'
-import type { TicketListItem } from '../api'
+import type { TicketsResponse } from '../api'
+import { useAuth } from '../context/AuthContext'
+import './ITStaffQueue.css'
 
-function formatDate(dateStr: string) {
-    const d = new Date(dateStr)
-    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-}
-
-function PriorityBadge({ value }: { value?: string | null }) {
-    if (!value) return <span style={{ color: '#9CA3AF' }}>—</span>
-    let color = '#374151', bg = '#F3F4F6'
-    if (value === 'HIGH') { color = '#991B1B'; bg = '#FEF2F2' }
-    if (value === 'MEDIUM') { color = '#92400E'; bg = '#FEF3C7' }
-    if (value === 'LOW') { color = '#065F46'; bg = '#D1FAE5' }
-    return (
-        <span style={{ background: bg, color, padding: '2px 8px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600 }}>
-            {value}
-        </span>
-    )
-}
-
+const statuses = ['NEW','OPEN','IN_PROGRESS','WAITING_FOR_REQUESTER','RESOLVED','CLOSED','REOPENED','CANCELLED']
 export default function ITStaffQueue() {
-    const [tickets, setTickets] = useState<TicketListItem[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [search, setSearch] = useState('')
-    const [statusFilter, setStatusFilter] = useState('')
-    const [priorityFilter, setPriorityFilter] = useState('')
-    const [totalItems, setTotalItems] = useState(0)
-
-    useEffect(() => {
-        loadTickets()
-    }, [statusFilter, priorityFilter])
-
-    async function loadTickets() {
-        setLoading(true)
-        setError(null)
-        try {
-            const res = await fetchStaffTickets({
-                search: search || undefined,
-                status: statusFilter || undefined,
-                priority: priorityFilter || undefined,
-                page: 1,
-                pageSize: 50,
-            })
-            setTickets(res.data)
-            setTotalItems(res.meta.totalItems)
-        } catch {
-            setError('Failed to load tickets.')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    function handleSearch(e: React.FormEvent) {
-        e.preventDefault()
-        loadTickets()
-    }
-
-    return (
-        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827', margin: 0 }}>IT Staff Ticket Queue</h1>
-            </div>
-
-            <div style={{ background: 'white', padding: 20, borderRadius: 12, border: '1px solid #E5E7EB', marginBottom: 24, display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-                <form onSubmit={handleSearch} style={{ display: 'flex', flex: '1 1 300px', gap: 8 }}>
-                    <input
-                        type="text"
-                        placeholder="Search ticket number or summary..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: '0.875rem' }}
-                    />
-                    <button type="submit" style={{ background: '#006B3C', color: 'white', border: 'none', padding: '0 16px', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Search</button>
-                </form>
-
-                <div style={{ display: 'flex', gap: 12 }}>
-                    <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: '0.875rem', background: 'white' }}
-                    >
-                        <option value="">All Statuses</option>
-                        <option value="NEW">New</option>
-                        <option value="OPEN">Open</option>
-                        <option value="IN_PROGRESS">In Progress</option>
-                        <option value="WAITING_FOR_REQUESTER">Waiting for Requester</option>
-                        <option value="RESOLVED">Resolved</option>
-                        <option value="CLOSED">Closed</option>
-                        <option value="REOPENED">Reopened</option>
-                        <option value="CANCELLED">Cancelled</option>
-                    </select>
-                    
-                    <select
-                        value={priorityFilter}
-                        onChange={(e) => setPriorityFilter(e.target.value)}
-                        style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #D1D5DB', fontSize: '0.875rem', background: 'white' }}
-                    >
-                        <option value="">All IT Priorities</option>
-                        <option value="LOW">Low</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="HIGH">High</option>
-                    </select>
-                </div>
-            </div>
-
-            {error && (
-                <div style={{ padding: 16, background: '#FEF2F2', color: '#991B1B', borderRadius: 8, marginBottom: 24, border: '1px solid #FECACA' }}>
-                    {error}
-                </div>
-            )}
-
-            <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                <div style={{ padding: '16px 20px', background: '#F9FAFB', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontWeight: 600, color: '#374151' }}>{totalItems} tickets found</span>
-                </div>
-                
-                {loading ? (
-                    <div style={{ padding: 40, textAlign: 'center', color: '#6B7280' }}>Loading tickets...</div>
-                ) : tickets.length === 0 ? (
-                    <div style={{ padding: 60, textAlign: 'center', color: '#6B7280' }}>
-                        <div style={{ fontSize: '3rem', marginBottom: 16 }}>📋</div>
-                        <p style={{ fontSize: '1.1rem', fontWeight: 500, margin: '0 0 8px' }}>No tickets found</p>
-                        <p style={{ margin: 0, fontSize: '0.9rem' }}>Try adjusting your search or filters.</p>
-                    </div>
-                ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                            <thead>
-                                <tr style={{ borderBottom: '2px solid #E5E7EB', color: '#6B7280', fontSize: '0.75rem', textTransform: 'uppercase' }}>
-                                    <th style={{ padding: '12px 20px', fontWeight: 600 }}>Ticket</th>
-                                    <th style={{ padding: '12px 20px', fontWeight: 600 }}>Category & System</th>
-                                    <th style={{ padding: '12px 20px', fontWeight: 600 }}>Status & Priority</th>
-                                    <th style={{ padding: '12px 20px', fontWeight: 600 }}>Owner</th>
-                                    <th style={{ padding: '12px 20px', fontWeight: 600 }}>Created</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {tickets.map(ticket => (
-                                    <tr key={ticket.id} style={{ borderBottom: '1px solid #F3F4F6', transition: 'background 0.15s' }}>
-                                        <td style={{ padding: '16px 20px' }}>
-                                            <Link to={`/tickets/${ticket.id}`} style={{ color: '#006B3C', fontWeight: 600, textDecoration: 'none' }}>
-                                                {ticket.ticketNumber}
-                                            </Link>
-                                            <div style={{ fontSize: '0.875rem', color: '#374151', marginTop: 4 }}>
-                                                {ticket.summary.length > 50 ? ticket.summary.substring(0, 50) + '...' : ticket.summary}
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '16px 20px', fontSize: '0.875rem' }}>
-                                            <div style={{ color: '#111827', fontWeight: 500 }}>{ticket.category.name}</div>
-                                            <div style={{ color: '#6B7280' }}>{ticket.relatedSystem.name}</div>
-                                        </td>
-                                        <td style={{ padding: '16px 20px' }}>
-                                            <div style={{ marginBottom: 6 }}>
-                                                <span style={{ background: '#E5E7EB', color: '#374151', padding: '2px 8px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 600 }}>
-                                                    {ticket.status}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <PriorityBadge value={ticket.itPriority} />
-                                            </div>
-                                        </td>
-                                        <td style={{ padding: '16px 20px', fontSize: '0.875rem', color: '#374151' }}>
-                                            {ticket.owner ? ticket.owner.name : <span style={{ color: '#9CA3AF' }}>Unassigned</span>}
-                                        </td>
-                                        <td style={{ padding: '16px 20px', fontSize: '0.875rem', color: '#6B7280' }}>
-                                            {formatDate(ticket.createdAt)}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
-        </div>
-    )
+  const { user } = useAuth(), userId = user?.id
+  const [params, setParams] = useSearchParams(), queryKey = params.toString()
+  const [input, setInput] = useState(params.get('search') || '')
+  const [snapshot, setSnapshot] = useState<{ key: string; data: TicketsResponse } | null>(null)
+  const [loading, setLoading] = useState(true), [error, setError] = useState(''), [revision, setRevision] = useState(0)
+  useEffect(() => { setInput(new URLSearchParams(queryKey).get('search') || '') }, [queryKey])
+  useEffect(() => {
+    let live = true; setLoading(true); setError('')
+    fetchStaffTickets(Object.fromEntries(new URLSearchParams(queryKey))).then(data => {
+      if (live) setSnapshot({ key: `${userId}:${queryKey}`, data })
+    }).catch(() => { if (live) setError('Failed to load tickets. Check the filters or retry.') }).finally(() => { if (live) setLoading(false) })
+    return () => { live = false }
+  }, [userId, queryKey, revision])
+  const result = snapshot?.key === `${userId}:${queryKey}` ? snapshot.data : null
+  const page = result?.meta.page || Number(params.get('page') || 1), totalPages = result?.meta.totalPages || 0
+  function update(changes: Record<string, string>, reset = true) {
+    const next = new URLSearchParams(params)
+    for (const [key,value] of Object.entries(changes)) { if (value) next.set(key,value); else next.delete(key) }
+    if (reset) next.set('page','1')
+    setParams(next)
+  }
+  return <div className="staff-queue">
+    <h1>IT Staff Ticket Queue</h1>
+    <form className="queue-filters" onSubmit={e => { e.preventDefault(); update({ search: input }) }}>
+      <label>Search<input placeholder="Search ticket number or summary..." value={input} maxLength={100} onChange={e => setInput(e.target.value)} /></label>
+      <button type="submit">Search</button>
+      <label>Status<select value={params.get('status') || ''} onChange={e => update({ status: e.target.value })}><option value="">All Statuses</option>{statuses.map(s => <option key={s} value={s}>{s.replaceAll('_',' ')}</option>)}</select></label>
+      <label>IT Priority<select value={params.get('priority') || ''} onChange={e => update({ priority: e.target.value })}><option value="">All IT Priorities</option>{['LOW','MEDIUM','HIGH','UNSET'].map(p => <option key={p}>{p}</option>)}</select></label>
+      <label>Owner<select value={params.get('owner') || ''} onChange={e => update({ owner: e.target.value, ownerId: '' })}><option value="">All Owners</option><option value="me">Assigned to me</option><option value="unassigned">Unassigned</option></select></label>
+      <label>Scope<select value={params.get('scope') || ''} onChange={e => update({ scope: e.target.value })}><option value="">All Tickets</option><option value="active">Active Tickets</option></select></label>
+      <label>Sort by<select value={params.get('sort') || 'createdAt'} onChange={e => update({ sort: e.target.value })}>{[['createdAt','Created'],['updatedAt','Last Updated'],['ticketNumber','Ticket Number'],['status','Status'],['itPriority','IT Priority'],['summary','Summary']].map(([key,label]) => <option key={key} value={key}>{label}</option>)}</select></label>
+      <label>Sort order<select value={params.get('order') || 'desc'} onChange={e => update({ order: e.target.value })}><option value="desc">Descending</option><option value="asc">Ascending</option></select></label>
+      {queryKey && <button type="button" onClick={() => { setInput(''); setParams({}) }}>Clear Filters</button>}
+    </form>
+    {queryKey && <p className="queue-query">Current filters: {Array.from(params).filter(([key]) => !['page','pageSize','sort','order'].includes(key)).map(([key,value]) => `${key}: ${value}`).join(' · ') || 'All Tickets'}</p>}
+    {loading && <p role="status">Loading tickets...</p>}
+    {error && <div role="alert"><p>{error}</p><button onClick={() => setRevision(n => n + 1)}>Retry tickets</button></div>}
+    {result && !loading && !error && <section aria-label="Queue results">
+      <p>{result.meta.totalItems} tickets found</p>
+      {!result.data.length ? <p>No tickets found. {result.meta.totalItems > 0 ? 'Choose an earlier page.' : 'Try adjusting your search or filters.'}</p> : <div className="queue-table" role="region" aria-label="Ticket Queue table" tabIndex={0}>
+        <table><thead><tr>{['Ticket','Category & System','Status & Priority','Owner','Created','Last Updated'].map(h => <th key={h}>{h}</th>)}</tr></thead><tbody>{result.data.map(t => <tr key={t.id}>
+          <td><Link to={`/tickets/${t.id}`}>{t.ticketNumber}</Link><div>{t.summary}</div></td>
+          <td>{t.category.name}<div>{t.relatedSystem.name}</div></td>
+          <td>{t.status}<div>IT Priority: {t.itPriority || 'UNSET'}</div></td>
+          <td>{t.owner?.name || 'Unassigned'}</td>
+          <td>{new Date(t.createdAt).toLocaleString('en-GB',{timeZone:'Asia/Bangkok'})}</td>
+          <td>{new Date(t.updatedAt).toLocaleString('en-GB',{timeZone:'Asia/Bangkok'})}</td>
+        </tr>)}</tbody></table>
+      </div>}
+      <nav className="queue-pages" aria-label="Queue pages"><span>Page {page} of {totalPages || 1}</span><button disabled={page <= 1} onClick={() => update({page:'1'},false)}>First page</button><button disabled={page <= 1} onClick={() => update({page:String(Math.max(1,page - 1))},false)}>Previous page</button><button disabled={page >= totalPages} onClick={() => update({page:String(page + 1)},false)}>Next page</button><label>Tickets per page<select value={params.get('pageSize') || '10'} onChange={e => update({pageSize:e.target.value})}>{[10,25,50].map(n => <option key={n}>{n}</option>)}</select></label></nav>
+    </section>}
+  </div>
 }

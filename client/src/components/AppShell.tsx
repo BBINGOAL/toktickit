@@ -62,7 +62,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             </>
                         )}
                         {(user.role === 'IT_STAFF' || user.role === 'ADMIN') && (
-                            <NavLink
+                            <><NavLink to="/staff/dashboard" style={({ isActive }) => ({ color: isActive ? 'var(--color-pale-green)' : '#fff', textDecoration: isActive ? 'underline' : 'none', fontWeight: 500, fontSize: 14 })}>Dashboard</NavLink><NavLink
                                 to="/staff/tickets"
                                 style={({ isActive }) => ({
                                     color: isActive ? 'var(--color-pale-green)' : '#fff',
@@ -72,7 +72,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                                 })}
                             >
                                 Ticket Queue
-                            </NavLink>
+                            </NavLink></>
                         )}
                         {user.role === 'ADMIN' && (
                             <NavLink

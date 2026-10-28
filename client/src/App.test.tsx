@@ -8,6 +8,13 @@ beforeEach(() => {
   window.history.replaceState({}, '', '/')
 })
 describe('Application authentication regression', () => {
+  it.each([['REQUESTER','/staff/dashboard'],['IT_STAFF','/admin/users']])('shows forbidden state instead of login redirect for %s on %s', async(role,url)=>{
+    vi.mocked(getCurrentUser).mockResolvedValue({id:1,name:'Signed in user',role})
+    window.history.replaceState({},'',url)
+    render(<App />)
+    expect(await screen.findByRole('heading',{name:'Access denied'})).toBeVisible()
+    expect(window.location.pathname).toBe(url)
+  })
   it('renders sign-in instead of the retired system-check screen', async () => {
     render(<App />)
     expect(await screen.findByRole('button', { name: 'Sign In' })).toBeVisible()
