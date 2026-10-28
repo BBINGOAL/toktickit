@@ -38,7 +38,7 @@ async function readable(req: Request, db: Pick<typeof prisma, 'ticket'> = prisma
 }
 const unsupported = handle(async (req, res) => {
   staff(req)
-  res.set('Allow', req.params.actionId ? 'PATCH' : 'GET, POST').status(405).json({ error: 'Method not allowed', code: 'METHOD_NOT_ALLOWED' })
+  res.set('Allow', req.params.actionId ? 'GET, PATCH' : 'GET, POST').status(405).json({ error: 'Method not allowed', code: 'METHOD_NOT_ALLOWED' })
 })
 router.route('/tickets/:ticketId/actions').all(requireAppAccess)
   .get(handle(async (req, res) => {
@@ -74,6 +74,17 @@ router.route('/tickets/:ticketId/actions/:actionId/history').all(requireAppAcces
   })).all(handle(async (_req, res) => { res.set('Allow', 'GET').status(405).json({ error: 'Method not allowed', code: 'METHOD_NOT_ALLOWED' }) }))
 
 router.route('/tickets/:ticketId/actions/:actionId').all(requireAppAccess)
+  .get(handle(async (req, res) => {
+    if (Object.keys(req.query).length) invalid('query', 'Unknown query parameter')
+    const actionId = id(req.params.actionId, 'actionId')
+    const result = await prisma.$transaction(async tx => {
+      const ticket = await readable(req, tx)
+      const data = await tx.actionTaken.findFirst({ where: { id: actionId, ticketId: ticket.id }, select: publicAction })
+      if (!data) throw new ActionError(404, 'NOT_FOUND', 'Resource not found')
+      return { data, ticketVersion: ticket.version }
+    }, { isolationLevel: 'RepeatableRead' })
+    res.json(result)
+  }))
   .patch(handle(async (req, res) => {
     staff(req)
     const result = await mutateAction(id(req.params.ticketId, 'ticketId'), id(req.params.actionId, 'actionId'), actor(req).userId, req.body, idempotencyKey(req.headers['idempotency-key'], false))

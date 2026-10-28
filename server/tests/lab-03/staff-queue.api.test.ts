@@ -25,11 +25,11 @@ describe('Lab 3 staff queue API', () => {
     })
 
     it('returns paginated queue data with metadata', async () => {
-        const res = await request(app).get('/api/staff/tickets?page=1&pageSize=1&sort=createdAt&order=desc').set('Cookie', [cookie])
+        const res = await request(app).get('/api/staff/tickets?page=1&pageSize=10&sort=createdAt&order=desc').set('Cookie', [cookie])
         expect(res.status).toBe(200)
         expect(Array.isArray(res.body.data)).toBe(true)
-        expect(res.body.data.length).toBeLessThanOrEqual(1)
-        expect(res.body.meta).toMatchObject({ page: 1, pageSize: 1 })
+        expect(res.body.data.length).toBeLessThanOrEqual(10)
+        expect(res.body.meta).toMatchObject({ page: 1, pageSize: 10 })
     })
 
     it('filters by status, priority, category, and text search', async () => {

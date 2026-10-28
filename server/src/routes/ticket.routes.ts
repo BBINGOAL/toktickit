@@ -8,7 +8,6 @@ import path from 'path';
 const router = Router();
 const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
 const VALID_PRIORITIES = new Set(['LOW', 'MEDIUM', 'HIGH']);
-const VALID_STATUSES = new Set(['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'RESOLVED', 'CLOSED', 'REOPENED', 'CANCELLED']);
 
 async function getAccessibleTicket(req: Request, res: Response) {
     const id = Number.parseInt(String(req.params.id), 10)
@@ -80,59 +79,8 @@ router.post('/tickets', requireAppAccess, async (req: Request, res: Response) =>
 
 // ─── List Tickets (Requester) ─────────────────────────────
 // Requester list lives in dashboard.routes.ts (shared drill-down filters).
-router.get('/staff/tickets', requireAppAccess, async (req: Request, res: Response) => {
-    const userRole = (req as any).user.role;
-    if (userRole !== 'IT_STAFF' && userRole !== 'ADMIN') {
-        res.status(403).json({ error: 'Access denied' }); return;
-    }
-    const search = (req.query.search as string) || ''
-    const status = req.query.status as string | undefined
-    const priority = req.query.priority as string | undefined
-    const categoryId = req.query.categoryId ? Number.parseInt(req.query.categoryId as string, 10) : undefined
-    const sort = (req.query.sort as string) || 'createdAt'
-    const order = (req.query.order as string) || 'desc'
-    const ownerId = req.query.ownerId ? parseInt(req.query.ownerId as string) : undefined
-    const page = parseInt((req.query.page as string) || '1')
-    const pageSize = parseInt((req.query.pageSize as string) || '10')
+// Queue lives in dashboard.routes.ts with shared validated predicates.
 
-    try {
-        if (status && !VALID_STATUSES.has(status)) return res.status(400).json({ error: 'Invalid status' })
-        if (priority && !VALID_PRIORITIES.has(priority)) return res.status(400).json({ error: 'Invalid priority' })
-        if (categoryId !== undefined && !Number.isInteger(categoryId)) return res.status(400).json({ error: 'Invalid categoryId' })
-        if (!['createdAt', 'updatedAt', 'summary', 'status', 'itPriority'].includes(sort) || !['asc', 'desc'].includes(order)) return res.status(400).json({ error: 'Invalid sorting' })
-        const where: any = {}
-        if (status) where.status = status
-        if (priority) where.itPriority = priority
-        if (ownerId) where.ownerId = ownerId
-        if (categoryId) where.categoryId = categoryId
-        if (search) {
-            where.OR = [
-                { ticketNumber: { contains: search, mode: 'insensitive' } },
-                { summary: { contains: search, mode: 'insensitive' } },
-            ]
-        }
-        const [totalItems, data] = await Promise.all([
-            prisma.ticket.count({ where }),
-            prisma.ticket.findMany({
-                where,
-                include: {
-                    category: true,
-                    relatedSystem: true,
-                    requester: { select: { id: true, name: true } },
-                    owner: { select: { id: true, name: true } }
-                },
-                orderBy: { [sort]: order },
-                skip: (page - 1) * pageSize, take: pageSize,
-            }),
-        ])
-        res.status(200).json({ data, meta: { totalItems, page, pageSize, totalPages: Math.ceil(totalItems / pageSize) } })
-    } catch {
-        res.status(500).json({ error: 'Failed to fetch staff tickets' })
-    }
-});
-
-
-// ─── Collaboration: Public Comments ───────────────────────
 router.get('/tickets/:id/comments', requireAppAccess, async (req: Request, res: Response) => {
     try {
         if (!await getAccessibleTicket(req, res)) return

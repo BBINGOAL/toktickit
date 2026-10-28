@@ -1,6 +1,7 @@
 import type { Prisma, TicketStatus } from '../generated/prisma/client'
 
 export const activeStatuses: TicketStatus[] = ['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'REOPENED']
+export const allTicketStatuses: TicketStatus[] = [...activeStatuses, 'RESOLVED', 'CLOSED', 'CANCELLED']
 
 export function dashboardWindow(asOf = new Date()) {
   // Bangkok has a fixed UTC+7 offset. UTC arithmetic avoids the host timezone/DST.
@@ -72,4 +73,27 @@ export function requesterTicketQuery(query: Record<string, unknown>, requesterId
   if (and.length) where.AND = and
   const orderBy: Prisma.TicketOrderByWithRelationInput[] = [{ [sort]: order }, { id: order as 'asc'|'desc' }]
   return { where, orderBy, skip: (page - 1) * pageSize, take: pageSize, page, pageSize }
+}
+
+export function staffTicketQuery(query: Record<string, unknown>, staffId: number) {
+  const { owner, ownerId, priority, ...rest } = query
+  if ('requesterId' in rest || 'requestedPriority' in rest || 'itPriority' in rest) return bad()
+  if (owner !== undefined && (!['me','unassigned'].includes(scalar(owner)) || ownerId !== undefined)) return bad()
+  if (priority !== undefined && !['LOW','MEDIUM','HIGH','UNSET'].includes(scalar(priority))) return bad()
+  const parsed = requesterTicketQuery({ ...rest, ...(priority !== undefined && priority !== 'UNSET' ? { itPriority: priority } : {}) }, staffId)
+  delete parsed.where.requesterId
+  if (priority === 'UNSET') parsed.where.itPriority = null
+  if (owner !== undefined) parsed.where.ownerId = owner === 'me' ? staffId : null
+  if (ownerId !== undefined) {
+    const value = scalar(ownerId)
+    if (!/^[1-9]\d*$/.test(value) || Number(value) > 2147483647) return bad()
+    parsed.where.ownerId = Number(value)
+  }
+  return parsed
+}
+
+export function myActionsQuery(query: Record<string, unknown>, staffId: number) {
+  if (Object.keys(query).some(key => !['page','pageSize'].includes(key))) return bad()
+  const { page, pageSize, skip, take } = requesterTicketQuery(query, staffId)
+  return { page, pageSize, skip, take, where: { assigneeId: staffId, status: { in: ['PLANNED','IN_PROGRESS'] as ('PLANNED'|'IN_PROGRESS')[] }, ticket: { status: { in: activeStatuses } } } }
 }
