@@ -19,11 +19,22 @@
 | [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/53#pullrequestreview-5568221570), 2026-10-19; four nonblocking suggestions below | APPROVED for f6bae9e; merged as 3465088 on 2026-10-20 |
 | [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/54#pullrequestreview-5581899545), nonblocking suggestions below; author replied | APPROVED for latest head 2cb79da; merged as 10dd684 on 2026-10-20 |
 | [#47 Ticket Workflow and Resolution](https://github.com/BBINGOAL/toktickit/issues/47) | [PR #55](https://github.com/BBINGOAL/toktickit/pull/55) into lab4-staging | PpAnpt requested on 2026-10-20 | [Review](https://github.com/BBINGOAL/toktickit/pull/55#pullrequestreview-5638567438) and [author response](https://github.com/BBINGOAL/toktickit/pull/55#issuecomment-6459305158); follow-up below | APPROVED for latest head d1f9e72 on 2026-10-24; merged be6e14f on 2026-10-28 |
-| [#48 Requester Dashboard](https://github.com/BBINGOAL/toktickit/issues/48) | [PR #56](https://github.com/BBINGOAL/toktickit/pull/56) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-28; verified in metadata | Backend 244/244, client 72/72, combined Chromium 20/20; actual review awaited | Pending |
+| [#48 Requester Dashboard](https://github.com/BBINGOAL/toktickit/issues/48) | [PR #56](https://github.com/BBINGOAL/toktickit/pull/56) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-28 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/56#pullrequestreview-5682178217) and [author response](https://github.com/BBINGOAL/toktickit/pull/56#issuecomment-6468406174) | APPROVED latest head 947e090; merged cdc2a65 on 2026-10-28 |
 
 Record exact PR/review/comment URLs, reviewer identity, feedback and author response only after they occur. A review request is not approval. Wait for peer review and staging integration before starting each next issue.
 
-Issues #44-#47 are Done after reviewed integration. Issue #48 started only after the student's merge/continue instruction and verification of PR #55 merge be6e14f; feature5/lab4-requester-dashboard starts there. Its approval remains pending, with results in requester-dashboard-verification.md.
+Issues #44-#48 are Done after reviewed integration. Issue #49 started only after the student's merge/continue instruction and verification of PR #56 merge cdc2a65; feature6/lab4-staff-dashboard starts there. Its approval remains pending; results are in staff-dashboard-verification.md.
+
+### PR #56 feedback and follow-up in #49
+
+PpAnpt approved latest head 947e090 on 2026-10-28 at 18:55 Asia/Bangkok, reporting backend 244/244 on a fresh isolated DB, client 72/72 and typecheck. Reviewer explicitly did not rerun E2E. All four suggestions were nonblocking. Author replied with thanks/dispositions at 18:59; GitHub records staging merge cdc2a65 at 19:03. These are actual review records, not inferred AI-tool use.
+
+| Suggestion | Actual follow-up |
+|---|---|
+| Split shared req.path-switching Requester handler | Separate explicit Dashboard/list handlers with shared role/error helpers, extended for Staff; earlier Requester regression passes. |
+| Document encoded + in timezone offsets | api-spec.md adds %2B example and equivalent Z; transport test verifies the decoded value and credentialed request. |
+| Document global RoleRoute behavior change | tests.md/UI/spec and PR compatibility notes distinguish authenticated Access denied from signed-out redirect; two App regression cases pass. |
+| Confirm removed-download 410 UI compatibility | Prior author reply inspected code only; #49 now adds a transport regression asserting 410 rejects before blob handling. No false claim that this test existed during the earlier response. |
 
 ### PR #55 feedback and follow-up in #48
 

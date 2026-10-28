@@ -1,12 +1,12 @@
 # Lab 4 UI Specification
 
-Status: reviewed intended UI contract. Actions/workflow (#45-#47) integrated. #48 implements Requester Dashboard and URL-driven My Tickets; current evidence is in requester-dashboard-verification.md. Staff Dashboard and whole-product visual/contrast/200% zoom checks remain future issues. These are not final-main product results.
+Status: reviewed intended UI contract. Actions/workflow/Requester Dashboard (#45-#48) integrated. #49 implements Staff/Admin Dashboard, My Actions and URL-owned Queue; current evidence is in staff-dashboard-verification.md. Whole-product contrast/200% zoom/performance checks remain #50. These are not final-main results.
 
 ## Application shell and routes
 
 Preserve Zen Green tokens, existing role labels/navigation and active-page indication. After sign-in or required password change, Requester lands on `/dashboard`; Staff/Admin on `/staff/dashboard`. Existing My Tickets, Create Ticket, Ticket Queue, Ticket Detail and Admin Users remain reachable. Signed-out users return to login; direct forbidden routes show a clear forbidden state, not a misleading working dashboard.
 
-Incremental #48 boundary: Requester login/required password change now lands on /dashboard; Staff/Admin keep /staff/tickets until their Dashboard ships in #49. Wrong-role protected routes display Access denied with permitted shell navigation. Requester cards use the server totals/URLs; loading never invents zero counts, recoverable refresh failures label the previous snapshot, and 401/403 clears it. Late responses from an earlier user/query are ignored.
+Current #49 boundary: Requester login/required password change lands on /dashboard; Staff/Admin now land on /staff/dashboard, including after first-password change. Wrong-role protected routes display Access denied with permitted shell navigation. Dashboard cards use server totals/URLs; loading never invents zero counts, recoverable refresh failures label previous data, and 401/403 clears it. Late responses from an earlier user/query are ignored.
 
 Dashboard navigation is a real link with visible active state. Grid: one metric column on narrow mobile, two on tablet, up to four on desktop; labels/counts wrap without clipping. Major verification widths: 390x844, 768x1024, 1280x900, plus 320px minimum-width smoke. Page must not scroll horizontally. Wide tables may scroll inside a labeled container with visible access to hidden actions.
 
@@ -21,6 +21,8 @@ Backend performs calculations; frontend never counts a partially loaded list. Re
 Cards: Unassigned Active, My Active Tickets, My Pending Actions. Status and active IT-priority groups have text labels/counts and filtered Queue links. Lists: My Actions, Recent Tickets and Urgent Tickets (each max 5). My Actions links focus/scroll to the action on Ticket Detail; view-all uses a paged My Actions mode on Staff Dashboard backed by `/api/staff/actions`. Preserve selected page in URL, use page size 10/25/50 and display matching total. Admin reuses this screen and retains Users navigation.
 
 Use unset-priority label rather than a blank badge. Urgent indicates HIGH IT priority on an active Ticket, not requested priority. Current-user actions are assigned to the signed-in user, not all actions they originally created.
+
+Issue #49: three primary Staff cards, status/priority groups with all keys including zeros, bounded work/recent/urgent previews, and /staff/dashboard?view=my-actions&page=1&pageSize=10. Preserve My Actions page/size on refresh/Back; reset page on size change. Its direct action link opens the named details/history dialog with initial focus and Escape close, independent of action-list page one; safe missing/inaccessible feedback has explicit retry. A read-only dialog does not add edit rights. Queue now offers search/status/IT priority including UNSET/owner/scope/sort/order and 10/25/50 pagination. Filters reset page atomically and preserve other Dashboard predicates; clear removes them. Its labeled focusable table scrolls internally rather than widening the page. Empty/out-of-range, loading, retry and role denial are distinct.
 
 ## Actions Taken on Ticket Detail
 
@@ -68,7 +70,7 @@ Screenshots are real runtime captures stored locally under `artifacts/lab-04/scr
 | Check | Planned evidence | Status |
 |---|---|---|
 | Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Pending |
-| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester API/UI/E2E pass; Staff Dashboard remains #49 |
+| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester and Staff/Admin API/UI/E2E pass on feature branch; final main pending |
 | Actions modes, editable/read-only and validation placement | List/create/edit/terminal/follow-up/conflict | Actions branch checks pass; runtime lifecycle/failure E2E pass; images inspected |
 | Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Actions labels/focus cycle/Escape/restore pass; whole-product contrast/zoom remain #50 |
-| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Actions and Requester Dashboard pass at 320/390/768/1280; Requester 320/1280 captures inspected; Staff Dashboard/zoom remain pending |
+| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Actions, Requester and Staff/Admin Dashboard/Queue pass at 320/390/768/1280; Staff 768/1280 and Admin 320 captures inspected; whole-product/200% zoom remains #50 |

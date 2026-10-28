@@ -1,6 +1,6 @@
 # Lab 4 REST API Contract
 
-Status: reviewed contract; Actions/workflow integrated, Requester Dashboard implemented in issue #48; Staff Dashboard remains issue #49. Base path `/api`; JSON request/response, cookie authentication. Existing auth, Tickets, attachments, comments, notes, reference and admin APIs remain, subject to explicit workflow changes below.
+Status: reviewed contract; Actions/workflow and Requester Dashboard integrated. Issue #49 implements Staff/Admin Dashboard, paged My Actions and matching Queue filters. Base path `/api`; JSON request/response, cookie authentication. Existing auth, Tickets, attachments, comments, notes, reference and admin APIs remain, subject to explicit workflow changes below.
 
 ## Shared rules
 
@@ -91,9 +91,17 @@ Issue #48 implementation: no dashboard query parameters accepted (400 on supplie
 
 Staff/Admin only. Same snapshot/timezone metadata; metrics `{unassignedActive,myActiveTickets,byStatus:{all eight keys},activeByPriority:{LOW,MEDIUM,HIGH,UNSET},myPendingActions}`. Bounded recentTickets/urgentTickets/myActions arrays and drillDown map. My action preview includes action/ticket IDs, Ticket number, description, state, updatedAt and `/tickets/:id?actionId=:actionId`. Optional Admin user-account counts are excluded.
 
+Issue #49: one repeatable-read snapshot, eight aggregate/bounded preview queries (auth/transaction statements excluded from that count). No query parameters allowed. byStatus counts all accessible Tickets; activeByPriority and unassigned/my-active apply ACTIVE. My Actions uses current assignee, not creator/performer, unfinished state and active parent. Every preview is capped at five and ordered updatedAt DESC,id DESC. Groups include explicit zeros and UNSET maps to null IT priority. All metrics are backend-owned. DrillDown includes unassignedActive, myActiveTickets, myPendingActions, byStatus and activeByPriority maps, plus recentTickets/urgentTickets. Queue URLs include matching filters and sort=updatedAt&order=desc&page=1; My Actions links to `/staff/dashboard?view=my-actions&page=1&pageSize=10`. A new list request may reflect changes committed after the card snapshot.
+
 ### GET /staff/actions
 
 Staff/Admin, implicit assignee=current user and parent ACTIVE, action PLANNED/IN_PROGRESS. Paginate 10/25/50, updatedAt DESC,id DESC; used by My Actions view-all. Client cannot substitute another userId. Return data/meta and action links.
+
+Only page/pageSize are accepted, with strict positive-decimal/offset bounds as Requester pagination. Other user/assignee/filter inputs are rejected 400; role checks occur before query validation. Item fields: id, ticketId, ticketNumber, description, status, updatedAt, detailUrl. Empty totalPages=0; out-of-range positive pages return empty data with actual totals. Unauthorized role 403, no session/inactive 401, required password change 403, safe query failure 500; unsupported methods on dashboard/My Actions routes return 405 after authentication.
+
+### GET /tickets/:ticketId/actions/:actionId
+
+Added in #49 for a bounded direct action link, independently of the current Ticket action-list page. Authorized Ticket readers, including its Requester, receive `{data: publicAction, ticketVersion}` from one repeatable-read snapshot. Reject malformed IDs or supplied query parameters 400; missing, wrong-Ticket and non-owned resources share 404 NOT_FOUND. No private notes or credentials. This adds read-only GET alongside the existing versioned Staff/Admin PATCH; no new mutation permission. The UI opens the named action details/history dialog with focus, without fetching the whole collection or rewriting list order.
 
 ## Drill-down and queue compatibility
 
@@ -102,6 +110,10 @@ Extend Requester GET `/tickets` with status,scope=active,updatedSince/updatedUnt
 Requester implementation rejects unknown/repeated/object query values, invalid enums, nondecimal/unsafe pagination, search over 100 characters, invalid calendar dates, missing ISO timezone or reversed bounds. Page and category IDs are positive decimal integers; pageSize 10/25/50; offsets must fit a signed 32-bit integer. Optional itPriority remains LOW/MEDIUM/HIGH. Resolved date filters also require current status RESOLVED/CLOSED; status/scope/date predicates intersect rather than overwrite each other. Count and paginated rows use one repeatable-read snapshot. Default sort createdAt DESC; all sorts append id in the same direction. No matches gives totalPages=0; an out-of-range positive page gives an empty data array with actual totals.
 
 Extend Staff GET `/staff/tickets` with scope=active,owner=me|unassigned,priority=UNSET plus existing enum priorities; preserve explicit ownerId/search/status/categoryId/sort/order. Reject conflicting owner/ownerId inputs. Both lists accept allowed sort/order and page >=1, pageSize 10/25/50; append id in the same direction as sort for stable ties. Empty totalPages=0, UI does not request negative/out-of-range pages. Search <=100 chars and date bounds valid ISO, since <=until; bounds inclusive.
+
+Issue #49 replaces the earlier permissive Queue parser: pageSize=1 is no longer valid (use 10/25/50); nondecimal/unsafe page, ID, unknown/duplicate parameters, invalid enum/sort/date input and owner plus ownerId are 400. owner=me resolves to the session user; ownerId must be a positive signed-32-bit ID, never a requester identity override. Staff Queue keeps public categoryId/ownerId plus names but does not return full Ticket descriptions or private note fields. Count/rows share a repeatable-read snapshot. Existing category/search/status/priority filters remain and intersect scope/date/owner filters.
+
+PR #56 date-encoding clarification: in query strings, a positive ISO timezone offset must encode `+` as `%2B`. For example `updatedSince=2026-10-22T00%3A00%3A00%2B07%3A00`; the same instant is `2026-10-21T17%3A00%3A00Z`. A literal unencoded plus becomes a space and is rejected 400. Use URLSearchParams or an HTTP client's query encoder for updatedSince/Until and resolvedSince/Until. Current Dashboard links use UTC Z and the client transport encodes supplied offsets; an automated transport test covers this.
 
 Dashboard links use existing browser paths, fixed query names and backend ownership. Filtered counts and paginated totalItems must match the card at the same query snapshot; later changes may alter totals and are shown after refresh. No entire Ticket collection is returned by dashboard endpoints.
 
