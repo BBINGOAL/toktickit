@@ -230,10 +230,11 @@ router.get('/attachments/:id/download', requireAppAccess, async (req: Request, r
             where: { id: parseInt(String(req.params.id), 10) },
             include: { ticket: { select: { requesterId: true } } },
         });
-        if (!attachment || attachment.isRemoved) { res.status(404).json({ error: 'Not found' }); return; }
-        if (attachment.ticket.requesterId !== userId && userRole !== 'IT_STAFF' && userRole !== 'ADMIN') {
-            res.status(403).json({ error: 'Access denied.' }); return;
+        // Hide existence from other Requesters before exposing removal state.
+        if (!attachment || (attachment.ticket.requesterId !== userId && userRole !== 'IT_STAFF' && userRole !== 'ADMIN')) {
+            res.status(404).json({ error: 'Resource not found', code: 'NOT_FOUND' }); return;
         }
+        if (attachment.isRemoved) { res.status(410).json({ error: 'This attachment has been removed and is no longer available.' }); return; }
         const filePath = path.join(UPLOADS_DIR, attachment.storedFilename);
         if (!fs.existsSync(filePath)) { res.status(500).json({ error: 'File missing.' }); return; }
         res.setHeader('Content-Type', attachment.mimeType);
