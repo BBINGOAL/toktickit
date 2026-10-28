@@ -46,7 +46,7 @@ describe('MyTicketsPage', () => {
         // จำลองให้มีการค้นหา/กรอง (เช่น search="NotFound") และ API คืนค่าว่าง
         vi.mocked(api.fetchTickets).mockResolvedValue({ data: [], meta: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 } })
         
-        const { container } = renderPage()
+        renderPage()
         
         // รอให้โหลดเสร็จ
         await waitFor(() => expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument())

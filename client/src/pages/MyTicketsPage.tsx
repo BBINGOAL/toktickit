@@ -62,7 +62,10 @@ export default function MyTicketsPage() {
     const pageSize = Number(params.get('pageSize') || 10)
     function updateQuery(changes: Record<string, string>, reset = true) {
         const next = new URLSearchParams(params)
-        for (const [key, value] of Object.entries(changes)) value ? next.set(key, value) : next.delete(key)
+        for (const [key, value] of Object.entries(changes)) {
+            if (value) next.set(key, value)
+            else next.delete(key)
+        }
         if (reset) next.set('page', '1')
         setParams(next)
     }
@@ -105,7 +108,8 @@ export default function MyTicketsPage() {
         }
     }, [user, queryKey])
 
-    useEffect(() => { load(); return () => { generation.current++ } }, [load])
+    const cancelLoad = useCallback(() => { generation.current++ }, [])
+    useEffect(() => { load(); return cancelLoad }, [load, cancelLoad])
 
     function handleSearch(e: React.FormEvent) {
         e.preventDefault()

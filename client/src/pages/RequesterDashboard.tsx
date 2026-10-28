@@ -24,16 +24,17 @@ function TicketList({ title, tickets, viewAll, empty }: { title: string; tickets
 
 export default function RequesterDashboard() {
   const { user } = useAuth()
+  const userId = user?.id, role = user?.role
   const [snapshot, setSnapshot] = useState<{ userId: number; data: RequesterDashboardData } | null>(null)
   const [error, setError] = useState<{ status: number; message: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [refresh, setRefresh] = useState(0)
   useEffect(() => {
-    if (!user || user.role !== 'REQUESTER') return
+    if (userId === undefined || role !== 'REQUESTER') return
     let live = true
     setLoading(true); setError(null)
     fetchRequesterDashboard().then(data => {
-      if (live) setSnapshot({ userId: user.id, data })
+      if (live) setSnapshot({ userId, data })
     }).catch(e => {
       if (!live) return
       const status = e instanceof DashboardError ? e.status : 0
@@ -41,7 +42,7 @@ export default function RequesterDashboard() {
       if (status === 401 || status === 403) setSnapshot(null)
     }).finally(() => { if (live) setLoading(false) })
     return () => { live = false }
-  }, [user?.id, user?.role, refresh])
+  }, [userId, role, refresh])
   if (!user || user.role !== 'REQUESTER') return <div role="alert"><h1>Dashboard unavailable</h1><p>Requester access required.</p><Link to="/">Return to sign in</Link></div>
   const data = snapshot?.userId === user.id ? snapshot.data : null
   return <div className="requester-dashboard">
