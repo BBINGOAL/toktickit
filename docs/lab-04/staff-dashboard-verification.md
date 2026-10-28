@@ -1,6 +1,6 @@
 # Issue #49 Staff/Admin Dashboard verification
 
-Date: 2026-10-28, Asia/Bangkok. Branch: `feature6/lab4-staff-dashboard`, based on reviewed PR #56 staging merge `cdc2a655ba9464cfc7a488a99f1ef48aa80ba294`. Issue: [#49](https://github.com/BBINGOAL/toktickit/issues/49). PR/reviewer request recorded after creation. No approval/final-main result is claimed.
+Date: 2026-10-28, Asia/Bangkok. Branch: `feature6/lab4-staff-dashboard`, based on reviewed PR #56 staging merge `cdc2a655ba9464cfc7a488a99f1ef48aa80ba294`. Issue: [#49](https://github.com/BBINGOAL/toktickit/issues/49). [PR #57](https://github.com/BBINGOAL/toktickit/pull/57) targets lab4-staging, has a verified Development link to #49 and verified PpAnpt review request. Status: In review. No approval/final-main result is claimed.
 
 ## Delivered behavior
 
