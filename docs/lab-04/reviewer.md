@@ -17,11 +17,25 @@
 |---|---|---|---|---|
 | [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised PR merged as 7922e0e on 2026-10-14 (no separate later review recorded) |
 | [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/53#pullrequestreview-5568221570), 2026-10-19; four nonblocking suggestions below | APPROVED for f6bae9e; merged as 3465088 on 2026-10-20 |
-| [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20; verified in GitHub metadata | Backend 124/124, UI 53/53, Actions E2E 9/9 on isolated native PostgreSQL 18.1; no review received at submission | Pending |
+| [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/54#pullrequestreview-5581899545), nonblocking suggestions below; author replied | APPROVED for latest head 2cb79da; merged as 10dd684 on 2026-10-20 |
+| [#47 Ticket Workflow and Resolution](https://github.com/BBINGOAL/toktickit/issues/47) | [PR #55](https://github.com/BBINGOAL/toktickit/pull/55) into lab4-staging | PpAnpt requested on 2026-10-20; verified in GitHub metadata | Backend 209/209, UI 61/61 and combined Actions/workflow E2E 13/13 on isolated native PostgreSQL 18.1; actual review awaited | Pending |
 
 Record exact PR/review/comment URLs, reviewer identity, feedback and author response only after they occur. A review request is not approval. Wait for peer review and staging integration before starting each next issue.
 
-Issue #45 is Done on Project 4 after PR #53 integration. Issue #46 started on 2026-10-20 only after the student confirmed the merge and GitHub verified it; branch feature3/lab4-actions-taken-ui starts at 3465088. PR #54 is open, linked to #46 through GitHub Development references and In review on Project 4. PpAnpt review and integration remain pending; no auto-merge. See ui-verification.md. Issue #47 has not started.
+Issues #45/#46 are Done after reviewed integration. Issue #47 started only after the student's merge/continue instruction and verification of PR #54 merge 10dd684; branch feature4/lab4-ticket-workflow-resolution starts there. Current branch results are in workflow-verification.md. No issue #48 work or new peer approval is claimed.
+
+### PR #54 feedback and response
+
+PpAnpt APPROVED latest head 2cb79da on 2026-10-20 at 14:20 Asia/Bangkok. Reviewer reports client 53/53, TypeScript and server 124/124 passed; reviewer explicitly did **not** rerun E2E. All four suggestions were nonblocking. PR merged at 10dd684 on 2026-10-20 at 14:45 Asia/Bangkok.
+
+| Suggestion | Follow-up in issue #47 |
+|---|---|
+| Clarify input timezone versus Bangkok display | Explicit Intl input timezone and Asia/Bangkok display hint in the Action form; runtime images inspected |
+| Uncertain submission may have committed when closing dialog | Warning explains possible prior success, refreshes authoritative list/parent; test verifies warning/refresh; focus restored after reload |
+| frozen reads intent ref in render | Submission intent is React state; ref remains only for synchronous double-submit lock |
+| Split ActionsTaken.tsx later | Recorded for #50 readability hardening; Ticket workflow is a separate component/service already |
+
+Actual author replies: [PR #53 response](https://github.com/BBINGOAL/toktickit/pull/53#issuecomment-6286073824), [PR #54 response](https://github.com/BBINGOAL/toktickit/pull/54#issuecomment-6286074513). Going forward, read the review and reply with thanks plus accurate dispositions before recommending merge; never claim pending suggestions were already fixed.
 
 ### PR #53 feedback and follow-up
 
@@ -31,7 +45,7 @@ Reviewer: PpAnpt, APPROVED on 2026-10-19 at 14:27 Asia/Bangkok, for the latest h
 |---|---|
 | Assignee test depends on the fixture user appearing in the first 50 global matches | Issue #46 searches its unique staff name with matching inactive/Requester control prefixes, retaining meaningful exclusion assertions. Changed test passes in the 124/124 native PostgreSQL 18.1 rerun on 2026-10-20. |
 | Repeat seed uses update: {} and no longer resets Lab 3 demo accounts | Documented explicitly in implementation-plan.md and ui-verification.md; keep current credentials/roles/activity and do not use repeat seed as a password reset. README consolidation remains #51. |
-| Demo Tickets have version 0 despite actions; OPEN sample has no owner but assigned actions | Recorded for seed/workflow consistency review in #47. No existing user data or demo records were rewritten in #46. Ticket owner and action assignee remain separate relationships; any changed demo-state assumptions must be documented and tested. |
+| Demo Tickets have version 0 despite actions; OPEN sample has no owner but assigned actions | #47 documents the initial-snapshot decision: version is a concurrency token, not child count; unowned Tickets may have assigned work but cannot resolve until owner/work gates pass. Gate/owner/legacy-zero-action tests pass. No demo rewrite or fictional historical events; see specification section 7 and workflow-verification.md. |
 | Consider DB CHECK constraints and remove redundant single-column requesterId/ownerId indexes | Recorded for measured schema/index review in #50; not silently added to the UI change and not claimed completed. |
 
 Positive review notes: Ticket-before-User lock ordering, idempotency scope/payload digest, concurrency tests, and non-owner Requester 404. Reviewer's AI-tool usage cannot be verified from GitHub metadata.

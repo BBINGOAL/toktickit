@@ -89,6 +89,18 @@ describe('Actions Taken interface', () => {
     expect(screen.getByLabelText('Action description')).toHaveValue('Draft survives conflict')
     expect(api.createAction).toHaveBeenCalledOnce()
   })
+  it('warns on closing an uncertain submission and refreshes authoritative work', async () => {
+    vi.mocked(api.createAction).mockRejectedValue(new TypeError('Response lost'))
+    setup(); await newForm()
+    expect(screen.getByText(/Input timezone:/)).toHaveTextContent('Asia/Bangkok')
+    fireEvent.change(screen.getByLabelText('Action description'),{target:{value:'Maybe already committed'}})
+    fireEvent.click(screen.getByRole('button',{name:'Create action'}))
+    await screen.findByRole('alert')
+    fireEvent.click(screen.getByRole('button',{name:'Close'}))
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('may already have succeeded'))
+    await waitFor(()=>expect(api.fetchActions).toHaveBeenCalledTimes(2))
+    expect(changed).toHaveBeenCalledOnce()
+  })
   it('shows inactive-assignee errors and refreshes choices without discarding fields', async () => {
     vi.mocked(api.createAction).mockRejectedValue(new api.ActionApiError(400, 'VALIDATION_ERROR', 'Check fields', { assigneeId: 'Choose an active IT Staff or Administrator' }))
     setup(); await newForm()

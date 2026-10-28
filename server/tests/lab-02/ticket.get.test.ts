@@ -82,11 +82,11 @@ describe('Ticket GET APIs', () => {
             expect(res.status).toBe(404)
         })
 
-        it('should return 403 for another requester\'s ticket', async () => {
+        it('should return 404 for another requester\'s ticket without revealing existence', async () => {
             const res = await request(app)
                 .get(`/api/tickets/${createdTicketId}`)
                 .set('Cookie', fixture.otherCookie)
-            expect(res.status).toBe(403)
+            expect(res.status).toBe(404)
         })
     })
 })

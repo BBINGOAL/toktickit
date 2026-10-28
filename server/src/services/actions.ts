@@ -10,14 +10,14 @@ export const publicAction = {
   followUpRequired: true, followUpNote: true, attachmentNotes: true, followsUpActionId: true,
   status: true, cancellationReason: true, version: true, createdAt: true, updatedAt: true,
 } satisfies Prisma.ActionTakenSelect
-const json = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value))
+export const json = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value))
 function stable(value: any): any {
   if (value instanceof Date) return value.toISOString()
   if (Array.isArray(value)) return value.map(stable)
   if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map(k => [k, stable(value[k])]))
   return value
 }
-function digest(value: unknown) { return createHash('sha256').update(JSON.stringify(stable(value))).digest('hex') }
+export function digest(value: unknown) { return createHash('sha256').update(JSON.stringify(stable(value))).digest('hex') }
 export function idempotencyKey(value: unknown, required: boolean): string | undefined {
   if (value === undefined && !required) return undefined
   if (typeof value !== 'string' || !/^[A-Za-z0-9_-]{16,128}$/.test(value)) invalid('Idempotency-Key', 'Use 16-128 letters, digits, hyphens or underscores')
@@ -51,7 +51,7 @@ export async function lockEligibleUsers(tx: Tx, actorId: number, assigneeId: num
   const assignee = users.find(u => u.id === assigneeId)
   if (validateAssignee && (!assignee?.isActive || !['IT_STAFF', 'ADMIN'].includes(assignee.role))) invalid('assigneeId', 'Choose an active IT Staff or Administrator')
 }
-async function replay(tx: Tx, userId: number, scope: string, key: string | undefined, payloadDigest: string) {
+export async function replay(tx: Tx, userId: number, scope: string, key: string | undefined, payloadDigest: string) {
   if (!key) return null
   const previous = await tx.mutationRequest.findUnique({ where: { userId_scope_key: { userId, scope, key } } })
   if (!previous) return null
