@@ -42,7 +42,7 @@ describe('Requester dashboard and query-preserving drill-down', () => {
   it('uses exact inclusive dates, active status membership and current resolved status', async () => {
     const r = await get()
     expect(r.status).toBe(200)
-    expect(r.body).toMatchObject({ asOf: now.toISOString(), windowStart: start.toISOString(), timezone: 'Asia/Bangkok', metrics: { activeTickets: 7, waitingForRequester: 2, recentlyUpdated: 6, recentlyResolved: 2 } })
+    expect(r.body).toMatchObject({ asOf: now.toISOString(), windowStart: start.toISOString(), timezone: 'Asia/Bangkok', metrics: { activeTickets: 7, waitingForRequester: 2, recentlyUpdated: 5, recentlyResolved: 2 } })
   })
   it('matches independent authoritative counts and each drill-down total', async () => {
     const r = await get()
@@ -111,5 +111,32 @@ describe('Requester dashboard and query-preserving drill-down', () => {
     vi.spyOn(prisma, '$transaction').mockRejectedValueOnce(new Error('SQL passwordHash SECRET'))
     const r = await get()
     expect(r.status).toBe(500); expect(r.body).toEqual({ error: 'Unable to load Requester dashboard' })
+  })
+  it('keeps one snapshot when a concurrent update commits between metric queries', async () => {
+    const original = prisma.$transaction.bind(prisma)
+    let changed = false
+    vi.spyOn(prisma, '$transaction').mockImplementationOnce(((callback: any, options: any) => original(async (tx: any) => callback(new Proxy(tx, {
+      get(target, prop) {
+        if (prop !== 'ticket') return target[prop]
+        return new Proxy(target.ticket, { get(table, method) {
+          if (method !== 'count') return table[method]
+          return async (...args: any[]) => {
+            const result = await table.count(...args)
+            if (!changed) { changed = true; await prisma.ticket.update({ where: { id: f.ticket.id }, data: { updatedAt: now } }) }
+            return result
+          }
+        } })
+      }
+    })), options)) as any)
+    try {
+      const r = await get()
+      expect(changed).toBe(true); expect(r.status).toBe(200)
+      expect(r.body.metrics.recentlyUpdated).toBe(5)
+      expect((await get()).body.metrics.recentlyUpdated).toBe(6)
+    } finally { await prisma.ticket.update({ where: { id: f.ticket.id }, data: { updatedAt: old } }); vi.restoreAllMocks() }
+  })
+  it('rejects dashboard query manipulation and unsupported write methods', async () => {
+    expect((await get('/api/dashboards/requester?asOf=2020-01-01')).status).toBe(400)
+    expect((await request(app).post('/api/dashboards/requester').set('Cookie', f.cookie(f.requester))).status).toBe(405)
   })
 })

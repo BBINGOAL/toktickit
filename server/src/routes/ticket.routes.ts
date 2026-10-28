@@ -79,58 +79,7 @@ router.post('/tickets', requireAppAccess, async (req: Request, res: Response) =>
 });
 
 // ─── List Tickets (Requester) ─────────────────────────────
-router.get('/tickets', requireAppAccess, async (req: Request, res: Response) => {
-    const requesterId = (req as any).user.userId;
-    if ((req as any).user.role !== 'REQUESTER') return res.status(403).json({ error: 'Requester access required' })
-    const search = (req.query.search as string) || ''
-    const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined
-    const requestedPriority = req.query.requestedPriority as string | undefined
-    const itPriority = req.query.itPriority as string | undefined
-    const status = req.query.status as string | undefined
-    const sortField = (req.query.sort as string) || 'createdAt'
-    const order = (req.query.order as string) || 'desc'
-    const page = Number(req.query.page || '1')
-    const pageSize = Number(req.query.pageSize || '10')
-    if (!Number.isInteger(page) || page < 1 || ![10, 25, 50].includes(pageSize)) return res.status(400).json({ error: 'Invalid pagination: page >= 1 and pageSize must be 10, 25, or 50' })
-    if (!['createdAt', 'updatedAt', 'summary', 'status', 'itPriority', 'requestedPriority', 'ticketNumber'].includes(sortField) || !['asc', 'desc'].includes(order)) return res.status(400).json({ error: 'Invalid sorting' })
-    if ((requestedPriority && !VALID_PRIORITIES.has(requestedPriority)) || (itPriority && !VALID_PRIORITIES.has(itPriority)) || (status && !VALID_STATUSES.has(status))) return res.status(400).json({ error: 'Invalid filter' })
-    if (req.query.categoryId && (!Number.isInteger(Number(req.query.categoryId)) || Number(req.query.categoryId) <= 0)) return res.status(400).json({ error: 'Invalid categoryId' })
-
-    try {
-        const where: Record<string, unknown> = { requesterId }
-        if (categoryId) where.categoryId = categoryId
-        if (requestedPriority) where.requestedPriority = requestedPriority
-        if (itPriority) where.itPriority = itPriority
-        if (status) where.status = status
-        if (search) {
-            where.OR = [
-                { ticketNumber: { contains: search, mode: 'insensitive' } },
-                { summary: { contains: search, mode: 'insensitive' } },
-            ]
-        }
-        const [totalItems, data] = await Promise.all([
-            prisma.ticket.count({ where }),
-            prisma.ticket.findMany({
-                where,
-                select: {
-                    id: true, ticketNumber: true, summary: true,
-                    category: { select: { id: true, name: true } },
-                    relatedSystem: { select: { id: true, name: true } },
-                    requestedPriority: true, itPriority: true,
-                    status: true, owner: { select: { id: true, name: true } },
-                    createdAt: true, updatedAt: true,
-                },
-                orderBy: { [sortField]: order as 'asc' | 'desc' },
-                skip: (page - 1) * pageSize, take: pageSize,
-            }),
-        ])
-        res.status(200).json({ data, meta: { totalItems, page, pageSize, totalPages: Math.ceil(totalItems / pageSize) } })
-    } catch {
-        res.status(500).json({ error: 'Failed to fetch tickets' })
-    }
-});
-
-// ─── List Tickets (IT Staff Queue) ────────────────────────
+// Requester list lives in dashboard.routes.ts (shared drill-down filters).
 router.get('/staff/tickets', requireAppAccess, async (req: Request, res: Response) => {
     const userRole = (req as any).user.role;
     if (userRole !== 'IT_STAFF' && userRole !== 'ADMIN') {
