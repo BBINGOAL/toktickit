@@ -4,6 +4,8 @@ Status: initial factual record for the engineering-contract issue; expand as the
 
 ## Tool and roles
 
+Issue #48 (2026-10-28) followed the student's actual instruction, "เพื่อน merge มาเเล้วครับ ทำissue ถัดไปได้เลย", after verifying PR #55 merged into lab4-staging as be6e14f. Codex created feature5/lab4-requester-dashboard, updated the existing Kanban and committed tests, backend, UI, PR #55 follow-ups and E2E separately. Implemented scoped snapshot metrics, Bangkok dates, matching URL drill-down and stale-response protection. Actual final results: backend 244/244, client 72/72, combined Chromium 20/20, types/builds and drift checks pass. Initial fixture-count/selector/typecheck/keyboard-test issues and a transient workflow hook timeout are recorded in requester-dashboard-verification.md. Real captures remain local; no student reflection, peer approval, final-main result or Docker recovery was invented.
+
 LLM: OpenAI GPT-6 through Codex. Specification-agent work: read the Lab 4 handout and existing Lab 3 code, propose issue/branch decomposition, identify handout/rubric ambiguity, and draft FR/BR/AC, API/UI rules and test traceability. Coding-agent work for issue #45 implements the additive data model, Actions Taken APIs, seed preservation and automated validation/API/concurrency/migration/recovery tests after issue #44 integration.
 
 ## Selected actual prompts
