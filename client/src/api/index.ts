@@ -142,6 +142,11 @@ export interface TicketsResponse {
 }
 
 export interface TicketQuery {
+    scope?: string
+    updatedSince?: string
+    updatedUntil?: string
+    resolvedSince?: string
+    resolvedUntil?: string
     search?: string
     categoryId?: number
     requestedPriority?: string
@@ -190,6 +195,7 @@ export async function createTicket(payload: CreateTicketPayload): Promise<Ticket
 
 export async function fetchTickets(query: TicketQuery = {}): Promise<TicketsResponse> {
     const params = new URLSearchParams()
+    for (const key of ['scope','updatedSince','updatedUntil','resolvedSince','resolvedUntil'] as const) if (query[key]) params.set(key, query[key])
     if (query.search) params.set('search', query.search)
     if (query.categoryId) params.set('categoryId', String(query.categoryId))
     if (query.requestedPriority) params.set('requestedPriority', query.requestedPriority)

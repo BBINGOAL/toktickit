@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: #44/#45/#46 integrated through reviewed PRs #52/#53/#54; latest staging merge 10dd684. #47 Ticket Workflow is In review through PR #55 from feature4/lab4-ticket-workflow-resolution; PpAnpt requested after backend 209/209, UI 61/61 and Actions/workflow E2E 13/13. #48-#51 have not started. See workflow-verification.md for isolated native PostgreSQL 18.1 results; Docker recovery is not claimed.
+Status: #44-#47 integrated through reviewed PRs #52-#55; latest staging merge be6e14f. #48 Requester Dashboard is In review through PR #56 on feature5/lab4-requester-dashboard from that merge, linked to the issue with PpAnpt requested. Backend 244/244, client 72/72 and combined Chromium 20/20 pass; see requester-dashboard-verification.md. #49-#51 have not started. Verification uses isolated native PostgreSQL 18.1; Docker recovery is not claimed.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -25,7 +25,7 @@ Create subsequent feature branches from the latest integrated staging commit. Ru
 | 7 | Lab4 Final Regression and Product Hardening | `feature7/lab4-final-hardening-regression` | Labs 1-3 regression, Staff Queue sorting/pagination, stable ordering, retry/double-submit, security, accessibility, responsive/style inspection, performance smoke and failure states. |
 | 8 | Lab4 Documentation Evidence and Release Integration | `feature8/lab4-docs-release` | README, actual test traceability, real review records and AI reflection, screenshots, concise MD/PDF Answer Part 1-9, staging release checks and post-merge main evidence. |
 
-Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires acceptance tests and reviewed integration. Release issue stays open until final main verification succeeds. All issues #44-#51 are on the existing private Project 4: #44/#45/#46 Done; #47 In review linked to PR #55; #48-#51 Backlog. Projects permission has been granted. Do not mark issues Done merely because a PR is open.
+Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires acceptance tests and reviewed integration. Release issue stays open until final main verification succeeds. All issues #44-#51 are on the existing private Project 4: #44-#47 Done; #48 In review linked to PR #56; #49-#51 Backlog. Projects permission has been granted. Do not mark issues Done merely because a PR is open.
 
 ## Must-have versus stretch and complexity limits
 
@@ -42,7 +42,7 @@ The eight issues are reviewable work packages, not a promise that every package 
 
 These mechanisms are **contract design choices**, not claims that the handout mandates those exact tables/locks/fields. They remain in the current acceptance contract so documents/API/tests do not contradict each other. If implementation shows they are disproportionate, propose a simpler mechanism and update affected BR/API/AC/test rows for peer review before changing the scope. Never silently demote duplicate prevention, stale-write safety, historical attribution or required rubric evidence to stretch. Optional items above must not delay required delivery.
 
-## Existing implementation and work to preserve
+## Pre-Lab-4 baseline and work to preserve
 
 - React/TypeScript, Express, PostgreSQL and Prisma remain the stack; reuse authentication, role middleware, design tokens, Ticket Detail, attachments, comments and notes.
 - TicketStatus already contains all eight required values. Existing backend transition checks are a starting point; current status update reads then writes without a version check and has no Actions Taken resolution gate.

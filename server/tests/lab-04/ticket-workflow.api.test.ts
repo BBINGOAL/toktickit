@@ -15,6 +15,43 @@ async function prepare(status:'IN_PROGRESS'|'RESOLVED'|'OPEN'='IN_PROGRESS') {
 beforeEach(async()=>{f=await fixture()})
 afterEach(async()=>{vi.restoreAllMocks();await f?.cleanup()})
 describe('versioned Ticket workflow',()=>{
+  it('retains removed attachment metadata after reload while denying download and cross-requester reads',async()=>{
+    const removed=await prisma.attachment.create({data:{ticketId:f.ticket.id,uploadedById:f.requester.id,originalFilename:'removed-evidence.png',storedFilename:`lab4-removed-${crypto.randomUUID()}.png`,mimeType:'image/png',sizeBytes:10,isRemoved:true,removedAt:new Date(),removalReason:'Wrong evidence'}})
+    for(const user of [f.requester,f.staff]){
+      for(let reload=0;reload<2;reload++){
+        const r=await request(app).get(`/api/tickets/${f.ticket.id}`).set('Cookie',f.cookie(user))
+        expect(r.status).toBe(200)
+        expect(r.body.attachments).toContainEqual(expect.objectContaining({id:removed.id,isRemoved:true,removalReason:'Wrong evidence'}))
+        expect(r.body.attachments.find(a=>a.id===removed.id).removedAt).toBeTruthy()
+      }
+      expect((await request(app).get(`/api/attachments/${removed.id}/download`).set('Cookie',f.cookie(user))).status).toBe(410)
+    }
+    const a=await request(app).get(`/api/attachments/${removed.id}/download`).set('Cookie',f.cookie(f.other))
+    const b=await request(app).get('/api/attachments/2147483647/download').set('Cookie',f.cookie(f.other))
+    expect(a.status).toBe(404);expect(a.body).toEqual(b.body)
+  })
+  it.each(['CLOSED','CANCELLED'] as const)('allows versioned owner/priority metadata on %s without reopening or changing Actions',async status=>{
+    const action=await prepare()
+    await prisma.ticket.update({where:{id:f.ticket.id},data:{status}})
+    const owner=await patch('owner',{ownerId:f.colleague.id,expectedVersion:0})
+    expect(owner.status).toBe(200);expect(owner.body).toMatchObject({status,ownerId:f.colleague.id,version:1})
+    const priority=await patch('priority',{itPriority:'HIGH',expectedVersion:1})
+    expect(priority.status).toBe(200);expect(priority.body).toMatchObject({status,itPriority:'HIGH',version:2})
+    expect(await prisma.actionTaken.findUnique({where:{id:action.id}})).toMatchObject({status:'COMPLETED',version:0})
+    expect(await prisma.ticketWorkflowEvent.count({where:{ticketId:f.ticket.id}})).toBe(2)
+  })
+  it('hides existence of active attachments from other Requesters before disk access',async()=>{
+    const att=await prisma.attachment.create({data:{ticketId:f.ticket.id,uploadedById:f.requester.id,originalFilename:'private.png',storedFilename:`lab4-private-${crypto.randomUUID()}.png`,mimeType:'image/png',sizeBytes:10}})
+    const a=await request(app).get(`/api/attachments/${att.id}/download`).set('Cookie',f.cookie(f.other))
+    const b=await request(app).get('/api/attachments/2147483647/download').set('Cookie',f.cookie(f.other))
+    expect(a.status).toBe(404);expect(a.body).toEqual(b.body)
+  })
+  it('allows eligible non-owner Staff to Resolve and records the real actor',async()=>{
+    await prepare()
+    const r=await patch('status',{status:'RESOLVED',expectedVersion:0,resolutionSummary:'Owner-coordinated work verified'},f.colleague)
+    expect(r.status).toBe(200);expect(r.body.ownerId).toBe(f.staff.id)
+    expect(await prisma.ticketWorkflowEvent.findFirst({where:{ticketId:f.ticket.id,kind:'STATUS'}})).toMatchObject({actorId:f.colleague.id})
+  })
   it.each(['staff','admin','requester'] as const)('enforces all 64 Ticket edges for %s',async role=>{
     await prepare()
     for(const from of Object.keys(ticketEdges))for(const to of Object.keys(ticketEdges)){

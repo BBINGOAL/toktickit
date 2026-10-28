@@ -1,6 +1,6 @@
 # Lab 4 REST API Contract
 
-Status: proposed contract for peer review. Base path `/api`; JSON request/response, cookie authentication. Existing auth, Tickets, attachments, comments, notes, reference and admin APIs remain, subject to explicit workflow changes below.
+Status: reviewed contract; Actions/workflow integrated, Requester Dashboard implemented in issue #48; Staff Dashboard remains issue #49. Base path `/api`; JSON request/response, cookie authentication. Existing auth, Tickets, attachments, comments, notes, reference and admin APIs remain, subject to explicit workflow changes below.
 
 ## Shared rules
 
@@ -67,6 +67,8 @@ PATCH `/tickets/:id/owner` adds required expectedVersion; body `{ownerId:null|po
 
 Owner/priority mutations accept an optional Idempotency-Key with the same scoped exact-response replay semantics; the current client supplies it to keep uncertain retries safe. No-op owner/priority patches return 400 without extra events. Successful workflow mutations return the authoritative Ticket detail shape, including gate/allowed-next metadata. Public history kinds are STATUS, OWNER, PRIORITY and REQUESTER_RESOLVED; snapshot fields are public status/ownerId/itPriority/resolution/advisory/cycle/version only, never Internal Notes or credentials. Ticket cancellation also appends CANCELLED_BY_TICKET action events atomically.
 
+PR #55 clarification: owner/priority remain editable by authorized Staff/Admin in CLOSED/CANCELLED, with version increments/events but no status/action changes. Formal Resolve requires an eligible Ticket owner, not that the submitting Staff/Admin equals that owner. Detail includes active and removed attachment metadata (including removedAt/removalReason), preserving Lab 2's visible soft-removal record. Removed-file download is 410 only for an authorized reader; non-owned/missing file reads share 404 NOT_FOUND before disk/removal checks.
+
 POST `/tickets/:id/requester-resolved` remains Requester-only owned-ticket advisory action. Accept `{expectedVersion}`; first change increments parent version and records an advisory event, repeated already-true call returns current flag/time without duplicate event. Allowed statuses follow BR-15. Version check before first mutation; optional Idempotency-Key for replay.
 
 GET `/tickets/:id/workflow-history`: authorized Ticket readers, page/pageSize 10/25/50, order createdAt ASC,id ASC. Events include kind, public before/after status/owner/priority or advisory change, actor name and cycle. Never serialize private notes.
@@ -83,6 +85,8 @@ Requester-only, no caller-supplied requesterId. No filters required. Returns:
 
 Preview arrays may be empty even though the example metrics are illustrative. Ticket preview includes id,ticketNumber,summary,status,itPriority,updatedAt,detailUrl only, max 5 per list; formulas in specification.md are authoritative.
 
+Issue #48 implementation: no dashboard query parameters accepted (400 on supplied parameters), unsupported methods 405 after session authentication. One repeatable-read transaction uses six bounded aggregate/preview queries and one server asOf; no client clock/count calculation. Actual drill-down URLs also include sort=updatedAt&order=desc&page=1. Attention view-all reuses waitingForRequester; Recent Tickets view-all uses the unfiltered updatedAt-desc list. Time-window bounds are inclusive. A later list request may legitimately reflect changes committed after the dashboard snapshot.
+
 ### GET /dashboards/staff
 
 Staff/Admin only. Same snapshot/timezone metadata; metrics `{unassignedActive,myActiveTickets,byStatus:{all eight keys},activeByPriority:{LOW,MEDIUM,HIGH,UNSET},myPendingActions}`. Bounded recentTickets/urgentTickets/myActions arrays and drillDown map. My action preview includes action/ticket IDs, Ticket number, description, state, updatedAt and `/tickets/:id?actionId=:actionId`. Optional Admin user-account counts are excluded.
@@ -94,6 +98,8 @@ Staff/Admin, implicit assignee=current user and parent ACTIVE, action PLANNED/IN
 ## Drill-down and queue compatibility
 
 Extend Requester GET `/tickets` with status,scope=active,updatedSince/updatedUntil,resolvedSince/resolvedUntil and updatedAt/status sort support while preserving existing category/search/requestedPriority filters. Never accept alternate requester identity.
+
+Requester implementation rejects unknown/repeated/object query values, invalid enums, nondecimal/unsafe pagination, search over 100 characters, invalid calendar dates, missing ISO timezone or reversed bounds. Page and category IDs are positive decimal integers; pageSize 10/25/50; offsets must fit a signed 32-bit integer. Optional itPriority remains LOW/MEDIUM/HIGH. Resolved date filters also require current status RESOLVED/CLOSED; status/scope/date predicates intersect rather than overwrite each other. Count and paginated rows use one repeatable-read snapshot. Default sort createdAt DESC; all sorts append id in the same direction. No matches gives totalPages=0; an out-of-range positive page gives an empty data array with actual totals.
 
 Extend Staff GET `/staff/tickets` with scope=active,owner=me|unassigned,priority=UNSET plus existing enum priorities; preserve explicit ownerId/search/status/categoryId/sort/order. Reject conflicting owner/ownerId inputs. Both lists accept allowed sort/order and page >=1, pageSize 10/25/50; append id in the same direction as sort for stable ties. Empty totalPages=0, UI does not request negative/out-of-range pages. Search <=100 chars and date bounds valid ISO, since <=until; bounds inclusive.
 

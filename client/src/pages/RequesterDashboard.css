@@ -1,0 +1,22 @@
+.requester-dashboard { min-width: 0; }
+.requester-dashboard h1 { margin: 0; font-size: 1.7rem; }
+.requester-dashboard h2 { font-size: 1.15rem; margin: 0 0 1rem; }
+.dashboard-heading { display: flex; justify-content: space-between; flex-wrap: wrap; align-items: flex-start; gap: 1rem; }
+.requester-dashboard button { padding: .65rem 1rem; border: 1px solid var(--color-primary); border-radius: 6px; background: var(--color-primary); color: white; cursor: pointer; }
+.requester-dashboard button:disabled { opacity: .6; cursor: wait; }
+.requester-dashboard nav { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+.requester-dashboard a { color: var(--color-primary); overflow-wrap: anywhere; }
+.requester-dashboard a:focus-visible, .requester-dashboard button:focus-visible { outline: 3px solid #925c00; outline-offset: 3px; }
+.dashboard-window { color: var(--color-text-secondary); line-height: 1.6; }
+.dashboard-metrics { display: grid; grid-template-columns: minmax(0,1fr); gap: 1rem; margin: 1.5rem 0; }
+.dashboard-metric, .dashboard-panel { border: 1px solid var(--color-border); border-radius: 10px; background: white; padding: 1.25rem; min-width: 0; }
+.dashboard-metric { display: flex; flex-direction: column; gap: .75rem; text-decoration: none; }
+.dashboard-metric:hover { background: var(--color-pale-green, #eaf6ef); }
+.dashboard-metric strong { font-size: 2rem; }
+.dashboard-lists { display: grid; grid-template-columns: minmax(0,1fr); gap: 1rem; }
+.dashboard-tickets { padding: 0; list-style: none; }
+.dashboard-tickets li { padding: .75rem 0; border-bottom: 1px solid var(--color-border); }
+.dashboard-tickets span { display: block; color: var(--color-text-secondary); font-size: .85rem; margin-top: .4rem; overflow-wrap: anywhere; }
+.dashboard-error { border: 1px solid #991b1b; padding: 1rem; color: #991b1b; border-radius: 6px; }
+@media (min-width: 600px) { .dashboard-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (min-width: 1000px) { .dashboard-metrics { grid-template-columns: repeat(4,minmax(0,1fr)); } .dashboard-lists { grid-template-columns: repeat(2,minmax(0,1fr)); } }

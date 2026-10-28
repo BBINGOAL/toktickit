@@ -1,10 +1,12 @@
 # Lab 4 UI Specification
 
-Status: reviewed intended UI contract. #46 Actions Taken is integrated and #47 Ticket workflow is implemented on its feature branch: UI 61/61 and combined Actions/workflow E2E 13/13 pass, including four widths/keyboard checks. See workflow-verification.md for isolated native PostgreSQL 18.1 results. Dashboards and whole-product visual/contrast/200% zoom checks remain future issues. These are not final-main product results.
+Status: reviewed intended UI contract. Actions/workflow (#45-#47) integrated. #48 implements Requester Dashboard and URL-driven My Tickets; current evidence is in requester-dashboard-verification.md. Staff Dashboard and whole-product visual/contrast/200% zoom checks remain future issues. These are not final-main product results.
 
 ## Application shell and routes
 
 Preserve Zen Green tokens, existing role labels/navigation and active-page indication. After sign-in or required password change, Requester lands on `/dashboard`; Staff/Admin on `/staff/dashboard`. Existing My Tickets, Create Ticket, Ticket Queue, Ticket Detail and Admin Users remain reachable. Signed-out users return to login; direct forbidden routes show a clear forbidden state, not a misleading working dashboard.
+
+Incremental #48 boundary: Requester login/required password change now lands on /dashboard; Staff/Admin keep /staff/tickets until their Dashboard ships in #49. Wrong-role protected routes display Access denied with permitted shell navigation. Requester cards use the server totals/URLs; loading never invents zero counts, recoverable refresh failures label the previous snapshot, and 401/403 clears it. Late responses from an earlier user/query are ignored.
 
 Dashboard navigation is a real link with visible active state. Grid: one metric column on narrow mobile, two on tablet, up to four on desktop; labels/counts wrap without clipping. Major verification widths: 390x844, 768x1024, 1280x900, plus 320px minimum-width smoke. Page must not scroll horizontally. Wide tables may scroll inside a labeled container with visible access to hidden actions.
 
@@ -40,6 +42,8 @@ Requester sees advisory resolution control only in allowed states; label it "Pro
 
 Queue and My Tickets consume dashboard URLs and show current filters. Staff sorting controls and pagination expose all matching data; reset page to 1 on filter change and use 10/25/50 sizes. Clear filters returns to normal detailed view.
 
+Requester implementation: My Tickets reads query filters/page/sort directly from the URL, preserves Dashboard date/scope bounds during category/priority/status/search/sort/pagination changes and resets page atomically for changed filters. Back/Forward/reload restores query state. Clear Filters removes Dashboard bounds too. Wide results have a labeled keyboard-focusable internal scroll region; sort headers and page controls are keyboard buttons. Positive out-of-range pages retain actual totals with an earlier-page explanation.
+
 ## Feedback states
 
 | State | Required behavior |
@@ -64,7 +68,7 @@ Screenshots are real runtime captures stored locally under `artifacts/lab-04/scr
 | Check | Planned evidence | Status |
 |---|---|---|
 | Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Pending |
-| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Pending |
+| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester API/UI/E2E pass; Staff Dashboard remains #49 |
 | Actions modes, editable/read-only and validation placement | List/create/edit/terminal/follow-up/conflict | Actions branch checks pass; runtime lifecycle/failure E2E pass; images inspected |
 | Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Actions labels/focus cycle/Escape/restore pass; whole-product contrast/zoom remain #50 |
-| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Actions page/dialog bounds pass at 320/390/768/1280; checkbox/header corrected after image inspection; dashboards/zoom remain pending |
+| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Actions and Requester Dashboard pass at 320/390/768/1280; Requester 320/1280 captures inspected; Staff Dashboard/zoom remain pending |

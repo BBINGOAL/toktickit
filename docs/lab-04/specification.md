@@ -83,6 +83,8 @@ The matrix retains the existing Lab 3 transitions. Only active Staff/Admin may m
 | BR-18 | Ticket workflow events are append-only and visible to its Requester and Staff/Admin, with only public fields. Notes remain Staff/Admin-only. Order actions by actionDateTime ASC,id ASC and events by createdAt ASC,id ASC. |
 | BR-19 | Stale writes return 409 and the current version. Reusing an idempotency key with a different validated payload returns 409; identical replay returns the original result. Unauthorized users cannot replay another user's response. |
 
+PR #55 review clarification (implemented/tested follow-up in #48): eligible Ticket owner is a gate condition, not an actor-equals-owner restriction. Any authorized active Staff/Admin may formally resolve after all gates pass; the event records the actual actor and preserves the coordinating owner. Owner/priority metadata may be changed on CLOSED/CANCELLED Tickets with versions/history; this does not reopen the Ticket, alter completed Actions or permit new work. Attachment soft-removal preserves metadata, removal time and reason for authorized Ticket readers, as Lab 2 BR-19/AC-17 requires; removed content is not downloadable/previewable. An authorized removed-file download returns 410; missing/non-owned downloads return the same 404 before checking removal or disk state.
+
 ### 5.3 Dashboard definitions
 
 | ID | Rule |

@@ -36,6 +36,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <div className="app-nav-links">
                         {user.role === 'REQUESTER' && (
                             <>
+                                <NavLink to="/dashboard" style={({ isActive }) => ({ color: isActive ? 'var(--color-pale-green)' : '#fff', textDecoration: isActive ? 'underline' : 'none', fontWeight: 500, fontSize: 14 })}>Dashboard</NavLink>
                                 <NavLink
                                     to="/tickets"
                                     style={({ isActive }) => ({

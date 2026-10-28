@@ -18,11 +18,25 @@
 | [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised PR merged as 7922e0e on 2026-10-14 (no separate later review recorded) |
 | [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/53#pullrequestreview-5568221570), 2026-10-19; four nonblocking suggestions below | APPROVED for f6bae9e; merged as 3465088 on 2026-10-20 |
 | [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/54#pullrequestreview-5581899545), nonblocking suggestions below; author replied | APPROVED for latest head 2cb79da; merged as 10dd684 on 2026-10-20 |
-| [#47 Ticket Workflow and Resolution](https://github.com/BBINGOAL/toktickit/issues/47) | [PR #55](https://github.com/BBINGOAL/toktickit/pull/55) into lab4-staging | PpAnpt requested on 2026-10-20; verified in GitHub metadata | Backend 209/209, UI 61/61 and combined Actions/workflow E2E 13/13 on isolated native PostgreSQL 18.1; actual review awaited | Pending |
+| [#47 Ticket Workflow and Resolution](https://github.com/BBINGOAL/toktickit/issues/47) | [PR #55](https://github.com/BBINGOAL/toktickit/pull/55) into lab4-staging | PpAnpt requested on 2026-10-20 | [Review](https://github.com/BBINGOAL/toktickit/pull/55#pullrequestreview-5638567438) and [author response](https://github.com/BBINGOAL/toktickit/pull/55#issuecomment-6459305158); follow-up below | APPROVED for latest head d1f9e72 on 2026-10-24; merged be6e14f on 2026-10-28 |
+| [#48 Requester Dashboard](https://github.com/BBINGOAL/toktickit/issues/48) | [PR #56](https://github.com/BBINGOAL/toktickit/pull/56) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-28; verified in metadata | Backend 244/244, client 72/72, combined Chromium 20/20; actual review awaited | Pending |
 
 Record exact PR/review/comment URLs, reviewer identity, feedback and author response only after they occur. A review request is not approval. Wait for peer review and staging integration before starting each next issue.
 
-Issues #45/#46 are Done after reviewed integration. Issue #47 started only after the student's merge/continue instruction and verification of PR #54 merge 10dd684; branch feature4/lab4-ticket-workflow-resolution starts there. Current branch results are in workflow-verification.md. No issue #48 work or new peer approval is claimed.
+Issues #44-#47 are Done after reviewed integration. Issue #48 started only after the student's merge/continue instruction and verification of PR #55 merge be6e14f; feature5/lab4-requester-dashboard starts there. Its approval remains pending, with results in requester-dashboard-verification.md.
+
+### PR #55 feedback and follow-up in #48
+
+PpAnpt approved d1f9e72 on 2026-10-24 at 21:17 Asia/Bangkok, reporting server 209/209 on a new isolated DB and client 61/61 plus typecheck; E2E was explicitly not rerun by the reviewer. The author replied with thanks and dispositions on 2026-10-28. Student subsequently confirmed merge; GitHub records be6e14f into lab4-staging on 2026-10-28 at 16:58 Asia/Bangkok. Approval was for PR #55, not the subsequent #48 changes.
+
+| Suggestion | Actual follow-up |
+|---|---|
+| Removed attachments now reappear with time/reason; verify intent | Preserve Lab 2 BR-19/AC-17 visible soft-removal metadata. Added reload/Requester/Staff regression and blocked-download checks. Corrected removed download to authorized 410 and missing/non-owned identical 404 before disk/removal-state checks. No removed content is exposed. |
+| Confirm owner/priority edits on CLOSED/CANCELLED | Documented as metadata-only versioned/history-recorded edits; two terminal-state tests ensure Ticket status and completed Actions remain unchanged. |
+| Confirm Resolve actor need not equal Ticket owner | Explicit spec/API clarification and non-owner Staff resolve test, retaining eligible owner gate and actual actor attribution. |
+| Document cross-requester 403 to 404 compatibility change | tests.md and API compatibility section now explicitly state Lab 2/3 behavior change; role-level denial remains 403. |
+
+The later 410/404 correction is part of #48's reviewable diff and will receive its own peer review. The earlier author reply accurately said these follow-ups were not yet implemented at the time it was posted.
 
 ### PR #54 feedback and response
 
