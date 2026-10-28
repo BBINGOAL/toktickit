@@ -1,6 +1,6 @@
 # Lab 4 Test Plan and Acceptance Traceability
 
-Status: test plan created before implementation, now updated with issue #45 branch results. Branch pass is not a final-main pass; Partial identifies coverage spanning later issues. Not run paths remain planned until implemented. See [foundation verification](foundation-verification.md) for actual commands/counts and stage boundaries.
+Status: test plan created before implementation, now updated through issue #48 branch results. Branch pass is not a final-main pass; Partial identifies coverage spanning later issues. Not run paths remain planned until implemented. See the per-increment verification documents for actual commands/counts and stage boundaries.
 
 Issue #48 verification (2026-10-28): backend **244/244** (22 files), client **72/72** (17 files), Chromium combined Actions/workflow/Requester Dashboard **20/20** (5 files); client/server types/builds pass and schema drift none. This adds 30 Dashboard/date/query tests, 5 PR #55 follow-up checks, 11 component tests and 7 Requester E2E cases to earlier coverage. See [Requester Dashboard verification](requester-dashboard-verification.md) for actual times, failures/fixes, environment and scope limits. No final-main, Staff Dashboard or full legacy E2E pass is claimed.
 

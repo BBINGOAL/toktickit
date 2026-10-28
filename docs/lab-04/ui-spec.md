@@ -68,7 +68,7 @@ Screenshots are real runtime captures stored locally under `artifacts/lab-04/scr
 | Check | Planned evidence | Status |
 |---|---|---|
 | Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Pending |
-| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Pending |
+| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester API/UI/E2E pass; Staff Dashboard remains #49 |
 | Actions modes, editable/read-only and validation placement | List/create/edit/terminal/follow-up/conflict | Actions branch checks pass; runtime lifecycle/failure E2E pass; images inspected |
 | Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Actions labels/focus cycle/Escape/restore pass; whole-product contrast/zoom remain #50 |
-| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Actions page/dialog bounds pass at 320/390/768/1280; checkbox/header corrected after image inspection; dashboards/zoom remain pending |
+| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Actions and Requester Dashboard pass at 320/390/768/1280; Requester 320/1280 captures inspected; Staff Dashboard/zoom remain pending |
