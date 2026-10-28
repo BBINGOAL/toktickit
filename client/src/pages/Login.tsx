@@ -41,7 +41,7 @@ export default function Login() {
                 if (data.role === 'IT_STAFF' || data.role === 'ADMIN') {
                     navigate('/staff/tickets');
                 } else {
-                    navigate('/tickets');
+                    navigate('/dashboard');
                 }
             }
         } catch (err: any) {
@@ -74,7 +74,7 @@ export default function Login() {
                 if (finalUser.role === 'IT_STAFF' || finalUser.role === 'ADMIN') {
                     navigate('/staff/tickets');
                 } else {
-                    navigate('/tickets');
+                    navigate('/dashboard');
                 }
             }
         } catch (err: any) {

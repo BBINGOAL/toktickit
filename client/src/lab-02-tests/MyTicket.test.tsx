@@ -103,7 +103,7 @@ describe('MyTicketsPage', () => {
         expect(priorityBadge).toHaveStyle({ color: '#991B1B' }) // แดงตาม Zen Green 
         
         // ตรวจสอบ Status Badge
-        const statusBadge = screen.getByText('NEW')
+        const statusBadge = screen.getByText('NEW', { selector: 'span' })
         expect(statusBadge).toHaveStyle({ color: '#006B3C' }) // เขียวเข้ม
     })
 })

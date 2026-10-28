@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { fetchTickets, fetchCategories } from '../api'
 import type { TicketListItem, Category } from '../api'
 import { useAuth } from '../context/AuthContext'
@@ -47,15 +47,31 @@ function formatDate(iso: string) {
 export default function MyTicketsPage() {
     const { user } = useAuth()
 
-    // filter / sort / pagination state
-    const [search, setSearch] = useState('')
+    // URL is authoritative for filters, pagination and browser Back/Forward.
+    const [params, setParams] = useSearchParams()
+    const queryKey = params.toString()
+    const search = params.get('search') || ''
     const [searchInput, setSearchInput] = useState('')
-    const [categoryId, setCategoryId] = useState('')
-    const [priority, setPriority] = useState('')
-    const [sort, setSort] = useState('createdAt')
-    const [order, setOrder] = useState('desc')
-    const [page, setPage] = useState(1)
-    const [pageSize, setPageSize] = useState(10)
+    const categoryId = params.get('categoryId') || ''
+    const priority = params.get('requestedPriority') || ''
+    const status = params.get('status') || ''
+    const scope = params.get('scope') || ''
+    const sort = params.get('sort') || 'createdAt'
+    const order = params.get('order') || 'desc'
+    const page = Number(params.get('page') || 1)
+    const pageSize = Number(params.get('pageSize') || 10)
+    function updateQuery(changes: Record<string, string>, reset = true) {
+        const next = new URLSearchParams(params)
+        for (const [key, value] of Object.entries(changes)) value ? next.set(key, value) : next.delete(key)
+        if (reset) next.set('page', '1')
+        setParams(next)
+    }
+    const setPage = (next: number | ((old: number) => number)) => updateQuery({ page: String(typeof next === 'function' ? next(page) : next) }, false)
+    const setPageSize = (next: number) => updateQuery({ pageSize: String(next) })
+    const setCategoryId = (next: string) => updateQuery({ categoryId: next })
+    const setPriority = (next: string) => updateQuery({ requestedPriority: next })
+    useEffect(() => { setSearchInput(search) }, [search])
+    const generation = useRef(0)
 
     // data state
     const [tickets, setTickets] = useState<TicketListItem[]>([])
@@ -72,56 +88,37 @@ export default function MyTicketsPage() {
 
     const load = useCallback(async () => {
         if (!user) return
+        const requestId = ++generation.current
         setLoading(true)
         setError(null)
         try {
-            const res = await fetchTickets({
-                search: search || undefined,
-                categoryId: categoryId ? Number(categoryId) : undefined,
-                requestedPriority: priority || undefined,
-                sort,
-                order,
-                page,
-                pageSize,
-            })
+            const res = await fetchTickets(Object.fromEntries(new URLSearchParams(queryKey)))
+            if (requestId !== generation.current) return
             setTickets(res.data)
             setTotalPages(res.meta.totalPages)
             setTotalItems(res.meta.totalItems)
         } catch {
+            if (requestId !== generation.current) return
             setError('Failed to load tickets. Please try again.')
         } finally {
-            setLoading(false)
+            if (requestId === generation.current) setLoading(false)
         }
-    }, [user, search, categoryId, priority, sort, order, page, pageSize])
+    }, [user, queryKey])
 
-    useEffect(() => { load() }, [load])
-
-    // reset to page 1 when filters change
-    useEffect(() => { setPage(1) }, [search, categoryId, priority, sort, order, pageSize])
+    useEffect(() => { load(); return () => { generation.current++ } }, [load])
 
     function handleSearch(e: React.FormEvent) {
         e.preventDefault()
-        setSearch(searchInput)
+        updateQuery({ search: searchInput })
     }
 
     function clearFilters() {
         setSearchInput('')
-        setSearch('')
-        setCategoryId('')
-        setPriority('')
-        setSort('createdAt')
-        setOrder('desc')
-        setPageSize(10)
-        setPage(1)
+        setParams({})
     }
 
     function toggleSort(field: string) {
-        if (sort === field) {
-            setOrder(prev => prev === 'asc' ? 'desc' : 'asc')
-        } else {
-            setSort(field)
-            setOrder('desc')
-        }
+        updateQuery({ sort: field, order: sort === field && order === 'desc' ? 'asc' : 'desc' })
     }
 
     const SortIcon = ({ field }: { field: string }) => {
@@ -129,7 +126,7 @@ export default function MyTicketsPage() {
         return <span style={{ marginLeft: 4, color: 'var(--color-primary)' }}>{order === 'asc' ? '↑' : '↓'}</span>
     }
 
-    const hasFilters = search || categoryId || priority
+    const hasFilters = search || categoryId || priority || status || scope || params.has('updatedSince') || params.has('updatedUntil') || params.has('resolvedSince') || params.has('resolvedUntil')
 
     const containerStyle: React.CSSProperties = {
         maxWidth: 1200, margin: '0 auto',
@@ -155,7 +152,7 @@ export default function MyTicketsPage() {
     }
 
     return (
-        <div style={containerStyle}>
+        <div className="my-tickets-page" style={containerStyle}>
             {/* Header */}
             <div style={{ marginBottom: 'var(--space-6)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
                 <div>
@@ -175,12 +172,14 @@ export default function MyTicketsPage() {
             </div>
 
             {/* Filters */}
+            {hasFilters && <p role="status" style={{ overflowWrap: 'anywhere' }}>Current filters: {scope === 'active' ? 'Active tickets. ' : ''}{status ? `Status ${status}. ` : ''}{['updatedSince','updatedUntil','resolvedSince','resolvedUntil'].filter(key => params.has(key)).map(key => `${key}: ${params.get(key)} (UTC)`).join('; ')}</p>}
             <div style={{ ...cardStyle, marginBottom: 'var(--space-4)', padding: 'var(--space-4)' }}>
                 <form onSubmit={handleSearch} style={{ display: 'flex', gap: 'var(--space-3)', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     {/* Search */}
                     <div style={{ flex: '1 1 220px' }}>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 4 }}>Search</label>
+                        <label htmlFor="ticket-search" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 4 }}>Search</label>
                         <input
+                            id="ticket-search"
                             type="text"
                             placeholder="Ticket No. or Summary…"
                             value={searchInput}
@@ -190,16 +189,16 @@ export default function MyTicketsPage() {
                     </div>
                     {/* Category */}
                     <div style={{ flex: '1 1 160px' }}>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 4 }}>Category</label>
-                        <select value={categoryId} onChange={e => setCategoryId(e.target.value)} style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }}>
+                        <label htmlFor="ticket-category" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 4 }}>Category</label>
+                        <select id="ticket-category" value={categoryId} onChange={e => setCategoryId(e.target.value)} style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }}>
                             <option value="">All Categories</option>
                             {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                     </div>
                     {/* Priority */}
                     <div style={{ flex: '1 1 140px' }}>
-                        <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 4 }}>Requested Priority</label>
-                        <select value={priority} onChange={e => setPriority(e.target.value)} style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }}>
+                        <label htmlFor="ticket-priority" style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: 4 }}>Requested Priority</label>
+                        <select id="ticket-priority" value={priority} onChange={e => setPriority(e.target.value)} style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }}>
                             <option value="">All Priorities</option>
                             <option value="LOW">Low</option>
                             <option value="MEDIUM">Medium</option>
@@ -207,6 +206,7 @@ export default function MyTicketsPage() {
                         </select>
                     </div>
                     {/* Buttons */}
+                    <div style={{ flex: '1 1 150px' }}><label htmlFor="ticket-status">Status</label><select id="ticket-status" value={status} onChange={e => updateQuery({ status: e.target.value })} style={{ ...inputStyle, width: '100%' }}><option value="">All Statuses</option>{['NEW','OPEN','IN_PROGRESS','WAITING_FOR_REQUESTER','RESOLVED','CLOSED','REOPENED','CANCELLED'].map(s => <option key={s} value={s}>{s}</option>)}</select></div>
                     <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end' }}>
                         <button type="submit" style={{
                             background: 'var(--color-primary)', color: 'white',
@@ -269,7 +269,7 @@ export default function MyTicketsPage() {
 
                 {/* Table */}
                 {!loading && !error && tickets.length > 0 && (
-                    <div style={{ overflowX: 'auto' }}>
+                    <div role="region" aria-label="My Tickets results" tabIndex={0} style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                             <thead>
                                 <tr style={{ background: '#F9FAFB', borderBottom: '2px solid var(--color-border)' }}>
@@ -286,7 +286,7 @@ export default function MyTicketsPage() {
                                     ].map(({ label, field }) => (
                                         <th
                                             key={label}
-                                            onClick={field ? () => toggleSort(field) : undefined}
+                                            aria-sort={field && sort === field ? order === 'asc' ? 'ascending' : 'descending' : undefined}
                                             style={{
                                                 padding: '10px 14px', textAlign: 'left', fontWeight: 600,
                                                 color: 'var(--color-text-secondary)', whiteSpace: 'nowrap',
@@ -294,7 +294,7 @@ export default function MyTicketsPage() {
                                                 userSelect: 'none',
                                             }}
                                         >
-                                            {label}{field && <SortIcon field={field} />}
+                                            {field ? <button onClick={() => toggleSort(field)} style={{ background: 'none', border: 0, color: 'inherit', font: 'inherit', padding: 0, cursor: 'pointer' }}>{label}<SortIcon field={field} /></button> : label}
                                         </th>
                                     ))}
                                 </tr>
@@ -329,7 +329,7 @@ export default function MyTicketsPage() {
                 {!loading && !error && totalItems > 0 && (
                     <div style={{ padding: '12px 16px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
                         <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                            Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalItems)} of {totalItems} tickets
+                            {tickets.length ? `Showing ${(page - 1) * pageSize + 1}–${Math.min(page * pageSize, totalItems)} of ${totalItems} tickets` : `No tickets on page ${page}. ${totalItems} matching tickets; choose an earlier page.`}
                         </span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                             <label style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
@@ -341,8 +341,8 @@ export default function MyTicketsPage() {
                                 </select>
                             </label>
                             <div style={{ display: 'flex', gap: 4 }}>
-                                <button onClick={() => setPage(1)} disabled={page === 1} style={pageBtnStyle(page === 1)}>«</button>
-                                <button onClick={() => setPage(p => p - 1)} disabled={page === 1} style={pageBtnStyle(page === 1)}>‹</button>
+                                <button aria-label="First page" onClick={() => setPage(1)} disabled={page <= 1} style={pageBtnStyle(page <= 1)}>«</button>
+                                <button aria-label="Previous page" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={pageBtnStyle(page <= 1)}>‹</button>
                                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                                     const start = Math.max(1, Math.min(page - 2, totalPages - 4))
                                     const p = start + i
@@ -352,15 +352,15 @@ export default function MyTicketsPage() {
                                         </button>
                                     )
                                 })}
-                                <button onClick={() => setPage(p => p + 1)} disabled={page === totalPages} style={pageBtnStyle(page === totalPages)}>›</button>
-                                <button onClick={() => setPage(totalPages)} disabled={page === totalPages} style={pageBtnStyle(page === totalPages)}>»</button>
+                                <button aria-label="Next page" onClick={() => setPage(p => p + 1)} disabled={page >= totalPages} style={pageBtnStyle(page >= totalPages)}>›</button>
+                                <button aria-label="Last page" onClick={() => setPage(Math.max(1,totalPages))} disabled={page >= totalPages} style={pageBtnStyle(page >= totalPages)}>»</button>
                             </div>
                         </div>
                     </div>
                 )}
             </div>
 
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } } .my-tickets-page input:focus-visible, .my-tickets-page select:focus-visible, .my-tickets-page button:focus-visible, .my-tickets-page a:focus-visible, .my-tickets-page [tabindex]:focus-visible { outline: 3px solid #925c00 !important; outline-offset: 2px; }`}</style>
         </div>
     )
 }
