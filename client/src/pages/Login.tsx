@@ -39,7 +39,7 @@ export default function Login() {
             } else {
                 setUser(data);
                 if (data.role === 'IT_STAFF' || data.role === 'ADMIN') {
-                    navigate('/staff/tickets');
+                    navigate('/staff/dashboard');
                 } else {
                     navigate('/dashboard');
                 }
@@ -72,7 +72,7 @@ export default function Login() {
                 const finalUser = { ...tempUser, mustChangePassword: false };
                 setUser(finalUser);
                 if (finalUser.role === 'IT_STAFF' || finalUser.role === 'ADMIN') {
-                    navigate('/staff/tickets');
+                    navigate('/staff/dashboard');
                 } else {
                     navigate('/dashboard');
                 }

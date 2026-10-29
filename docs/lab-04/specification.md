@@ -111,6 +111,8 @@ PR #55 review clarification (implemented/tested follow-up in #48): eligible Tick
 
 See [ui-spec.md](ui-spec.md). Add `/dashboard` for Requester and `/staff/dashboard` for Staff/Admin. Preserve all old navigation and screens. Ticket Detail adds action list, read-only view, form, state controls and public workflow timeline. API returns allowed next statuses; UI does not infer extra permitted transitions. All important forms retain drafts on recoverable errors and expose conflict refresh controls.
 
+Issue #49 implementation clarification: Staff/Admin share the operational Dashboard and keep Queue/Admin Users navigation. My Actions view-all is paged in the Dashboard URL; links open focused public action details/history on Ticket Detail even when that action is outside the first work-list page. One bounded authorized GET resolves the action; it does not grant any edit permission or load all actions. Staff Queue filters, ordering and page state are URL-owned, with stable ID ties and exact count/list predicates. Wrong-role authenticated routes show Access denied while preserving shell navigation; unauthenticated routes still redirect to sign-in.
+
 ## 7. Data Changes and Migration
 
 | Model/change | Fields and constraints |

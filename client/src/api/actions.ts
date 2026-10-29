@@ -53,6 +53,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export function fetchActions(ticketId: number, page = 1, pageSize = 10) {
   return request<ActionPage>(`/tickets/${ticketId}/actions?page=${page}&pageSize=${pageSize}`)
 }
+export function fetchActionById(ticketId: number, actionId: string) {
+  return request<{ data: ActionTaken; ticketVersion: number }>(`/tickets/${ticketId}/actions/${encodeURIComponent(actionId)}`)
+}
 export function fetchActionHistory(ticketId: number, actionId: number, page = 1) {
   return request<{ data: ActionEvent[]; meta: PageMeta }>(`/tickets/${ticketId}/actions/${actionId}/history?page=${page}&pageSize=10`)
 }

@@ -8,6 +8,7 @@ import TicketDetailPage from './pages/TicketDetailPage'
 import ITStaffQueue from './pages/ITStaffQueue'
 import UserManagement from './pages/UserManagement'
 import RequesterDashboard from './pages/RequesterDashboard'
+import StaffDashboard from './pages/StaffDashboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { user, loading } = useAuth()
@@ -30,6 +31,7 @@ function AppRoutes() {
             <Routes>
                 <Route path="/" element={<Login />} />
                 <Route path="/dashboard" element={<RoleRoute roles={['REQUESTER']}><RequesterDashboard /></RoleRoute>} />
+                <Route path="/staff/dashboard" element={<RoleRoute roles={['IT_STAFF','ADMIN']}><StaffDashboard /></RoleRoute>} />
                 <Route
                     path="/create"
                     element={

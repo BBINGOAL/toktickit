@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { ActionApiError, createAction, fetchActionHistory, fetchActions, fetchAssignees, updateAction } from '../api/actions'
+import { ActionApiError, createAction, fetchActionHistory, fetchActionById, fetchActions, fetchAssignees, updateAction } from '../api/actions'
 import type { ActionEvent, ActionFields, ActionPage, ActionStatus, ActionTaken, Assignee, CreateAction, PageMeta, UpdateAction } from '../api/actions'
 import './ActionsTaken.css'
 
@@ -248,8 +248,8 @@ function Editor({ ticketId, ticketCreatedAt, ticketVersion, workCycle, action, p
   </Modal>
 }
 
-export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, workCycle, ticketVersion, onChanged }: {
-  ticketId: number; ticketStatus: string; ticketCreatedAt: string; workCycle?: number; ticketVersion?: number; onChanged: () => void
+export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, workCycle, ticketVersion, linkedActionId, onChanged }: {
+  ticketId: number; ticketStatus: string; ticketCreatedAt: string; workCycle?: number; ticketVersion?: number; linkedActionId?: string; onChanged: () => void
 }) {
   const { user } = useAuth()
   const [data, setData] = useState<ActionPage | null>(null)
@@ -261,6 +261,14 @@ export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, 
   const [notice, setNotice] = useState('')
   const [editor, setEditor] = useState<{ action?: ActionTaken; predecessor?: ActionTaken } | null>(null)
   const [view, setView] = useState<ActionTaken | null>(null)
+  const [linkError, setLinkError] = useState('')
+  const [linkRevision, setLinkRevision] = useState(0)
+  useEffect(() => {
+    if (!linkedActionId) return
+    let live = true; setLinkError(''); setView(null)
+    fetchActionById(ticketId, linkedActionId).then(result => { if (live) setView(result.data) }).catch(e => { if (live) setLinkError(message(e)) })
+    return () => { live = false }
+  }, [ticketId, linkedActionId, linkRevision])
   const newActionButton = useRef<HTMLButtonElement>(null)
   const restoreFocusAfterReload = useRef(false)
   const staff = user?.role === 'IT_STAFF' || user?.role === 'ADMIN'
@@ -289,6 +297,7 @@ export default function ActionsTaken({ ticketId, ticketStatus, ticketCreatedAt, 
     {staff && !writable && <p>This Ticket is terminal. Actions and history remain read-only.</p>}
     <div role="status" aria-live="polite">{notice}{loading && <p>Loading actions...</p>}</div>
     {error && <div role="alert" className="action-error">{error}<button onClick={() => setRevision(n => n + 1)}>Retry actions</button></div>}
+    {linkError && <div role="alert">Linked action unavailable. {linkError}<button onClick={() => setLinkRevision(n => n + 1)}>Retry linked action</button></div>}
     {data && <>
       {!data.data.length && !loading && !error && <p>No Actions Taken yet.</p>}
       <ol className="action-list">{data.data.map(action => <li className="action-card" id={`action-${action.id}`} key={action.id}>
