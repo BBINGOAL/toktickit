@@ -1,8 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { downloadAttachment, fetchStaffTickets, fetchTickets } from '../api'
+import { createTicket, createAdminUser, removeAttachment, resetAdminUserPassword, downloadAttachment, fetchStaffTickets, fetchTickets } from '../api'
 import { fetchStaffDashboard } from '../api/dashboards'
 afterEach(()=>vi.restoreAllMocks())
 describe('dashboard transport and PR #56 compatibility',()=>{
+  it.each([
+    ['Ticket create', () => createTicket({summary:'Valid summary',description:'A valid description',categoryId:1,relatedSystemId:1,requestedPriority:'LOW'})],
+    ['Admin create', () => createAdminUser({name:'New user'})],
+    ['Attachment removal', () => removeAttachment(1,'Wrong file')],
+    ['Password reset', () => resetAdminUserPassword(1,'password123')],
+  ] as const)('does not expose arbitrary outage text for %s',async(_,send)=>{
+    vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response('{"error":"SQL PRIVATE passwordHash"}',{status:500}))
+    await expect(send()).rejects.not.toThrow('PRIVATE')
+  })
   it('encodes a positive timezone offset instead of sending a literal plus',async()=>{
     const fetch=vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response('{"data":[],"meta":{}}'))
     await fetchTickets({updatedSince:'2026-10-28T00:00:00+07:00'})

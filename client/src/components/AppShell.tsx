@@ -20,7 +20,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             {/* ─── Nav Bar ─── */}
-            <nav className="app-nav" style={{
+            <nav className="app-nav" aria-label="Application navigation" style={{
                 background: 'var(--color-primary)',
                 position: 'sticky',
                 top: 0,
@@ -94,7 +94,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 {user ? (
                     <div className="app-nav-user">
                         <span style={{ 
-                            background: '#7b9c7b', 
+                            background: '#396845',
                             color: '#fff', 
                             fontSize: 11, 
                             padding: '2px 6px', 
@@ -127,6 +127,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {/* ─── Page Content ─── */}
             <main style={{
                 flex: 1,
+                minWidth: 0,
                 maxWidth: 1200,
                 width: '100%',
                 margin: '0 auto',

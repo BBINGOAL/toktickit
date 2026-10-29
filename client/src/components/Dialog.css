@@ -1,5 +1,5 @@
-.action-backdrop { position: fixed; inset: 0; z-index: 1100; background: rgb(0 0 0 / .45); display: grid; place-items: center; padding: 16px; }
-.action-dialog { background: white; color: var(--color-text-primary); border-radius: 12px; padding: 24px; width: min(680px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; overflow-wrap: anywhere; min-width: 0; }
+.action-backdrop { position: fixed; inset: 0; z-index: 1100; background: rgb(0 0 0 / .45); display: grid; grid-template-rows: minmax(0, 1fr); place-items: center; padding: 16px; }
+.action-dialog { background: white; color: var(--color-text-primary); border-radius: 12px; padding: 24px; width: min(680px, 100%); max-height: 100%; overflow-y: auto; overflow-wrap: anywhere; min-width: 0; min-height: 0; }
 .action-dialog :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 .action-dialog button { border: 1px solid var(--color-border); border-radius: 6px; padding: 8px 12px; background: white; color: var(--color-text-primary); cursor: pointer; }
 .action-dialog button:disabled { opacity: .6; cursor: not-allowed; }

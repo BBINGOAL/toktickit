@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { fetchAdminUsers, createAdminUser, updateAdminUser, resetAdminUserPassword } from '../api'
 import type { AdminUser } from '../api'
 import { useAuth } from '../context/AuthContext'
+import Dialog from '../components/Dialog'
 
 export default function UserManagement() {
     const { user } = useAuth()
@@ -21,21 +22,28 @@ export default function UserManagement() {
     const [saving, setSaving] = useState(false)
     const [passwordResetMsg, setPasswordResetMsg] = useState<string | null>(null)
 
+    const [revision, setRevision] = useState(0)
+    const saveLock = useRef(false)
+    const initialForm = useRef(formData)
+    const allowed = user?.role === 'ADMIN'
     useEffect(() => {
-        loadUsers()
-    }, [search, roleFilter])
-
-    async function loadUsers() {
-        setLoading(true)
-        try {
-            const data = await fetchAdminUsers(search, roleFilter)
-            setUsers(data)
-            setError(null)
-        } catch (e: any) {
-            setError(e.message)
-        } finally {
-            setLoading(false)
-        }
+        if (!allowed) return
+        let live = true; setLoading(true); setError(null)
+        fetchAdminUsers(search, roleFilter).then(data => { if (live) setUsers(data) })
+            .catch(() => { if (live) setError('Unable to load users. Please retry.') })
+            .finally(() => { if (live) setLoading(false) })
+        return () => { live = false }
+    }, [allowed, search, roleFilter, revision])
+    function closeModal() {
+        if (saveLock.current) return
+        if (JSON.stringify(formData) !== JSON.stringify(initialForm.current) && !window.confirm('Discard this unsaved user draft?')) return
+        setShowModal(false)
+    }
+    const saveMessage = (error: unknown) => {
+        // Allow only known field/domain feedback; never display arbitrary server text.
+        const message = error instanceof Error ? error.message : ''
+        return /^(Email already exists|Cannot deactivate|Cannot demote|Cannot change|Cannot remove|Password must|Initial password is required|Invalid email|Name is required|Please enter a new password)/i.test(message)
+            ? message : 'Unable to save user. Your fields have been kept. Check the user list before retrying if the response was lost.'
     }
 
     function openCreateModal() {
@@ -43,6 +51,7 @@ export default function UserManagement() {
         setFormData({ name: '', email: '', role: 'REQUESTER', isActive: true, initialPassword: '' })
         setModalError(null)
         setPasswordResetMsg(null)
+        initialForm.current = { name: '', email: '', role: 'REQUESTER', isActive: true, initialPassword: '' }
         setShowModal(true)
     }
 
@@ -50,13 +59,15 @@ export default function UserManagement() {
         setModalMode('EDIT')
         setEditingUserId(u.id)
         setFormData({ name: u.name, email: u.email, role: u.role, isActive: u.isActive, initialPassword: '' })
+        initialForm.current = { name: u.name, email: u.email, role: u.role, isActive: u.isActive, initialPassword: '' }
         setModalError(null)
         setPasswordResetMsg(null)
         setShowModal(true)
     }
 
     async function handleSave() {
-        setSaving(true)
+        if (saveLock.current) return
+        saveLock.current = true; setSaving(true)
         setModalError(null)
         setPasswordResetMsg(null)
         try {
@@ -73,11 +84,11 @@ export default function UserManagement() {
                 })
             }
             setShowModal(false)
-            loadUsers()
+            setRevision(n => n + 1)
         } catch (e: any) {
-            setModalError(e.message)
+            setModalError(saveMessage(e))
         } finally {
-            setSaving(false)
+            saveLock.current = false; setSaving(false)
         }
     }
 
@@ -86,18 +97,19 @@ export default function UserManagement() {
             setModalError('Please enter a new password to reset.')
             return
         }
-        setSaving(true)
+        if (saveLock.current) return
+        saveLock.current = true; setSaving(true)
         setModalError(null)
         setPasswordResetMsg(null)
         try {
             await resetAdminUserPassword(editingUserId, formData.initialPassword)
             setPasswordResetMsg('Password reset successfully. The user will be forced to change it on next login.')
             setFormData({ ...formData, initialPassword: '' })
-            loadUsers()
+            setRevision(n => n + 1)
         } catch (e: any) {
-            setModalError(e.message)
+            setModalError(saveMessage(e))
         } finally {
-            setSaving(false)
+            saveLock.current = false; setSaving(false)
         }
     }
 
@@ -123,9 +135,10 @@ export default function UserManagement() {
                     placeholder="Search by name or email..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    style={{ flex: 1, minWidth: 250, padding: '10px 16px', borderRadius: 8, border: '1px solid #D1D5DB' }}
+                    aria-label="Search users"
+                    style={{ flex: '1 1 250px', minWidth: 0, padding: '10px 16px', borderRadius: 8, border: '1px solid #D1D5DB' }}
                 />
-                <select
+                <select aria-label="Filter users by role"
                     value={roleFilter}
                     onChange={e => setRoleFilter(e.target.value)}
                     style={{ padding: '10px 16px', borderRadius: 8, border: '1px solid #D1D5DB', background: 'white' }}
@@ -137,10 +150,10 @@ export default function UserManagement() {
                 </select>
             </div>
 
-            {error && <div style={{ background: '#FEE2E2', color: '#991B1B', padding: 16, borderRadius: 8, marginBottom: 24 }}>{error}</div>}
+            {error && <div role="alert" style={{ background: '#FEE2E2', color: '#991B1B', padding: 16, borderRadius: 8, marginBottom: 24 }}>{error}<button className="btn btn-secondary" onClick={() => setRevision(n => n + 1)}>Retry users</button></div>}
 
             <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E5E7EB', overflow: 'hidden' }}>
-                <div style={{ overflowX: 'auto' }}>
+                <div role="region" aria-label="User accounts table" tabIndex={0} style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 800 }}>
                         <thead style={{ background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
                             <tr>
@@ -153,9 +166,9 @@ export default function UserManagement() {
                         </thead>
                         <tbody>
                             {loading && <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: '#6B7280' }}>Loading users...</td></tr>}
-                            {!loading && users.length === 0 && <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: '#6B7280' }}>No users found.</td></tr>}
+                            {!loading && !error && users.length === 0 && <tr><td colSpan={5} style={{ padding: 24, textAlign: 'center', color: '#6B7280' }}>No users found.</td></tr>}
                             {!loading && users.map(u => (
-                                <tr key={u.id} style={{ borderBottom: '1px solid #E5E7EB', opacity: u.isActive ? 1 : 0.6 }}>
+                                <tr key={u.id} style={{ borderBottom: '1px solid #E5E7EB', opacity: 1 }}>
                                     <td style={{ padding: '16px 24px', fontWeight: 500, color: '#111827' }}>{u.name}</td>
                                     <td style={{ padding: '16px 24px', color: '#4B5563' }}>{u.email}</td>
                                     <td style={{ padding: '16px 24px' }}>
@@ -169,10 +182,10 @@ export default function UserManagement() {
                                     </td>
                                     <td style={{ padding: '16px 24px' }}>
                                         {u.isActive 
-                                            ? <span style={{ color: '#059669', fontWeight: 600, fontSize: '0.875rem' }}>Active</span>
+                                            ? <span style={{ color: '#047857', fontWeight: 600, fontSize: '0.875rem' }}>Active</span>
                                             : <span style={{ color: '#DC2626', fontWeight: 600, fontSize: '0.875rem' }}>Inactive</span>
                                         }
-                                        {u.mustChangePassword && <div style={{ fontSize: '0.7rem', color: '#D97706', marginTop: 4 }}>Needs Password Reset</div>}
+                                        {u.mustChangePassword && <div style={{ fontSize: '0.7rem', color: '#92400E', marginTop: 4 }}>Needs Password Reset</div>}
                                     </td>
                                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                                         <button onClick={() => openEditModal(u)} style={{ background: 'transparent', border: '1px solid #D1D5DB', color: '#374151', padding: '6px 12px', borderRadius: 6, cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem' }}>Edit</button>
@@ -186,25 +199,22 @@ export default function UserManagement() {
 
             {/* Modal */}
             {showModal && (
-                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
-                    <div style={{ background: 'white', borderRadius: 12, width: '100%', maxWidth: 500, padding: 32, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
-                        <h2 style={{ margin: '0 0 24px', fontSize: '1.5rem', color: '#111827' }}>{modalMode === 'CREATE' ? 'Create New User' : 'Edit User'}</h2>
-                        
-                        {modalError && <div style={{ background: '#FEE2E2', color: '#991B1B', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: '0.875rem' }}>{modalError}</div>}
-                        {passwordResetMsg && <div style={{ background: '#D1FAE5', color: '#065F46', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: '0.875rem' }}>{passwordResetMsg}</div>}
+                <Dialog title={modalMode === 'CREATE' ? 'Create New User' : 'Edit User'} onClose={closeModal} busy={saving}>
+                        {modalError && <div role="alert" style={{ background: '#FEE2E2', color: '#991B1B', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: '0.875rem' }}>{modalError}</div>}
+                        {passwordResetMsg && <div role="status" style={{ background: '#D1FAE5', color: '#065F46', padding: 12, borderRadius: 8, marginBottom: 16, fontSize: '0.875rem' }}>{passwordResetMsg}</div>}
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
                             <div>
                                 <label htmlFor="user-full-name" style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Full Name</label>
-                                <input id="user-full-name" type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
+                                <input id="user-full-name" disabled={saving} type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
                             </div>
                             <div>
                                 <label htmlFor="user-email" style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Email Address</label>
-                                <input id="user-email" type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
+                                <input id="user-email" disabled={saving} type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8 }} />
                             </div>
                             <div>
                                 <label htmlFor="user-role" style={{ display: 'block', marginBottom: 8, fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Role</label>
-                                <select id="user-role" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8, background: 'white' }}>
+                                <select disabled={saving} id="user-role" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} style={{ width: '100%', padding: '10px 12px', boxSizing: 'border-box', border: '1px solid #D1D5DB', borderRadius: 8, background: 'white' }}>
                                     <option value="REQUESTER">Requester</option>
                                     <option value="IT_STAFF">IT Staff</option>
                                     <option value="ADMIN">Administrator</option>
@@ -214,7 +224,7 @@ export default function UserManagement() {
                             {modalMode === 'EDIT' && (
                                 <div>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={formData.isActive} onChange={e => setFormData({ ...formData, isActive: e.target.checked })} style={{ width: 18, height: 18 }} />
+                                        <input disabled={saving} type="checkbox" checked={formData.isActive} onChange={e => setFormData({ ...formData, isActive: e.target.checked })} style={{ width: 18, height: 18 }} />
                                         <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#374151' }}>Account is Active</span>
                                     </label>
                                 </div>
@@ -225,7 +235,7 @@ export default function UserManagement() {
                                     {modalMode === 'CREATE' ? 'Initial Password' : 'Set New Password (Optional)'}
                                 </label>
                                 <div style={{ display: 'flex', gap: 12 }}>
-                                    <input id="user-password"
+                                    <input disabled={saving} id="user-password"
                                         type="text" 
                                         placeholder="e.g. password123" 
                                         value={formData.initialPassword} 
@@ -247,13 +257,12 @@ export default function UserManagement() {
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 32 }}>
-                            <button onClick={() => setShowModal(false)} disabled={saving} style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #D1D5DB', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
+                            <button onClick={closeModal} disabled={saving} style={{ padding: '10px 20px', borderRadius: 8, border: '1px solid #D1D5DB', background: 'white', color: '#374151', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
                             <button onClick={handleSave} disabled={saving || !formData.name || !formData.email} style={{ padding: '10px 24px', borderRadius: 8, border: 'none', background: '#006B3C', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
                                 {saving ? 'Saving...' : 'Save User'}
                             </button>
                         </div>
-                    </div>
-                </div>
+                </Dialog>
             )}
         </div>
     )
