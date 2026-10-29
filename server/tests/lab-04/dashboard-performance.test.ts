@@ -3,6 +3,8 @@ import request from 'supertest'
 import { Client } from 'pg'
 import { performance } from 'node:perf_hooks'
 import os from 'node:os'
+import { mkdir, writeFile } from 'node:fs/promises'
+import path from 'node:path'
 import app from '../../src/app'
 import { prisma } from '../../src/db'
 import { fixture } from './fixtures'
@@ -78,8 +80,12 @@ it('bounds payload, SQL queries and warm p95 for each role on 1000 Tickets / 300
     expect(result.maxBytes).toBeLessThanOrEqual(50 * 1024)
     expect(result.p95Ms).toBeLessThanOrEqual(1000)
   }
-  console.log('PERF_ENV', JSON.stringify({ node: process.version, platform: process.platform, arch: process.arch,
+  const evidence = { measuredAt: new Date().toISOString(), node: process.version, platform: process.platform, arch: process.arch,
     cpu: os.cpus()[0]?.model, logicalCpus: os.cpus().length, memoryGiB: Number((os.totalmem()/1024**3).toFixed(2)),
     postgres: (await prisma.$queryRawUnsafe<any[]>('SHOW server_version'))[0].server_version,
-    tickets: 1000, actions: 3000, originalRowsRetained: true, results }))
+    tickets: 1000, actions: 3000, originalRowsRetained: true, results }
+  console.log('PERF_ENV', JSON.stringify(evidence))
+  const output = path.resolve(__dirname, '../../../tmp/lab4-hardening-verification')
+  await mkdir(output, { recursive: true })
+  await writeFile(path.join(output, 'performance-metrics.json'), JSON.stringify(evidence, null, 2))
 }, 60000)

@@ -27,7 +27,16 @@ export async function staffDashboard(staffId: number) {
     const myPendingActions = await tx.actionTaken.count({ where: pending })
     const recent = await tx.ticket.findMany({ orderBy: recentOrder, take: 5, select: ticketSelect })
     const urgent = await tx.ticket.findMany({ where: { ...active, itPriority: 'HIGH' }, orderBy: recentOrder, take: 5, select: ticketSelect })
-    const mine = await tx.actionTaken.findMany({ where: pending, orderBy: recentOrder, take: 5, select: actionSelect })
+    // A bounded join avoids Prisma's additional Ticket lookup for this preview.
+    // Keep the same current-assignee/active-parent predicate as My Actions.
+    const mine = await tx.$queryRaw<Prisma.ActionTakenGetPayload<{ select: typeof actionSelect }>[]>`
+      SELECT a.id, a."ticketId", a.description, a.status, a."updatedAt",
+             jsonb_build_object('ticketNumber', t."ticketNumber") AS ticket
+      FROM "ActionTaken" a JOIN "Ticket" t ON t.id = a."ticketId"
+      WHERE a."assigneeId" = ${staffId}
+        AND a.status IN ('PLANNED', 'IN_PROGRESS')
+        AND t.status IN (${Prisma.join(activeStatuses.map(status => Prisma.sql`${status}::"TicketStatus"`))})
+      ORDER BY a."updatedAt" DESC, a.id DESC LIMIT 5`
     return { ...window, metrics: { unassignedActive, myActiveTickets, myPendingActions, ...staffGroupCounts(statusRows, priorityRows) },
       recentTickets: ticketPreview(recent), urgentTickets: ticketPreview(urgent), myActions: actionPreview(mine),
       drillDown: { unassignedActive: queueLink({ scope: 'active', owner: 'unassigned' }), myActiveTickets: queueLink({ scope: 'active', owner: 'me' }), myPendingActions: '/staff/dashboard?view=my-actions&page=1&pageSize=10',
