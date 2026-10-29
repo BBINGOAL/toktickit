@@ -2,6 +2,8 @@
 
 Issue [#50](https://github.com/BBINGOAL/toktickit/issues/50), branch `feature7/lab4-final-hardening-regression`. Started on 2026-10-29 only after the student's continue instruction and verified reviewed PR #57 staging merge `85a06ed67f7a30bc06ae605c8e7031bea1de0cf6`. This is feature-branch verification, not final-main release evidence.
 
+Submitted as [PR #58](https://github.com/BBINGOAL/toktickit/pull/58) into lab4-staging, Development-linked to #50. PpAnpt is requested; actual review is pending. Incremental commits separate regression tests, link/component work, performance tests/optimization, legacy UI, full E2E, evidence and PR metadata. Subsequent evidence/metadata commits do not alter the tested application source.
+
 ## Environment and isolation
 
 Windows x64, Node v24.14.0, native PostgreSQL 18.1, AMD Ryzen 5 7535HS (12 logical CPUs), 15.32 GiB RAM. The existing owned B: test cluster runs on `127.0.0.1:55434`; database `toktickit_lab4_verify_20261014_actions`. The owned test cluster was stopped cleanly after verification; postmaster.pid was absent. No original localdb, .env, Docker volume or report asset was reset or staged. Docker recovery is not claimed.

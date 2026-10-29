@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: #44-#49 integrated through reviewed PRs #52-#57; latest staging merge 85a06ed on 2026-10-29. #50 is In progress on feature7/lab4-final-hardening-regression from that merge; #51 has not started. See hardening-verification.md for actual branch checks and release boundaries. Native PostgreSQL 18.1 provides isolated verification; Docker recovery is not claimed.
+Status: #44-#49 integrated through reviewed PRs #52-#57; latest staging merge 85a06ed on 2026-10-29. #50 is In review through PR #58 on feature7/lab4-final-hardening-regression, Development-linked to #50 with PpAnpt requested. Backend 278/278 plus separate performance 1/1, client 109/109 and all application Chromium 49/49 pass. #51 has not started. See hardening-verification.md for actual branch checks and release boundaries. Native PostgreSQL 18.1 provides isolated verification; Docker recovery is not claimed.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -25,7 +25,7 @@ Create subsequent feature branches from the latest integrated staging commit. Ru
 | 7 | Lab4 Final Regression and Product Hardening | `feature7/lab4-final-hardening-regression` | Labs 1-3 regression, Staff Queue sorting/pagination, stable ordering, retry/double-submit, security, accessibility, responsive/style inspection, performance smoke and failure states. |
 | 8 | Lab4 Documentation Evidence and Release Integration | `feature8/lab4-docs-release` | README, actual test traceability, real review records and AI reflection, screenshots, concise MD/PDF Answer Part 1-9, staging release checks and post-merge main evidence. |
 
-Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires tests and reviewed integration. Existing private Project 4: #44-#49 Done, #50 In progress, #51 Backlog. PR #57 is merged and Development-linked to #49; #50 gets its own reviewed PR. Release stays open until final-main verification succeeds.
+Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires tests and reviewed integration. Existing private Project 4: #44-#49 Done, #50 In review through PR #58, #51 Backlog. PR #58 is Development-linked to #50 and requests PpAnpt review; await actual review and staging merge. Release stays open until final-main verification succeeds.
 
 ## Must-have versus stretch and complexity limits
 
