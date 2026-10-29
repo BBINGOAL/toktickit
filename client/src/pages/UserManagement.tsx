@@ -122,7 +122,7 @@ export default function UserManagement() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
                 <div>
                     <h1 style={{ margin: '0 0 8px', fontSize: '1.875rem', color: '#006B3C' }}>User Management</h1>
-                    <p style={{ margin: 0, color: '#6B7280' }}>Manage accounts and roles.</p>
+                    <p style={{ margin: 0, color: '#4B5563' }}>Manage accounts and roles.</p>
                 </div>
                 <button onClick={openCreateModal} style={{ background: '#006B3C', color: 'white', padding: '10px 20px', borderRadius: 8, border: 'none', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
                     + New User

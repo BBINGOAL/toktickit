@@ -6,6 +6,7 @@ test('initial password must be changed before app access', async ({ page, accoun
   await page.getByLabel('New Password', { exact: true }).fill('newpassword123')
   await page.getByLabel('Confirm New Password', { exact: true }).fill('newpassword123')
   await page.getByRole('button', { name: 'Set Password and Login' }).click()
-  await expect(page).toHaveURL(/\/tickets$/)
+  await expect(page).toHaveURL(/\/dashboard$/)
+  await page.getByRole('navigation', { name: 'Application navigation' }).getByRole('link', { name: 'My Tickets', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'My Tickets', exact: true })).toBeVisible()
 })

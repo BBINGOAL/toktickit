@@ -3,7 +3,7 @@ import { test, expect, login, screenshot } from '../fixtures';
 test.describe('E2E-01: Create Ticket Flow', () => {
   test('Complete requester submission flow', async ({ page, accounts }) => {
     await login(page, accounts.requester);
-    await expect(page).toHaveURL(/\/tickets$/);
+    await expect(page).toHaveURL(/\/dashboard$/);
     await page.goto('/create');
     await expect(page.getByRole('heading', { name: /Create New Ticket/i })).toBeVisible();
 
