@@ -178,7 +178,7 @@ function NoteSection({ ticketId }: { ticketId: number }) {
 
 export default function TicketDetailPage() {
     const { id } = useParams()
-    const [searchParams] = useSearchParams()
+    const [searchParams, setSearchParams] = useSearchParams()
     const { user } = useAuth()
     const [ticket, setTicket] = useState<TicketDetail | null>(null)
     const [loading, setLoading] = useState(true)
@@ -310,6 +310,10 @@ export default function TicketDetailPage() {
             </div>
 
             <ActionsTaken key={ticket.id} ticketId={ticket.id} ticketStatus={ticket.status} ticketCreatedAt={ticket.createdAt} workCycle={ticket.workCycle} ticketVersion={ticket.version} linkedActionId={searchParams.get('actionId') || undefined}
+                onDetailsClose={() => {
+                    if (!searchParams.has('actionId')) return
+                    setSearchParams(previous => { const next = new URLSearchParams(previous); next.delete('actionId'); return next }, { replace: true })
+                }}
                 onChanged={() => { fetchTicketDetail(ticket.id).then(setTicket).catch(() => { /* The saved action is authoritative; existing Ticket content stays visible. */ }) }} />
             <CommentSection ticketId={ticket.id} />
             {isStaff && <NoteSection ticketId={ticket.id} />}

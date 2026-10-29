@@ -35,6 +35,7 @@ describe('Staff Dashboard', () => {
     expect(screen.getByRole('link',{name:'UNSET: 1'})).toHaveAttribute('href',data.drillDown.activeByPriority.UNSET)
     expect(screen.getByRole('link',{name:/TKT-7 · Action #99/})).toHaveAttribute('href','/tickets/7?actionId=99')
     expect(screen.getByText(/Snapshot:/)).toHaveTextContent('Asia/Bangkok')
+    expect(screen.getByText(/Queue and My Actions links show current data/)).toBeVisible()
   })
   it('shows loading without inventing zero counts and disables refresh', () => {
     vi.mocked(api.fetchStaffDashboard).mockReturnValue(new Promise(() => {})); page()

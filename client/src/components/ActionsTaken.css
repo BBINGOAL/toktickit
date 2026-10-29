@@ -10,8 +10,6 @@
 .action-card p, .action-dialog p { margin: 8px 0; white-space: pre-wrap; }
 .action-status { background: var(--color-pale-green); color: var(--color-primary); border-radius: 6px; padding: 4px 8px; font-weight: 600; }
 .action-error { color: var(--color-error); background: var(--color-error-bg); padding: 12px; border-radius: 6px; margin: 12px 0; }
-.action-backdrop { position: fixed; inset: 0; z-index: 1100; background: rgb(0 0 0 / .45); display: grid; place-items: center; padding: 16px; }
-.action-dialog { background: white; color: var(--color-text-primary); border-radius: 12px; padding: 24px; width: min(680px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; overflow-wrap: anywhere; min-width: 0; }
 .action-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .action-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; margin: 12px 0; }
 .action-field input:not([type=checkbox]), .action-field select, .action-field textarea, .assignee-search { border: 1px solid var(--color-border); border-radius: 6px; padding: 10px; width: 100%; min-width: 0; color: var(--color-text-primary); background: white; }
