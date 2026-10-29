@@ -93,6 +93,10 @@ Staff/Admin only. Same snapshot/timezone metadata; metrics `{unassignedActive,my
 
 Issue #49: one repeatable-read snapshot, eight aggregate/bounded preview queries (auth/transaction statements excluded from that count). No query parameters allowed. byStatus counts all accessible Tickets; activeByPriority and unassigned/my-active apply ACTIVE. My Actions uses current assignee, not creator/performer, unfinished state and active parent. Every preview is capped at five and ordered updatedAt DESC,id DESC. Groups include explicit zeros and UNSET maps to null IT priority. All metrics are backend-owned. DrillDown includes unassignedActive, myActiveTickets, myPendingActions, byStatus and activeByPriority maps, plus recentTickets/urgentTickets. Queue URLs include matching filters and sort=updatedAt&order=desc&page=1; My Actions links to `/staff/dashboard?view=my-actions&page=1&pageSize=10`. A new list request may reflect changes committed after the card snapshot.
 
+PR #57 clarification in #50: Staff retains `windowStart` for response compatibility with the shared metadata helper. It is **not a filter on any Staff metric or preview**: status/owner/priority/assignee rules apply across all dates, and recent previews select the most recently updated rows across all dates. Only the Requester recent metrics use the seven-day window. `asOf` labels the snapshot; Queue/My Actions links read current data, never a historical snapshot. The UI states this beside the cards.
+
+#50 performance hardening uses one parameterized bounded SQL join for the five-item My Actions preview, preserving the same assignee, action-state and parent-ACTIVE predicate. This avoids a second Ticket relation query without enabling preview ORM features or loading entire collections. The measured SQL budget includes authentication plus transaction-control statements: Requester 10, Staff/Admin 12 per request on the documented smoke dataset. The original eight Staff logical aggregate/preview operations remain; see [hardening verification](hardening-verification.md).
+
 ### GET /staff/actions
 
 Staff/Admin, implicit assignee=current user and parent ACTIVE, action PLANNED/IN_PROGRESS. Paginate 10/25/50, updatedAt DESC,id DESC; used by My Actions view-all. Client cannot substitute another userId. Return data/meta and action links.
@@ -102,6 +106,8 @@ Only page/pageSize are accepted, with strict positive-decimal/offset bounds as R
 ### GET /tickets/:ticketId/actions/:actionId
 
 Added in #49 for a bounded direct action link, independently of the current Ticket action-list page. Authorized Ticket readers, including its Requester, receive `{data: publicAction, ticketVersion}` from one repeatable-read snapshot. Reject malformed IDs or supplied query parameters 400; missing, wrong-Ticket and non-owned resources share 404 NOT_FOUND. No private notes or credentials. This adds read-only GET alongside the existing versioned Staff/Admin PATCH; no new mutation permission. The UI opens the named action details/history dialog with focus, without fetching the whole collection or rewriting list order.
+
+#50 client behavior: malformed nonempty action IDs are rejected before GET with link-specific feedback. Empty IDs open no dialog. Close/Escape removes only `actionId` via router replace, preserving other query values and history length; reload does not reopen the dialog. Link failures never reuse form-validation wording or expose arbitrary server text; an explicit retry remains available. Server validation and ownership enforcement still apply to direct calls.
 
 ## Drill-down and queue compatibility
 
