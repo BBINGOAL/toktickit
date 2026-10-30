@@ -20,11 +20,25 @@
 | [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/54#pullrequestreview-5581899545), nonblocking suggestions below; author replied | APPROVED for latest head 2cb79da; merged as 10dd684 on 2026-10-20 |
 | [#47 Ticket Workflow and Resolution](https://github.com/BBINGOAL/toktickit/issues/47) | [PR #55](https://github.com/BBINGOAL/toktickit/pull/55) into lab4-staging | PpAnpt requested on 2026-10-20 | [Review](https://github.com/BBINGOAL/toktickit/pull/55#pullrequestreview-5638567438) and [author response](https://github.com/BBINGOAL/toktickit/pull/55#issuecomment-6459305158); follow-up below | APPROVED for latest head d1f9e72 on 2026-10-24; merged be6e14f on 2026-10-28 |
 | [#48 Requester Dashboard](https://github.com/BBINGOAL/toktickit/issues/48) | [PR #56](https://github.com/BBINGOAL/toktickit/pull/56) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-28 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/56#pullrequestreview-5682178217) and [author response](https://github.com/BBINGOAL/toktickit/pull/56#issuecomment-6468406174) | APPROVED latest head 947e090; merged cdc2a65 on 2026-10-28 |
-| [#49 Staff/Admin Dashboard](https://github.com/BBINGOAL/toktickit/issues/49) | [PR #57](https://github.com/BBINGOAL/toktickit/pull/57) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-28; verified in metadata | Backend 278/278, client 93/93, combined Chromium 32/32; actual review awaited | Pending |
+| [#49 Staff/Admin Dashboard](https://github.com/BBINGOAL/toktickit/issues/49) | [PR #57](https://github.com/BBINGOAL/toktickit/pull/57) into lab4-staging, Development-linked | PpAnpt requested 2026-10-28 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/57#pullrequestreview-5683665723) and [author response](https://github.com/BBINGOAL/toktickit/pull/57#issuecomment-6471169069); four nonblocking suggestions addressed in #50 | APPROVED latest head 191e425 on 2026-10-28; merged 85a06ed on 2026-10-29 |
+| [#50 Final Regression and Product Hardening](https://github.com/BBINGOAL/toktickit/issues/50) | [PR #58](https://github.com/BBINGOAL/toktickit/pull/58) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-29; verified in GitHub metadata | Backend 278/278 plus separate performance 1/1, client 109/109 and all app Chromium 49/49; actual review awaited | Pending; no approval or merge claimed |
 
 Record exact PR/review/comment URLs, reviewer identity, feedback and author response only after they occur. A review request is not approval. Wait for peer review and staging integration before starting each next issue.
 
-Issues #44-#48 are Done after reviewed integration. Issue #49 started only after the student's merge/continue instruction and verification of PR #56 merge cdc2a65; feature6/lab4-staff-dashboard starts there. Its approval remains pending; results are in staff-dashboard-verification.md.
+Issues #44-#49 are Done after reviewed staging integration. Issue #50 began only after the student confirmed merge and instructed continuation, and GitHub verified PR #57 merge 85a06ed. New #50 changes require their own review; earlier approval is not reused.
+
+### PR #57 feedback and follow-up in #50
+
+PpAnpt approved exact head 191e425 on 2026-10-28 at 20:47 Asia/Bangkok, reporting backend 278/278 on a fresh isolated DB, client 93/93 and typecheck; E2E was explicitly not rerun by the reviewer. Author replied with thanks and accurate dispositions at 21:06. GitHub merged PR #57 into lab4-staging as 85a06ed on 2026-10-29 at 20:32. All four suggestions were nonblocking.
+
+| Suggestion | Actual follow-up in #50 |
+|---|---|
+| Invalid actionId uses form error | Client validates IDs and gives link-specific feedback before GET; regression covers malformed values and inaccessible-link retry. |
+| Closing details leaves actionId in URL | Callback removes only actionId with replace; Close/Escape/reload/unrelated-query/history-length regressions. Literally empty actionId already opened no dialog. |
+| Staff windowStart is unused | API doc explains compatible shared metadata, never a Staff seven-day predicate; no formula changed. |
+| Card snapshot versus live Queue | Existing asOf retained; adjacent current-data explanation and component coverage added. |
+
+See [hardening verification](hardening-verification.md). These changes are submitted for a new peer review, not claimed covered by PR #57's approval.
 
 ### PR #56 feedback and follow-up in #49
 
@@ -59,7 +73,7 @@ PpAnpt APPROVED latest head 2cb79da on 2026-10-20 at 14:20 Asia/Bangkok. Reviewe
 | Clarify input timezone versus Bangkok display | Explicit Intl input timezone and Asia/Bangkok display hint in the Action form; runtime images inspected |
 | Uncertain submission may have committed when closing dialog | Warning explains possible prior success, refreshes authoritative list/parent; test verifies warning/refresh; focus restored after reload |
 | frozen reads intent ref in render | Submission intent is React state; ref remains only for synchronous double-submit lock |
-| Split ActionsTaken.tsx later | Recorded for #50 readability hardening; Ticket workflow is a separate component/service already |
+| Split ActionsTaken.tsx later | #50 splits list/editor/details/history/pager/presentation and reuses the accessible Dialog; lifecycle/draft/focus regressions retained |
 
 Actual author replies: [PR #53 response](https://github.com/BBINGOAL/toktickit/pull/53#issuecomment-6286073824), [PR #54 response](https://github.com/BBINGOAL/toktickit/pull/54#issuecomment-6286074513). Going forward, read the review and reply with thanks plus accurate dispositions before recommending merge; never claim pending suggestions were already fixed.
 
@@ -72,7 +86,7 @@ Reviewer: PpAnpt, APPROVED on 2026-10-19 at 14:27 Asia/Bangkok, for the latest h
 | Assignee test depends on the fixture user appearing in the first 50 global matches | Issue #46 searches its unique staff name with matching inactive/Requester control prefixes, retaining meaningful exclusion assertions. Changed test passes in the 124/124 native PostgreSQL 18.1 rerun on 2026-10-20. |
 | Repeat seed uses update: {} and no longer resets Lab 3 demo accounts | Documented explicitly in implementation-plan.md and ui-verification.md; keep current credentials/roles/activity and do not use repeat seed as a password reset. README consolidation remains #51. |
 | Demo Tickets have version 0 despite actions; OPEN sample has no owner but assigned actions | #47 documents the initial-snapshot decision: version is a concurrency token, not child count; unowned Tickets may have assigned work but cannot resolve until owner/work gates pass. Gate/owner/legacy-zero-action tests pass. No demo rewrite or fictional historical events; see specification section 7 and workflow-verification.md. |
-| Consider DB CHECK constraints and remove redundant single-column requesterId/ownerId indexes | Recorded for measured schema/index review in #50; not silently added to the UI change and not claimed completed. |
+| Consider DB CHECK constraints and remove redundant single-column requesterId/ownerId indexes | #50 inspects actual indexes and measures the representative workload; retains legacy indexes and application validation without a new migration. Explicit rationale/limits are in hardening-verification.md; no claim of production query-plan proof or privileged-SQL protection. |
 
 Positive review notes: Ticket-before-User lock ordering, idempotency scope/payload digest, concurrency tests, and non-owner Requester 404. Reviewer's AI-tool usage cannot be verified from GitHub metadata.
 
@@ -97,4 +111,10 @@ The student subsequently confirmed that the friend merged the revised PR; GitHub
 
 ## Reviews I performed
 
-No Lab 4 peer reviews recorded yet. Add only actual reviews and links as they occur.
+[PpAnpt/toktickit PR #37](https://github.com/PpAnpt/toktickit/pull/37), engineering contract at e2ba4cc, reviewed on 2026-10-29. [Submitted review](https://github.com/PpAnpt/toktickit/pull/37#pullrequestreview-5698709294): **CHANGES_REQUESTED**, with three inline comments:
+
+1. [Action assignment/lifecycle](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413085333): address the labsheet Part 6 rubric across model/API/UI/AC/tests.
+2. [Append-only history](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413085344): define preserved history rather than only overwriting current state/last editor.
+3. [Recently Resolved drill-down](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413085359): metric includes recent Resolved+Closed while destination filters only Resolved without the window.
+
+Static review read all five changed files and base API/Prisma, checked 16 FR/28 BR/30 AC/111 planned rows and valid traceability IDs. No friend's application tests were run and no merge/approval was issued. Further recommendations cover repeatable performance fixtures, bounded action lists and atomic stale writes. GitHub connector write returned 403; authenticated gh CLI submitted the authorized review, verified under BBINGOAL. This records the actual submitted review, not a claimed later disposition by the peer.

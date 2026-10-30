@@ -8,7 +8,7 @@ for (const role of ['REQUESTER', 'IT_STAFF', 'ADMIN']) {
     } }))
     await page.route('**/api/auth/logout', route => route.fulfill({ json: { message: 'Logged out' } }))
     await page.goto('/')
-    const nav = page.getByRole('navigation')
+    const nav = page.getByRole('navigation', { name: 'Application navigation' })
     const logout = nav.getByRole('button', { name: 'Logout', exact: true })
     await expect(logout).toBeVisible()
     for (const width of [320, 367, 390, 768, 1024, 1280]) {

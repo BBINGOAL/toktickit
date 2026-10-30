@@ -1,7 +1,10 @@
 import { test, expect, login, screenshot } from '../fixtures'
 test('IT staff can open the queue and ticket detail', async ({ page, accounts }) => {
   await login(page, accounts.staff)
-  await expect(page).toHaveURL(/\/staff\/tickets$/)
+  await expect(page).toHaveURL(/\/staff\/dashboard$/)
+  await page.getByRole('navigation', { name: 'Application navigation' }).getByRole('link', { name: 'Ticket Queue', exact: true }).click()
+  await page.getByLabel('Search', { exact: true }).fill(accounts.ticket.ticketNumber)
+  await page.getByRole('button', { name: 'Search', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'IT Staff Ticket Queue' })).toBeVisible()
   const ticket = page.locator('a[href="/tickets/' + accounts.ticket.id + '"]')
   await expect(ticket).toBeVisible()

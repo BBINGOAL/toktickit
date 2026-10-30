@@ -33,7 +33,7 @@ describe('Admin User Management (E2E Overview in UI)', () => {
         })
         render(<UserManagement />)
         expect(screen.getByText(/Access Denied/i)).toBeInTheDocument()
-        await waitFor(() => expect(api.fetchAdminUsers).toHaveBeenCalled())
+        expect(api.fetchAdminUsers).not.toHaveBeenCalled()
     })
 
     it('should load and display users', async () => {

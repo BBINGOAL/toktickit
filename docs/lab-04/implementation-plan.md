@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: #44-#48 integrated through reviewed PRs #52-#56; latest staging merge cdc2a65. #49 Staff/Admin Dashboard is In review through PR #57 on feature6/lab4-staff-dashboard, Development-linked to #49 with PpAnpt requested. Backend 278/278, client 93/93 and combined Chromium 32/32 pass; see staff-dashboard-verification.md. #50/#51 have not started. Verification uses isolated native PostgreSQL 18.1; Docker recovery is not claimed.
+Status: #44-#49 integrated through reviewed PRs #52-#57; latest staging merge 85a06ed on 2026-10-29. #50 is In review through PR #58 on feature7/lab4-final-hardening-regression, Development-linked to #50 with PpAnpt requested. Backend 278/278 plus separate performance 1/1, client 109/109 and all application Chromium 49/49 pass. #51 has not started. See hardening-verification.md for actual branch checks and release boundaries. Native PostgreSQL 18.1 provides isolated verification; Docker recovery is not claimed.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -25,7 +25,7 @@ Create subsequent feature branches from the latest integrated staging commit. Ru
 | 7 | Lab4 Final Regression and Product Hardening | `feature7/lab4-final-hardening-regression` | Labs 1-3 regression, Staff Queue sorting/pagination, stable ordering, retry/double-submit, security, accessibility, responsive/style inspection, performance smoke and failure states. |
 | 8 | Lab4 Documentation Evidence and Release Integration | `feature8/lab4-docs-release` | README, actual test traceability, real review records and AI reflection, screenshots, concise MD/PDF Answer Part 1-9, staging release checks and post-merge main evidence. |
 
-Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires acceptance tests and reviewed integration. Release issue stays open until final main verification succeeds. All issues #44-#51 are on the existing private Project 4: #44-#48 Done; #49 In review linked to PR #57; #50/#51 Backlog. Projects permission has been granted. Do not mark issues Done merely because a PR is open.
+Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires tests and reviewed integration. Existing private Project 4: #44-#49 Done, #50 In review through PR #58, #51 Backlog. PR #58 is Development-linked to #50 and requests PpAnpt review; await actual review and staging merge. Release stays open until final-main verification succeeds.
 
 ## Must-have versus stretch and complexity limits
 

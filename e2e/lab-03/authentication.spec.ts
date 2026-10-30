@@ -1,7 +1,8 @@
 import { test, expect, login, screenshot } from '../fixtures'
 test('valid credentials open the requester application', async ({ page, accounts }) => {
   await login(page, accounts.requester)
-  await expect(page).toHaveURL(/\/tickets$/)
+  await expect(page).toHaveURL(/\/dashboard$/)
+  await page.getByRole('navigation', { name: 'Application navigation' }).getByRole('link', { name: 'My Tickets', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'My Tickets', exact: true })).toBeVisible()
   await screenshot(page, '03-requester-my-tickets')
 })

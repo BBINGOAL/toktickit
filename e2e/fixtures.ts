@@ -6,7 +6,7 @@ import path from 'node:path'
 export const test = base.extend<{ accounts: { requester: any; staff: any; admin: any; firstLogin: any; ticket: any; createdEmail: string } }>({
   accounts: async ({}, use) => {
     const database = new URL(process.env.DATABASE_URL || 'postgresql://invalid/').pathname
-    if (!database.startsWith('/toktickit_lab3_verify_')) throw new Error('E2E requires an isolated toktickit_lab3_verify_* database; start the API with the same DATABASE_URL.')
+    if (!/^\/toktickit_lab[34]_verify_/.test(database)) throw new Error('E2E requires an isolated toktickit_lab3_verify_* or toktickit_lab4_verify_* database; start the API with the same DATABASE_URL.')
     const ids: number[] = []
     const createdEmail = `e2e-created-${Date.now()}-${Math.random().toString(36).slice(2)}@example.test`
     try {

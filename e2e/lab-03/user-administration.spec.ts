@@ -1,7 +1,7 @@
 import { test, expect, login, screenshot } from '../fixtures'
 test('administrator creates a requester with first-login restriction', async ({ page, accounts }) => {
   await login(page, accounts.admin)
-  await expect(page).toHaveURL(/\/staff\/tickets$/)
+  await expect(page).toHaveURL(/\/staff\/dashboard$/)
   await page.goto('/admin/users')
   await expect(page.getByRole('heading', { name: 'User Management' })).toBeVisible()
   await screenshot(page, '06-admin-user-management')

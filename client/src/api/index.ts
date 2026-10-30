@@ -4,6 +4,13 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
     return fetch(input, { ...init, credentials: 'include' })
 }
 
+async function responseError(response: Response, fallback: string): Promise<Error> {
+    const body = await response.json().catch(() => ({}))
+    // Field/domain feedback is useful on known client errors, never on outages.
+    const detail = [400, 409, 422].includes(response.status) && typeof body.error === 'string' ? body.error : fallback
+    return new Error(detail)
+}
+
 export async function login(payload: any) {
     const res = await apiFetch(`${BASE_URL}/api/auth/login`, {
         method: 'POST',
@@ -196,8 +203,7 @@ export async function createTicket(payload: CreateTicketPayload): Promise<Ticket
         body: JSON.stringify(payload),
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to create ticket')
+        throw await responseError(res, 'Failed to create ticket')
     }
     return res.json()
 }
@@ -285,8 +291,7 @@ export async function uploadAttachment(ticketId: number, file: File): Promise<At
         body: form,
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to upload attachment')
+        throw await responseError(res, 'Failed to upload attachment')
     }
     return res.json()
 }
@@ -310,8 +315,7 @@ export async function removeAttachment(attachmentId: number, removalReason: stri
         body: JSON.stringify({ removalReason }),
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to remove attachment')
+        throw await responseError(res, 'Failed to remove attachment')
     }
     return res.json()
 }
@@ -345,8 +349,7 @@ export async function createAdminUser(data: any): Promise<AdminUser> {
         body: JSON.stringify(data)
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to create user')
+        throw await responseError(res, 'Failed to create user')
     }
     return res.json()
 }
@@ -358,8 +361,7 @@ export async function updateAdminUser(id: number, data: any): Promise<AdminUser>
         body: JSON.stringify(data)
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to update user')
+        throw await responseError(res, 'Failed to update user')
     }
     return res.json()
 }
@@ -371,8 +373,7 @@ export async function resetAdminUserPassword(id: number, newInitialPassword: str
         body: JSON.stringify({ newInitialPassword })
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to reset password')
+        throw await responseError(res, 'Failed to reset password')
     }
     return res.json()
 }

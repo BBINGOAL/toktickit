@@ -61,6 +61,12 @@ Requester implementation: My Tickets reads query filters/page/sort directly from
 
 ## Accessibility, responsive and visual inspection
 
+Issue #50 extends shared focus-trapped Dialog to Administrator create/edit and attachment removal. It restores the opener, prevents Escape while saving, and confirms discarding dirty user drafts. User filters have accessible names and ignore outdated search responses. Comments/private notes have labelled inputs, explicit loading/error/reload/success states, synchronous pending locks and retained text on failure; private notes remain Staff/Admin only. Attachment removal keeps the reason after failure, and upload is triggered by a keyboard-operable button.
+
+Create Ticket labels are linked to controls with field-error descriptions and a focused validation summary. Responsive grids stack on phones. If creation succeeds but an attachment fails, show the saved Ticket number and upload warning with navigation to My Tickets; never offer the same creation form again. This avoids resubmitting an already-created Ticket. Arbitrary server outage text is suppressed in earlier write transports; known validation/domain feedback remains available.
+
+Staff cards label their asOf snapshot and explicitly state Queue/My Actions links load current data. Linked-action Close/Escape clears only actionId with replace; malformed links receive their own feedback. ActionsTaken is separated into list, editor, details, history, pager and presentation helpers; one Dialog implements the existing focus/draft behavior.
+
 Use existing typography/colors/spacing and semantic headings, buttons, links and table headers. Status/priority include text, never color-only meaning. Focus indicator at least a visible 2px outline; verify every actionable card/form/pagination element by keyboard. Form labels have stable IDs; checkbox state and required notes are announced. Modal has dialog role, accessible name, focus trap, Escape close when safe, initial focus and restoration to trigger. Warn before discarding a dirty draft; do not lose it on API failure.
 
 At desktop/tablet/mobile widths verify cards, action list, create/edit/cancel modes, dashboard preview/view-all and workflow controls. Long names/descriptions/IDs wrap. Modal stays within viewport with internal vertical scrolling. No clipped nav, overlap or whole-page horizontal overflow. Check adequate text contrast (normal text 4.5:1, large text 3:1) and keyboard focus visibility against actual styles. Test zoom 200% and headings/screen-reader names; remove obsolete placeholder controls and console errors.
@@ -69,8 +75,8 @@ Screenshots are real runtime captures stored locally under `artifacts/lab-04/scr
 
 | Check | Planned evidence | Status |
 |---|---|---|
-| Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Pending |
+| Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Branch pass: actual captures inspected; Bootstrap precedes app theme and rendered button colors asserted; final main pending |
 | Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester and Staff/Admin API/UI/E2E pass on feature branch; final main pending |
 | Actions modes, editable/read-only and validation placement | List/create/edit/terminal/follow-up/conflict | Actions branch checks pass; runtime lifecycle/failure E2E pass; images inspected |
-| Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Actions labels/focus cycle/Escape/restore pass; whole-product contrast/zoom remain #50 |
-| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Actions, Requester and Staff/Admin Dashboard/Queue pass at 320/390/768/1280; Staff 768/1280 and Admin 320 captures inspected; whole-product/200% zoom remains #50 |
+| Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Branch pass: earlier/new forms and Admin/removal dialogs, rendered solid-text contrast, four widths and 200% CSS zoom; precise audit limits in hardening-verification.md; final main pending |
+| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Branch pass: earlier/new role screens at 320/390/768/1280, bounded 200% CSS zoom dialogs; Requester Create/Staff Action/Admin user captures inspected; final main pending |
