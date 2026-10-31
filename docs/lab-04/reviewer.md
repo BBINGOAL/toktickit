@@ -14,7 +14,7 @@
 
 ## Lab 4 PR Coverage
 
-ตรวจรายการ PR, review submissions, inline comments และคำตอบบน GitHub วันที่ 31 ตุลาคม 2026 ขอบเขตครอบคลุม PR ของ Lab 4 ฝั่งผมที่มีอยู่ก่อนอัปเดตเอกสาร คือ #52-#61 พร้อม PR เอกสารฉบับนี้ #62 และ PR ของเพื่อนที่ผมไปรีวิวคือ #37 ไม่นำ PR ของ Lab 3 มานับรวม
+ตรวจรายการ PR, review submissions, inline comments และคำตอบบน GitHub วันที่ 31 ตุลาคม 2026 ขอบเขตครอบคลุม PR ของ Lab 4 ฝั่งผม #52-#63 รวม PR เอกสารฉบับนี้ #63 ที่แทน #62 หลังเปลี่ยนชื่อ branch และ PR ของเพื่อนที่ผมไปรีวิวคือ #37 ไม่นำ PR ของ Lab 3 มานับรวม
 
 | PR | Scope | Review status | Integration |
 |---|---|---|---|
@@ -28,7 +28,8 @@
 | [#59](https://github.com/BBINGOAL/toktickit/pull/59) | Documentation / submission preparation | ไม่ขอ peer review ตามคำสั่งผู้ส่ง; ไม่มี review/comment ใน PR | Merged into lab4-staging: `112497e` |
 | [#60](https://github.com/BBINGOAL/toktickit/pull/60) | Release lab4-staging to main | ไม่บังคับ peer review ตาม workflow ที่ผู้ส่งแจ้ง; ไม่มี review/comment ใน PR | Merged into main: `768975d` |
 | [#61](https://github.com/BBINGOAL/toktickit/pull/61) | Actual main verification / final evidence docs | เอกสารเท่านั้น ไม่ขอ peer review; ไม่มี review/comment ใน PR | Merged into main: `4edff60` |
-| [#62](https://github.com/BBINGOAL/toktickit/pull/62) | Technical AI Q&A / complete review records (ฉบับนี้) | ไม่ขอ peer review ตาม workflow เอกสาร; ยังไม่มี approval | Open; รอผู้ส่งรวมเข้า main |
+| [#62](https://github.com/BBINGOAL/toktickit/pull/62) | Final report documentation (superseded) | ไม่ขอ peer review ตาม workflow เอกสาร; ไม่มี approval | Closed without merge; replaced by #63 after branch rename |
+| [#63](https://github.com/BBINGOAL/toktickit/pull/63) | Final report documentation (ฉบับนี้) | ไม่ขอ peer review ตาม workflow เอกสาร; ยังไม่มี approval | Open; docs/lab4-final-report -> main |
 | [Peer #37](https://github.com/PpAnpt/toktickit/pull/37) | Sprint 4 contract ของ PpAnpt | BBINGOAL CHANGES_REQUESTED สองรอบ; รายละเอียดด้านล่าง | ยัง Open ที่ `b749842`; ยังไม่ merge |
 
 PR เอกสารที่ไม่มี review จะแสดงสถานะตามจริง ไม่เติมคำชม คำตอบขอบคุณ หรือ approval ที่ไม่มีบน GitHub
@@ -311,7 +312,8 @@ PR เอกสารที่ไม่มี review จะแสดงสถา
 | [#59 Documentation](https://github.com/BBINGOAL/toktickit/pull/59) | feature8/lab4-docs-release -> lab4-staging; merged 112497e on 2026-10-31 at 08:34:05 Asia/Bangkok | The student explicitly waived review; the PpAnpt request was withdrawn. No approval is fabricated. |
 | [#60 Release](https://github.com/BBINGOAL/toktickit/pull/60) | lab4-staging -> main; merged 768975d on 2026-10-31 at 08:39:17 Asia/Bangkok | The student clarified release PRs do not require peer review in this workflow. Seven product PR reviews above remain valid; no separate release approval is claimed. |
 | [#61 Final main evidence](https://github.com/BBINGOAL/toktickit/pull/61) | docs/lab4-final-main-evidence -> main; merged 4edff60 on 2026-10-31 at 09:31:49 Asia/Bangkok | Documentation-only under the same student workflow. No submitted peer review or Conversation comment was found; no approval or reply is invented. |
-| [#62 AI / review records](https://github.com/BBINGOAL/toktickit/pull/62) | docs/lab4-ai-review-records -> main; Open | Current documentation update only. No issue or peer-review request; awaits student integration. |
+| [#62 Report documentation](https://github.com/BBINGOAL/toktickit/pull/62) | Closed without merge after branch rename; replaced by #63 | Documentation only; no peer approval is claimed. |
+| [#63 Final report documentation](https://github.com/BBINGOAL/toktickit/pull/63) | docs/lab4-final-report -> main; Open | Current documentation update only. No issue or peer-review request; awaits student integration. |
 
 ### PR #59: Documentation / submission preparation
 
@@ -331,10 +333,16 @@ PR เอกสารที่ไม่มี review จะแสดงสถา
 - **Their Review Comment / My Response:** ไม่มี review หรือ comment ใน PR นี้ ไม่ขอ peer review ตาม workflow เอกสารที่ผู้ส่งกำหนด
 - **Integration:** รวมเข้า main ที่ `4edff60` วันที่ 31 ตุลาคม 2026 เวลา 09:31:49 น. (Asia/Bangkok) โดย product verification ยังคงอ้างอิงรอบที่รันจริงบน `768975d` ไม่เปลี่ยนชื่อผลเก่าเป็นผลรันใหม่บน `4edff60`
 
-### PR #62: Technical AI questions / complete review records
+### PR #62: Report documentation (superseded)
 
-- **Scope:** ปรับ ai-use.md เป็น 10 คำถาม–คำตอบทางเทคนิคพร้อม reflection และขยาย reviewer.md ให้ครบ PR/ข้อเสนอแนะ/คำตอบ/สถานะปัจจุบัน
+- **Scope:** ปรับเอกสารประกอบรายงานและหลักฐานรีวิวให้ครบ พร้อมคำตอบจริงและลิงก์ต้นทาง
 - **Their Review Comment / My Response:** ยังไม่มี review/comment ขณะจัดทำ ไม่ขอ peer review ตาม workflow เอกสาร และไม่สร้างข้อความตอบที่ไม่ได้โพสต์จริง
-- **Integration:** PR เอกสารฉบับนี้ยัง Open เป้าหมาย main ไม่มี issue ใหม่และไม่ merge อัตโนมัติ รายงาน MD/PDF และรูปเก็บในเครื่อง ไม่อยู่ใน PR
+- **Integration:** ปิดโดยไม่ได้ merge หลังเปลี่ยนชื่อ branch และเปิด PR #63 แทน โดยคงประวัติ commit เดิม
+
+### PR #63: Final report documentation
+
+- **Scope:** เอกสารประกอบรายงาน Lab 4 และบันทึกหลักฐานรีวิวฉบับสมบูรณ์ ใช้ branch `docs/lab4-final-report`
+- **Their Review Comment / My Response:** ยังไม่มี review/comment ขณะจัดทำ ไม่ขอ peer review ตาม workflow เอกสาร
+- **Integration:** Open เป้าหมาย main แทน PR #62 หลังเปลี่ยนชื่อ branch ไม่มี issue ใหม่และไม่ merge อัตโนมัติ รายงาน MD/PDF และรูปเก็บในเครื่อง ไม่อยู่ใน PR
 
 Fresh main verification: backend 278/278 + separate performance 1/1, client 109/109, all application Chromium 49/49, types/builds/lint/schema pass. Native isolated PostgreSQL and real baseline recovery were verified; these are author runs on main, distinct from the earlier reviewer-reported runs.
