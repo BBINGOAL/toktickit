@@ -4,6 +4,7 @@ ToktickIT is a Full-Stack Starter application for CPE 334 Software Engineering.
 - **Lab 1:** Project Foundation (Hello World, DB Setup, Basic APIs)
 - **Lab 2:** Requester Ticketing MVP with UI Foundation (Ticket Creation, My Tickets, Attachments, E2E Testing)
 - **Lab 3:** Cookie authentication, first-login password change, role-based access, IT Staff queue/operations, public comments/internal notes, and Administrator user management.
+- **Lab 4:** Versioned Actions Taken, assignment/lifecycle/history, complete Ticket workflow, scoped Requester/Staff dashboards, exact drill-down and full application hardening.
 
 ## Tech Stack
 - **Frontend:** React + TypeScript + Vite + Bootstrap
@@ -21,14 +22,16 @@ toktickit/
 ├── server/                 # Express backend application
 │   ├── prisma/             # Database schema and seeds
 │   ├── src/                # Backend source code
-│   └── tests/              # Supertest API tests (lab-01, lab-02, lab-03)
+│   └── tests/              # Supertest API tests (lab-01 through lab-04)
 ├── e2e/                    # Playwright End-to-End tests
 │   ├── lab-02/
-│   └── lab-03/
+│   ├── lab-03/
+│   └── lab-04/            # Actions/workflow/dashboards/regression
 ├── docs/
 │   ├── lab-01/             # Lab 1 submission documents
 │   ├── lab-02/             # Lab 2 submission documents
-│   └── lab-03/             # Lab 3 specification, UI spec, tests, AI use, reviews
+│   ├── lab-03/             # Lab 3 specification, UI spec, tests, AI use, reviews
+│   └── lab-04/             # Sprint 4 contracts, tests, AI use and reviews
 ├── artifacts/              # Screenshots and visual evidence
 │   └── lab-02/
 ├── .gitignore
@@ -61,7 +64,7 @@ cp .env.example .env
 # Make sure DATABASE_URL in .env points to the docker container (e.g., postgres://postgres:password@localhost:5434/localdb)
 
 # Run Prisma migrations to create tables
-npx prisma migrate dev
+npx prisma migrate deploy
 
 # Seed a NEW development database with references and demo users
 npx prisma db seed
@@ -102,11 +105,11 @@ npm test
 ```
 
 ### End-to-End Tests (Playwright)
-Ensure both the frontend and backend servers are running locally before executing E2E tests.
+The Lab 4 config below starts its own API and frontend. Use an isolated test DATABASE_URL and free ports 4000/5173, as described below.
 ```bash
 cd e2e
 npm install
-npx playwright test
+npx playwright test --config lab4-hardening.config.ts
 ```
 
 
@@ -121,33 +124,55 @@ Never reseed a database containing work merely to restore passwords.
 See [specification](docs/lab-03/specification.md), [UI specification](docs/lab-03/ui-spec.md),
 [test evidence](docs/lab-03/tests.md), [AI use](docs/lab-03/ai-use.md), and [reviews](docs/lab-03/reviewer.md).
 
-## Reproducible isolated verification (PowerShell)
+## Lab 4 setup, preservation and demonstration
 
-Use a new database name beginning with `toktickit_lab3_verify_`.
-The example below creates a separate database; it does not reset `localdb`.
-Run setup once, with Docker PostgreSQL healthy.
+Install locked dependencies with `npm ci` in server, client and e2e. Run `npx prisma generate`, `npx prisma migrate deploy` and `npx prisma db seed` in server against the intended database. Back up an existing database before migration; never reset it to install Lab 4. A new development database gets the demo accounts above. Repeated seed uses `update: {}` and **does not reset existing passwords, roles, activity, names or Ticket status**. If a demo password was changed, use that password or the authorized Administrator reset flow.
+
+The seed includes eight Ticket statuses, unset/LOW/MEDIUM/HIGH priorities, assigned/unassigned owners, zero/one/multiple Actions Taken and a Requester with no matching work. Actor, action assignee and primary Ticket owner are different responsibilities. Legacy resolved/closed zero-action Tickets remain valid; a new resolution must meet the current work-cycle gate. Existing resolution timestamps are an explicitly approximate backfill where required.
+
+After login, Requester lands on `/dashboard`; Staff/Admin on `/staff/dashboard`. Demo sequence:
+
+1. Requester opens owned counts, follows a filtered card into My Tickets and opens Ticket Detail. Public Actions Taken are read-only; Internal Notes remain hidden.
+2. Staff opens Dashboard/Queue, creates and assigns an action, starts it, supplies a Result and completes it. A second staff member may contribute without replacing the Ticket owner. Show follow-up, cancellation and immutable history.
+3. Attempt resolution before work is complete, then resolve with an eligible owner, completed current-cycle work, no pending/unresolved follow-up and a summary. Close/reopen and show the new cycle. Requester resolution indication remains advisory.
+4. Admin retains the Staff Dashboard and user-management navigation. Demonstrate earlier comments, notes, attachments and account safety.
+
+### Isolated Lab 4 verification (PowerShell)
+
+Create a NEW disposable database with prefix `toktickit_lab4_verify_`; do not use localdb. Docker example with the repository's container:
 
 ```powershell
-docker exec local-postgres createdb -U postgres toktickit_lab3_verify_local
-$env:DATABASE_URL='postgresql://postgres:password@127.0.0.1:5434/toktickit_lab3_verify_local'
+docker exec local-postgres createdb -U postgres toktickit_lab4_verify_release
+$env:DATABASE_URL='postgresql://postgres:password@127.0.0.1:5434/toktickit_lab4_verify_release'
+$env:JWT_SECRET='toktickit-super-secret-key'
 cd server
+npx prisma generate
 npx prisma migrate deploy
 npx prisma db seed
-npm test
-npm run dev
+npx vitest run --pool=threads --maxWorkers=1 --fileParallelism=false --exclude '**/dashboard-performance.test.ts'
+npx vitest run tests/lab-04/dashboard-performance.test.ts --pool=threads --maxWorkers=1 --fileParallelism=false
+npm run build
 ```
 
-Keep the API terminal open. In another terminal, start `npm run dev` in `client`
-(port 5173). In a third terminal, from the repository root:
+Use the same test DATABASE_URL/JWT_SECRET in the E2E terminal. With ports 4000/5173 free, `lab4-hardening.config.ts` starts and stops its own API/Vite servers; do not start duplicate servers. Install Chromium once with `npx playwright install chromium` in e2e.
 
 ```powershell
-$env:DATABASE_URL='postgresql://postgres:password@127.0.0.1:5434/toktickit_lab3_verify_local'
-cd e2e
-npx playwright test --workers=1
+cd client
+npx vitest run --maxWorkers=1 --fileParallelism=false
+npm run build
+npm run lint
+cd ../e2e
+npx playwright test --config lab4-hardening.config.ts
 ```
 
-The API and E2E process must use the same test database. E2E creates disposable accounts
-and tickets and cleans up its own data. It rejects non-test database names.
-Screenshots are saved under `report-assets/lab3-e2e/`.
-The two tests in `e2e/tests/example.spec.ts` are Playwright website examples, not application coverage.
-Run `npx playwright test lab-02 lab-03 --workers=1` for application-only tests.
+This includes all application specs in Labs 2-4 and excludes the external Playwright example. Keep one worker for the shared disposable fixtures. Performance runs separately: 1000 additional Tickets/3000 Actions, 2 warmups, 20 measured requests per role, p95 <=1000 ms, <=12 SQL statements and <=50 KiB JSON.
+
+An installed PostgreSQL server is also supported. Set DATABASE_URL to its isolated DB and `LAB4_PG_BIN` to its bin directory so migration tests can use matching pg_dump/pg_restore. The author's verified environment is PostgreSQL 18.1 at 127.0.0.1:55434 on B:, not the Docker/localdb database. Verification does not establish Docker health.
+
+### Recovery and engineering records
+
+Back up before upgrade with pg_dump; restore that backup into a separate empty recovery database and use the matching baseline application/schema/migration history. Do not drop Lab 4 tables on the original DB or mark a successful migration as rolled back. [Recovery evidence and exact release scope](docs/lab-04/release-verification.md).
+
+Lab 4: [specification](docs/lab-04/specification.md), [API](docs/lab-04/api-spec.md), [UI](docs/lab-04/ui-spec.md), [planned/actual tests](docs/lab-04/tests.md), [peer reviews](docs/lab-04/reviewer.md), [AI use/reflection](docs/lab-04/ai-use.md), [implementation history](docs/lab-04/implementation-plan.md).
+
+Runtime screenshots, report assets, report Markdown/PDF, temporary logs and test databases remain local and are excluded from commits. Clone users can regenerate evidence by running the documented suites. A staging verification is not a claim of final-main verification.

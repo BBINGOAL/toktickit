@@ -45,6 +45,8 @@ export default function CreateTicketPage() {
     const [createdTicketNumber, setCreatedTicketNumber] = useState<string | null>(null)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const submitLock = useRef(false)
+    const errorSummary = useRef<HTMLDivElement>(null)
 
     // The authenticated requester is the only identity used by this form.
     useEffect(() => {
@@ -110,11 +112,12 @@ export default function CreateTicketPage() {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
+        if (submitLock.current || createdTicketNumber) return
         const errs = validate()
         setErrors(errs)
-        if (Object.keys(errs).length > 0) return
+        if (Object.keys(errs).length > 0) { queueMicrotask(() => errorSummary.current?.focus()); return }
 
-        setSubmitting(true)
+        submitLock.current = true; setSubmitting(true)
         setApiError(null)
 
         try {
@@ -145,19 +148,20 @@ export default function CreateTicketPage() {
         } catch (err: unknown) {
             setApiError(err instanceof Error ? err.message : 'Failed to create ticket')
         } finally {
-            setSubmitting(false)
+            submitLock.current = false; setSubmitting(false)
         }
     }
 
     // ── SUCCESS STATE ──────────────────────────────────────
-    if (createdTicketNumber && !apiError) {
+    if (createdTicketNumber) {
         return (
             <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-8)' }}>
                 <div className="card callout-success" style={{ maxWidth: 480, width: '100%', textAlign: 'center' }}>
                     <div style={{ fontSize: 48, marginBottom: 'var(--space-4)' }}>✅</div>
-                    <h2 style={{ marginBottom: 'var(--space-2)', color: 'var(--color-success)' }}>
+                    <h1 style={{ marginBottom: 'var(--space-2)', color: 'var(--color-success)' }}>
                         Ticket Created!
-                    </h2>
+                    </h1>
+                    {apiError && <p role="alert" className="callout callout-warning">{apiError} Open the saved Ticket to add the files again.</p>}
                     <p style={{ marginBottom: 'var(--space-4)', color: 'var(--color-text-secondary)' }}>
                         Your ticket number is:
                     </p>
@@ -192,8 +196,8 @@ export default function CreateTicketPage() {
     })
 
     return (
-        <div>
-            <h2 style={{ marginBottom: 'var(--space-6)' }}>Create New Ticket</h2>
+        <div className="create-ticket-page">
+            <h1 style={{ marginBottom: 'var(--space-6)' }}>Create New Ticket</h1>
 
             {refLoading && (
                 <div style={{ textAlign: 'center', padding: 'var(--space-12) 0' }}>
@@ -210,6 +214,7 @@ export default function CreateTicketPage() {
 
             {!refLoading && !refError && (
                 <form onSubmit={handleSubmit} noValidate>
+                    {Object.values(errors).some(Boolean) && <div ref={errorSummary} tabIndex={-1} role="alert" className="callout callout-error">Check the marked fields below.</div>}
                     {/* ── API Error Banner ── */}
                     {apiError && (
                         <div className="callout callout-error" style={{ marginBottom: 'var(--space-5)', whiteSpace: 'pre-line' }}>
@@ -222,30 +227,30 @@ export default function CreateTicketPage() {
                         <h3 style={{ marginBottom: 'var(--space-4)', color: 'var(--color-text-secondary)' }}>
                             Ticket Information
                         </h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                        <div className="create-fields">
                             <div>
-                                <label className="form-label">Ticket Number</label>
-                                <input type="text" value="—" readOnly />
+                                <label htmlFor="create-number" className="form-label">Ticket Number</label>
+                                <input id="create-number" type="text" value="—" readOnly />
                             </div>
                             <div>
-                                <label className="form-label">Ticket Date</label>
-                                <input type="text" value={today} readOnly />
+                                <label htmlFor="create-date" className="form-label">Ticket Date</label>
+                                <input id="create-date" type="text" value={today} readOnly />
                             </div>
                             <div style={{ gridColumn: '1 / -1' }}>
-                                <label className="form-label">Requester</label>
-                                <input type="text" value={user?.name ?? ''} readOnly />
+                                <label htmlFor="create-requester" className="form-label">Requester</label>
+                                <input id="create-requester" type="text" value={user?.name ?? ''} readOnly />
                             </div>
                         </div>
                     </div>
 
                     {/* ── Category / Related System / Priority ── */}
                     <div className="card" style={{ marginBottom: 'var(--space-5)' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                        <div className="create-fields">
                             <div>
-                                <label className="form-label">
+                                <label htmlFor="create-categoryId" className="form-label">
                                     Category <span className="required-star">*</span>
                                 </label>
-                                <select
+                                <select id="create-categoryId" aria-invalid={Boolean(errors.categoryId)} aria-describedby={errors.categoryId ? "create-categoryId-error" : undefined}
                                     value={categoryId}
                                     onChange={e => { setCategoryId(e.target.value); setErrors(p => ({ ...p, categoryId: undefined })) }}
                                     className={errors.categoryId ? 'error' : ''}
@@ -256,14 +261,14 @@ export default function CreateTicketPage() {
                                         <option key={c.id} value={c.id}>{c.name}</option>
                                     ))}
                                 </select>
-                                {errors.categoryId && <p className="field-error">{errors.categoryId}</p>}
+                                {errors.categoryId && <p id="create-categoryId-error" className="field-error">{errors.categoryId}</p>}
                             </div>
 
                             <div>
-                                <label className="form-label">
+                                <label htmlFor="create-relatedSystemId" className="form-label">
                                     Related System <span className="required-star">*</span>
                                 </label>
-                                <select
+                                <select id="create-relatedSystemId" aria-invalid={Boolean(errors.relatedSystemId)} aria-describedby={errors.relatedSystemId ? "create-relatedSystemId-error" : undefined}
                                     value={relatedSystemId}
                                     onChange={e => { setRelatedSystemId(e.target.value); setErrors(p => ({ ...p, relatedSystemId: undefined })) }}
                                     className={errors.relatedSystemId ? 'error' : ''}
@@ -274,14 +279,14 @@ export default function CreateTicketPage() {
                                         <option key={s.id} value={s.id}>{s.name}</option>
                                     ))}
                                 </select>
-                                {errors.relatedSystemId && <p className="field-error">{errors.relatedSystemId}</p>}
+                                {errors.relatedSystemId && <p id="create-relatedSystemId-error" className="field-error">{errors.relatedSystemId}</p>}
                             </div>
 
                             <div style={{ gridColumn: '1 / -1' }}>
-                                <label className="form-label">
+                                <label htmlFor="create-requestedPriority" className="form-label">
                                     Requested Priority <span className="required-star">*</span>
                                 </label>
-                                <select
+                                <select id="create-requestedPriority" aria-invalid={Boolean(errors.requestedPriority)} aria-describedby={errors.requestedPriority ? "create-requestedPriority-error" : undefined}
                                     value={priority}
                                     onChange={e => { setPriority(e.target.value); setErrors(p => ({ ...p, requestedPriority: undefined })) }}
                                     className={errors.requestedPriority ? 'error' : ''}
@@ -293,7 +298,7 @@ export default function CreateTicketPage() {
                                     <option value="MEDIUM">MEDIUM</option>
                                     <option value="HIGH">HIGH</option>
                                 </select>
-                                {errors.requestedPriority && <p className="field-error">{errors.requestedPriority}</p>}
+                                {errors.requestedPriority && <p id="create-requestedPriority-error" className="field-error">{errors.requestedPriority}</p>}
                             </div>
                         </div>
                     </div>
@@ -302,10 +307,10 @@ export default function CreateTicketPage() {
                     <div className="card" style={{ marginBottom: 'var(--space-5)' }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                             <div>
-                                <label className="form-label">
+                                <label htmlFor="create-summary" className="form-label">
                                     Summary <span className="required-star">*</span>
                                 </label>
-                                <input
+                                <input id="create-summary" aria-invalid={Boolean(errors.summary)} aria-describedby={errors.summary ? "create-summary-error" : undefined}
                                     type="text"
                                     value={summary}
                                     onChange={e => { setSummary(e.target.value); setErrors(p => ({ ...p, summary: undefined })) }}
@@ -316,17 +321,17 @@ export default function CreateTicketPage() {
                                 />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                                     {errors.summary
-                                        ? <p className="field-error">{errors.summary}</p>
+                                        ? <p id="create-summary-error" className="field-error">{errors.summary}</p>
                                         : <span />}
                                     <span className="char-count">{summary.length}/200</span>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="form-label">
+                                <label htmlFor="create-description" className="form-label">
                                     Description <span className="required-star">*</span>
                                 </label>
-                                <textarea
+                                <textarea id="create-description" aria-invalid={Boolean(errors.description)} aria-describedby={errors.description ? "create-description-error" : undefined}
                                     value={description}
                                     onChange={e => { setDescription(e.target.value); setErrors(p => ({ ...p, description: undefined })) }}
                                     className={errors.description ? 'error' : ''}
@@ -337,7 +342,7 @@ export default function CreateTicketPage() {
                                 />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                                     {errors.description
-                                        ? <p className="field-error">{errors.description}</p>
+                                        ? <p id="create-description-error" className="field-error">{errors.description}</p>
                                         : <span />}
                                     <span className="char-count">{description.length}/2000</span>
                                 </div>

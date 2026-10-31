@@ -7,6 +7,8 @@ import MyTicketsPage from './pages/MyTicketsPage'
 import TicketDetailPage from './pages/TicketDetailPage'
 import ITStaffQueue from './pages/ITStaffQueue'
 import UserManagement from './pages/UserManagement'
+import RequesterDashboard from './pages/RequesterDashboard'
+import StaffDashboard from './pages/StaffDashboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const { user, loading } = useAuth()
@@ -19,7 +21,7 @@ function RoleRoute({ roles, children }: { roles: string[]; children: React.React
     const { user, loading } = useAuth()
     if (loading) return <div style={{ padding: 40, textAlign: 'center' }}>Loading session...</div>
     if (!user) return <Navigate to="/" replace />
-    if (!roles.includes(user.role)) return <Navigate to="/" replace />
+    if (!roles.includes(user.role)) return <div role="alert"><h1>Access denied</h1><p>Your role cannot open this page. Use the navigation above.</p></div>
     return <>{children}</>
 }
 
@@ -28,6 +30,8 @@ function AppRoutes() {
         <AppShell>
             <Routes>
                 <Route path="/" element={<Login />} />
+                <Route path="/dashboard" element={<RoleRoute roles={['REQUESTER']}><RequesterDashboard /></RoleRoute>} />
+                <Route path="/staff/dashboard" element={<RoleRoute roles={['IT_STAFF','ADMIN']}><StaffDashboard /></RoleRoute>} />
                 <Route
                     path="/create"
                     element={

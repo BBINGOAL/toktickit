@@ -12,7 +12,7 @@
   --color-border-focus:     #0B7A46;
   --color-text-primary:     #1A2E22;
   --color-text-secondary:   #4B5563;
-  --color-text-placeholder: #9CA3AF;
+  --color-text-placeholder: #64748B;
   --color-readonly-bg:      #F0F4F1;
   --color-readonly-text:    #374151;
   --color-error:            #991B1B;
@@ -43,6 +43,30 @@ body {
   color: var(--color-text-primary);
   background: var(--color-page-bg);
   -webkit-font-smoothing: antialiased;
+}
+
+/* All earlier screens share visible keyboard focus and readable form hints. */
+button, a, input, select, textarea { max-width: 100%; }
+button:focus-visible, a:focus-visible, [tabindex="0"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+input::placeholder, textarea::placeholder { color: var(--color-text-placeholder); opacity: 1; }
+.ticket-detail { min-width: 0; overflow-wrap: anywhere; }
+.ticket-discussion { margin-top: 24px; padding: 24px; background: white; border: 1px solid var(--color-border); border-radius: 12px; }
+.ticket-discussion h2 { margin-bottom: 16px; }
+.ticket-discussion textarea { margin: 8px 0 12px; }
+.discussion-messages { display: grid; gap: 12px; margin: 16px 0; max-height: 300px; overflow-y: auto; }
+.discussion-messages article { background: #F9FAFB; padding: 12px; border-radius: 8px; }
+.discussion-messages article p:first-child { font-size: .8rem; color: var(--color-text-secondary); margin-bottom: 4px; }
+.private-discussion { background: var(--color-warning-bg); color: #713F12; }
+.private-discussion .discussion-messages article { background: #FEF9C3; }
+.create-ticket-page { min-width: 0; overflow-wrap: anywhere; }
+.create-ticket-page input, .create-ticket-page select { min-width: 0; }
+.create-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+@media (max-width: 560px) {
+  .create-ticket-page .card { padding: 16px; }
+  .create-fields { grid-template-columns: minmax(0, 1fr); }
 }
 
 #root { min-height: 100vh; display: flex; flex-direction: column; }

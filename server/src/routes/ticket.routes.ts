@@ -8,17 +8,6 @@ import path from 'path';
 const router = Router();
 const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
 const VALID_PRIORITIES = new Set(['LOW', 'MEDIUM', 'HIGH']);
-const VALID_STATUSES = new Set(['NEW', 'OPEN', 'IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'RESOLVED', 'CLOSED', 'REOPENED', 'CANCELLED']);
-const STATUS_TRANSITIONS: Record<string, Set<string>> = {
-    NEW: new Set(['OPEN', 'CANCELLED']),
-    OPEN: new Set(['IN_PROGRESS', 'WAITING_FOR_REQUESTER', 'CANCELLED']),
-    IN_PROGRESS: new Set(['WAITING_FOR_REQUESTER', 'RESOLVED', 'CANCELLED']),
-    WAITING_FOR_REQUESTER: new Set(['IN_PROGRESS', 'RESOLVED', 'CANCELLED']),
-    RESOLVED: new Set(['CLOSED', 'REOPENED']),
-    CLOSED: new Set(['REOPENED']),
-    REOPENED: new Set(['IN_PROGRESS', 'CANCELLED']),
-    CANCELLED: new Set(['REOPENED']),
-};
 
 async function getAccessibleTicket(req: Request, res: Response) {
     const id = Number.parseInt(String(req.params.id), 10)
@@ -28,12 +17,12 @@ async function getAccessibleTicket(req: Request, res: Response) {
     }
     const ticket = await prisma.ticket.findUnique({ where: { id }, select: { id: true, requesterId: true } })
     if (!ticket) {
-        res.status(404).json({ error: 'Ticket not found' })
+        res.status(404).json({ error: 'Resource not found', code: 'NOT_FOUND' })
         return null
     }
     const user = (req as any).user
     if (user.role === 'REQUESTER' && ticket.requesterId !== user.userId) {
-        res.status(403).json({ error: 'Access denied' })
+        res.status(404).json({ error: 'Resource not found', code: 'NOT_FOUND' })
         return null
     }
     return ticket
@@ -89,191 +78,9 @@ router.post('/tickets', requireAppAccess, async (req: Request, res: Response) =>
 });
 
 // ─── List Tickets (Requester) ─────────────────────────────
-router.get('/tickets', requireAppAccess, async (req: Request, res: Response) => {
-    const requesterId = (req as any).user.userId;
-    if ((req as any).user.role !== 'REQUESTER') return res.status(403).json({ error: 'Requester access required' })
-    const search = (req.query.search as string) || ''
-    const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined
-    const requestedPriority = req.query.requestedPriority as string | undefined
-    const itPriority = req.query.itPriority as string | undefined
-    const status = req.query.status as string | undefined
-    const sortField = (req.query.sort as string) || 'createdAt'
-    const order = (req.query.order as string) || 'desc'
-    const page = Number(req.query.page || '1')
-    const pageSize = Number(req.query.pageSize || '10')
-    if (!Number.isInteger(page) || page < 1 || ![10, 25, 50].includes(pageSize)) return res.status(400).json({ error: 'Invalid pagination: page >= 1 and pageSize must be 10, 25, or 50' })
-    if (!['createdAt', 'updatedAt', 'summary', 'status', 'itPriority', 'requestedPriority', 'ticketNumber'].includes(sortField) || !['asc', 'desc'].includes(order)) return res.status(400).json({ error: 'Invalid sorting' })
-    if ((requestedPriority && !VALID_PRIORITIES.has(requestedPriority)) || (itPriority && !VALID_PRIORITIES.has(itPriority)) || (status && !VALID_STATUSES.has(status))) return res.status(400).json({ error: 'Invalid filter' })
-    if (req.query.categoryId && (!Number.isInteger(Number(req.query.categoryId)) || Number(req.query.categoryId) <= 0)) return res.status(400).json({ error: 'Invalid categoryId' })
+// Requester list lives in dashboard.routes.ts (shared drill-down filters).
+// Queue lives in dashboard.routes.ts with shared validated predicates.
 
-    try {
-        const where: Record<string, unknown> = { requesterId }
-        if (categoryId) where.categoryId = categoryId
-        if (requestedPriority) where.requestedPriority = requestedPriority
-        if (itPriority) where.itPriority = itPriority
-        if (status) where.status = status
-        if (search) {
-            where.OR = [
-                { ticketNumber: { contains: search, mode: 'insensitive' } },
-                { summary: { contains: search, mode: 'insensitive' } },
-            ]
-        }
-        const [totalItems, data] = await Promise.all([
-            prisma.ticket.count({ where }),
-            prisma.ticket.findMany({
-                where,
-                select: {
-                    id: true, ticketNumber: true, summary: true,
-                    category: { select: { id: true, name: true } },
-                    relatedSystem: { select: { id: true, name: true } },
-                    requestedPriority: true, itPriority: true,
-                    status: true, owner: { select: { id: true, name: true } },
-                    createdAt: true, updatedAt: true,
-                },
-                orderBy: { [sortField]: order as 'asc' | 'desc' },
-                skip: (page - 1) * pageSize, take: pageSize,
-            }),
-        ])
-        res.status(200).json({ data, meta: { totalItems, page, pageSize, totalPages: Math.ceil(totalItems / pageSize) } })
-    } catch {
-        res.status(500).json({ error: 'Failed to fetch tickets' })
-    }
-});
-
-// ─── List Tickets (IT Staff Queue) ────────────────────────
-router.get('/staff/tickets', requireAppAccess, async (req: Request, res: Response) => {
-    const userRole = (req as any).user.role;
-    if (userRole !== 'IT_STAFF' && userRole !== 'ADMIN') {
-        res.status(403).json({ error: 'Access denied' }); return;
-    }
-    const search = (req.query.search as string) || ''
-    const status = req.query.status as string | undefined
-    const priority = req.query.priority as string | undefined
-    const categoryId = req.query.categoryId ? Number.parseInt(req.query.categoryId as string, 10) : undefined
-    const sort = (req.query.sort as string) || 'createdAt'
-    const order = (req.query.order as string) || 'desc'
-    const ownerId = req.query.ownerId ? parseInt(req.query.ownerId as string) : undefined
-    const page = parseInt((req.query.page as string) || '1')
-    const pageSize = parseInt((req.query.pageSize as string) || '10')
-
-    try {
-        if (status && !VALID_STATUSES.has(status)) return res.status(400).json({ error: 'Invalid status' })
-        if (priority && !VALID_PRIORITIES.has(priority)) return res.status(400).json({ error: 'Invalid priority' })
-        if (categoryId !== undefined && !Number.isInteger(categoryId)) return res.status(400).json({ error: 'Invalid categoryId' })
-        if (!['createdAt', 'updatedAt', 'summary', 'status', 'itPriority'].includes(sort) || !['asc', 'desc'].includes(order)) return res.status(400).json({ error: 'Invalid sorting' })
-        const where: any = {}
-        if (status) where.status = status
-        if (priority) where.itPriority = priority
-        if (ownerId) where.ownerId = ownerId
-        if (categoryId) where.categoryId = categoryId
-        if (search) {
-            where.OR = [
-                { ticketNumber: { contains: search, mode: 'insensitive' } },
-                { summary: { contains: search, mode: 'insensitive' } },
-            ]
-        }
-        const [totalItems, data] = await Promise.all([
-            prisma.ticket.count({ where }),
-            prisma.ticket.findMany({
-                where,
-                include: {
-                    category: true,
-                    relatedSystem: true,
-                    requester: { select: { id: true, name: true } },
-                    owner: { select: { id: true, name: true } }
-                },
-                orderBy: { [sort]: order },
-                skip: (page - 1) * pageSize, take: pageSize,
-            }),
-        ])
-        res.status(200).json({ data, meta: { totalItems, page, pageSize, totalPages: Math.ceil(totalItems / pageSize) } })
-    } catch {
-        res.status(500).json({ error: 'Failed to fetch staff tickets' })
-    }
-});
-
-// ─── Get Single Ticket ────────────────────────────────────
-router.get('/tickets/:id', requireAppAccess, async (req: Request, res: Response) => {
-    const userId = (req as any).user.userId;
-    const userRole = (req as any).user.role;
-    try {
-        const ticket = await prisma.ticket.findUnique({
-                where: { id: parseInt(String(req.params.id), 10) },
-            include: {
-                requester: { select: { id: true, name: true } },
-                category: { select: { id: true, name: true } },
-                relatedSystem: { select: { id: true, name: true } },
-                owner: { select: { id: true, name: true } },
-                attachments: {
-                    where: { isRemoved: false },
-                    select: { id: true, originalFilename: true, mimeType: true, sizeBytes: true, isRemoved: true, createdAt: true },
-                },
-            },
-        })
-        if (!ticket) { res.status(404).json({ error: 'Ticket not found' }); return; }
-        if (ticket.requesterId !== userId && userRole !== 'IT_STAFF' && userRole !== 'ADMIN') {
-            res.status(403).json({ error: 'Access denied.' }); return;
-        }
-        res.status(200).json(ticket)
-    } catch {
-        res.status(500).json({ error: 'Failed to fetch ticket' })
-    }
-});
-
-// ─── IT Staff: Update Ticket ──────────────────────────────
-router.patch('/tickets/:id/status', requireAppAccess, async (req: Request, res: Response) => {
-    const userRole = (req as any).user.role;
-    if (userRole !== 'IT_STAFF' && userRole !== 'ADMIN') { res.status(403).json({ error: 'Access denied' }); return; }
-    const { status } = req.body;
-    if (!VALID_STATUSES.has(status)) return res.status(400).json({ error: 'Invalid status' })
-    try {
-        const current = await prisma.ticket.findUnique({ where: { id: parseInt(String(req.params.id), 10) }, select: { status: true } })
-        if (!current) return res.status(404).json({ error: 'Ticket not found' })
-        if (!STATUS_TRANSITIONS[current.status]?.has(status)) return res.status(409).json({ error: `Cannot transition from ${current.status} to ${status}` })
-        const updated = await prisma.ticket.update({ where: { id: parseInt(String(req.params.id), 10) }, data: { status } });
-        res.status(200).json(updated);
-    } catch { res.status(500).json({ error: 'Failed to update status' }); }
-});
-
-router.post('/tickets/:id/requester-resolved', requireAppAccess, async (req: Request, res: Response) => {
-    const user = (req as any).user
-    if (user.role !== 'REQUESTER') return res.status(403).json({ error: 'Requester access required' })
-    try {
-        const ticket = await getAccessibleTicket(req, res)
-        if (!ticket) return
-        const updated = await prisma.ticket.update({
-            where: { id: ticket.id },
-            data: { requesterResolved: true, requesterResolvedAt: new Date() },
-        })
-        res.status(200).json(updated)
-    } catch {
-        res.status(500).json({ error: 'Failed to record resolution indication' })
-    }
-})
-
-router.patch('/tickets/:id/owner', requireAppAccess, async (req: Request, res: Response) => {
-    const userRole = (req as any).user.role;
-    if (userRole !== 'IT_STAFF' && userRole !== 'ADMIN') { res.status(403).json({ error: 'Access denied' }); return; }
-    const { ownerId } = req.body;
-    if (ownerId !== null && (!Number.isInteger(ownerId) || !(await prisma.user.findFirst({ where: { id: ownerId, isActive: true, role: { in: ['IT_STAFF', 'ADMIN'] } } })))) return res.status(400).json({ error: 'Owner must be an active IT Staff or Administrator' })
-    try {
-        const updated = await prisma.ticket.update({ where: { id: parseInt(String(req.params.id), 10) }, data: { ownerId } });
-        res.status(200).json(updated);
-    } catch { res.status(500).json({ error: 'Failed to update owner' }); }
-});
-
-router.patch('/tickets/:id/priority', requireAppAccess, async (req: Request, res: Response) => {
-    const userRole = (req as any).user.role;
-    if (userRole !== 'IT_STAFF' && userRole !== 'ADMIN') { res.status(403).json({ error: 'Access denied' }); return; }
-    const { itPriority } = req.body;
-    if (!VALID_PRIORITIES.has(itPriority)) return res.status(400).json({ error: 'Invalid priority' })
-    try {
-        const updated = await prisma.ticket.update({ where: { id: parseInt(String(req.params.id), 10) }, data: { itPriority } });
-        res.status(200).json(updated);
-    } catch { res.status(500).json({ error: 'Failed to update priority' }); }
-});
-
-// ─── Collaboration: Public Comments ───────────────────────
 router.get('/tickets/:id/comments', requireAppAccess, async (req: Request, res: Response) => {
     try {
         if (!await getAccessibleTicket(req, res)) return
@@ -371,10 +178,11 @@ router.get('/attachments/:id/download', requireAppAccess, async (req: Request, r
             where: { id: parseInt(String(req.params.id), 10) },
             include: { ticket: { select: { requesterId: true } } },
         });
-        if (!attachment || attachment.isRemoved) { res.status(404).json({ error: 'Not found' }); return; }
-        if (attachment.ticket.requesterId !== userId && userRole !== 'IT_STAFF' && userRole !== 'ADMIN') {
-            res.status(403).json({ error: 'Access denied.' }); return;
+        // Hide existence from other Requesters before exposing removal state.
+        if (!attachment || (attachment.ticket.requesterId !== userId && userRole !== 'IT_STAFF' && userRole !== 'ADMIN')) {
+            res.status(404).json({ error: 'Resource not found', code: 'NOT_FOUND' }); return;
         }
+        if (attachment.isRemoved) { res.status(410).json({ error: 'This attachment has been removed and is no longer available.' }); return; }
         const filePath = path.join(UPLOADS_DIR, attachment.storedFilename);
         if (!fs.existsSync(filePath)) { res.status(500).json({ error: 'File missing.' }); return; }
         res.setHeader('Content-Type', attachment.mimeType);

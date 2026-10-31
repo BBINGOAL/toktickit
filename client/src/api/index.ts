@@ -1,7 +1,14 @@
-const BASE_URL = 'http://localhost:4000'
+export const BASE_URL = 'http://localhost:4000'
 
-async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
+export async function apiFetch(input: RequestInfo | URL, init?: RequestInit) {
     return fetch(input, { ...init, credentials: 'include' })
+}
+
+async function responseError(response: Response, fallback: string): Promise<Error> {
+    const body = await response.json().catch(() => ({}))
+    // Field/domain feedback is useful on known client errors, never on outages.
+    const detail = [400, 409, 422].includes(response.status) && typeof body.error === 'string' ? body.error : fallback
+    return new Error(detail)
 }
 
 export async function login(payload: any) {
@@ -74,6 +81,14 @@ export interface TicketListItem {
 }
 
 export interface TicketDetail extends TicketListItem {
+    allowedNextStatuses?: string[]
+    resolutionSummary?: string | null
+    resolvedAt?: string | null
+    cancelledReason?: string | null
+    canIndicateResolved?: boolean
+    resolutionGate?: { canResolve: boolean; reasons: string[]; workCycle: number; summaryRequired: boolean }
+    version?: number
+    workCycle?: number
     description: string
     requester: { id: number; name: string }
     attachments: Attachment[]
@@ -134,6 +149,11 @@ export interface TicketsResponse {
 }
 
 export interface TicketQuery {
+    scope?: string
+    updatedSince?: string
+    updatedUntil?: string
+    resolvedSince?: string
+    resolvedUntil?: string
     search?: string
     categoryId?: number
     requestedPriority?: string
@@ -145,6 +165,15 @@ export interface TicketQuery {
 }
 
 export interface StaffTicketQuery {
+    scope?: string
+    owner?: string
+    sort?: string
+    order?: string
+    categoryId?: number
+    updatedSince?: string
+    updatedUntil?: string
+    resolvedSince?: string
+    resolvedUntil?: string
     search?: string
     status?: string
     priority?: string
@@ -174,14 +203,14 @@ export async function createTicket(payload: CreateTicketPayload): Promise<Ticket
         body: JSON.stringify(payload),
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to create ticket')
+        throw await responseError(res, 'Failed to create ticket')
     }
     return res.json()
 }
 
 export async function fetchTickets(query: TicketQuery = {}): Promise<TicketsResponse> {
     const params = new URLSearchParams()
+    for (const key of ['scope','updatedSince','updatedUntil','resolvedSince','resolvedUntil'] as const) if (query[key]) params.set(key, query[key])
     if (query.search) params.set('search', query.search)
     if (query.categoryId) params.set('categoryId', String(query.categoryId))
     if (query.requestedPriority) params.set('requestedPriority', query.requestedPriority)
@@ -205,6 +234,7 @@ export async function fetchTicketDetail(ticketId: number): Promise<TicketDetail>
 
 export async function fetchStaffTickets(query: StaffTicketQuery = {}): Promise<TicketsResponse> {
     const params = new URLSearchParams()
+    for (const key of ['scope','owner','sort','order','categoryId','updatedSince','updatedUntil','resolvedSince','resolvedUntil'] as const) if (query[key] !== undefined) params.set(key, String(query[key]))
     if (query.search) params.set('search', query.search)
     if (query.status) params.set('status', query.status)
     if (query.priority) params.set('priority', query.priority)
@@ -216,35 +246,6 @@ export async function fetchStaffTickets(query: StaffTicketQuery = {}): Promise<T
     return res.json()
 }
 
-export async function updateTicketStatus(ticketId: number, status: string): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/status`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-    });
-    if (!res.ok) throw new Error('Failed to update status');
-    return res.json();
-}
-
-export async function updateTicketOwner(ticketId: number, ownerId: number | null): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/owner`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ownerId })
-    });
-    if (!res.ok) throw new Error('Failed to update owner');
-    return res.json();
-}
-
-export async function updateTicketPriority(ticketId: number, itPriority: string): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/priority`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itPriority })
-    });
-    if (!res.ok) throw new Error('Failed to update priority');
-    return res.json();
-}
 
 // ─── Collaboration ────────────────────────────────────────
 
@@ -290,8 +291,7 @@ export async function uploadAttachment(ticketId: number, file: File): Promise<At
         body: form,
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to upload attachment')
+        throw await responseError(res, 'Failed to upload attachment')
     }
     return res.json()
 }
@@ -315,8 +315,7 @@ export async function removeAttachment(attachmentId: number, removalReason: stri
         body: JSON.stringify({ removalReason }),
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to remove attachment')
+        throw await responseError(res, 'Failed to remove attachment')
     }
     return res.json()
 }
@@ -350,8 +349,7 @@ export async function createAdminUser(data: any): Promise<AdminUser> {
         body: JSON.stringify(data)
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to create user')
+        throw await responseError(res, 'Failed to create user')
     }
     return res.json()
 }
@@ -363,8 +361,7 @@ export async function updateAdminUser(id: number, data: any): Promise<AdminUser>
         body: JSON.stringify(data)
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to update user')
+        throw await responseError(res, 'Failed to update user')
     }
     return res.json()
 }
@@ -376,17 +373,8 @@ export async function resetAdminUserPassword(id: number, newInitialPassword: str
         body: JSON.stringify({ newInitialPassword })
     })
     if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to reset password')
+        throw await responseError(res, 'Failed to reset password')
     }
     return res.json()
 }
 
-export async function indicateRequesterResolved(ticketId: number): Promise<any> {
-    const res = await apiFetch(`${BASE_URL}/api/tickets/${ticketId}/requester-resolved`, { method: 'POST' })
-    if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Failed to record resolution indication')
-    }
-    return res.json()
-}

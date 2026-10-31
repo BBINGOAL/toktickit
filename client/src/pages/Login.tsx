@@ -39,9 +39,9 @@ export default function Login() {
             } else {
                 setUser(data);
                 if (data.role === 'IT_STAFF' || data.role === 'ADMIN') {
-                    navigate('/staff/tickets');
+                    navigate('/staff/dashboard');
                 } else {
-                    navigate('/tickets');
+                    navigate('/dashboard');
                 }
             }
         } catch (err: any) {
@@ -72,9 +72,9 @@ export default function Login() {
                 const finalUser = { ...tempUser, mustChangePassword: false };
                 setUser(finalUser);
                 if (finalUser.role === 'IT_STAFF' || finalUser.role === 'ADMIN') {
-                    navigate('/staff/tickets');
+                    navigate('/staff/dashboard');
                 } else {
-                    navigate('/tickets');
+                    navigate('/dashboard');
                 }
             }
         } catch (err: any) {
@@ -155,7 +155,7 @@ export default function Login() {
                 ) : (
                     <form onSubmit={handleChangePasswordSubmit}>
                         <div style={{ marginBottom: '24px' }}>
-                            <p style={{ fontSize: '14px', color: '#d97706', marginBottom: '16px', backgroundColor: '#fef3c7', padding: '12px', borderRadius: '6px' }}>
+                            <p style={{ fontSize: '14px', color: '#92400e', marginBottom: '16px', backgroundColor: '#fef3c7', padding: '12px', borderRadius: '6px' }}>
                                 For security reasons, you must change your password before continuing.
                             </p>
                             <label htmlFor="new-password" style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#374151', marginBottom: '8px' }}>
@@ -210,7 +210,7 @@ export default function Login() {
                         <p style={{ margin: '2px 0' }}>jennifer.anderson@kmutt.ac.th</p>
                         <p style={{ margin: '2px 0' }}>it1@kmutt.ac.th</p>
                         <p style={{ margin: '2px 0' }}>admin@kmutt.ac.th</p>
-                        <p style={{ margin: '8px 0 0 0', color: '#9ca3af', fontSize: '12px' }}>Password: password123</p>
+                        <p style={{ margin: '8px 0 0 0', color: '#64748b', fontSize: '12px' }}>Password: password123</p>
                     </div>
                 )}
             </div>

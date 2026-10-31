@@ -46,7 +46,7 @@ describe('MyTicketsPage', () => {
         // จำลองให้มีการค้นหา/กรอง (เช่น search="NotFound") และ API คืนค่าว่าง
         vi.mocked(api.fetchTickets).mockResolvedValue({ data: [], meta: { page: 1, pageSize: 10, totalItems: 0, totalPages: 1 } })
         
-        const { container } = renderPage()
+        renderPage()
         
         // รอให้โหลดเสร็จ
         await waitFor(() => expect(screen.queryByText(/Loading/i)).not.toBeInTheDocument())
@@ -103,7 +103,7 @@ describe('MyTicketsPage', () => {
         expect(priorityBadge).toHaveStyle({ color: '#991B1B' }) // แดงตาม Zen Green 
         
         // ตรวจสอบ Status Badge
-        const statusBadge = screen.getByText('NEW')
+        const statusBadge = screen.getByText('NEW', { selector: 'span' })
         expect(statusBadge).toHaveStyle({ color: '#006B3C' }) // เขียวเข้ม
     })
 })
