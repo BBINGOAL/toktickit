@@ -168,16 +168,16 @@ Every AC is mapped in [tests.md](tests.md).
 
 ## 10. Product Definition of Done
 
-- [ ] Issue 1 contract reviewed before coding subsequent feature issues.
-- [ ] FR/BR/AC implemented with backend authority and documented decisions.
-- [ ] Additive migration, safe repeated seed and backup recovery verified on isolated DBs.
-- [ ] Planned meaningful tests and all app regression/build checks pass; no invented pass status.
-- [ ] Dashboard count/query comparison and seven-day boundary evidence recorded.
-- [ ] Accessible desktop/tablet/mobile screens, safe error states and retained drafts verified.
-- [ ] Each issue has its own incremental commits, PR description and requested PpAnpt review; next issue waits for approval.
+- [x] Issue 1 contract reviewed before coding subsequent feature issues.
+- [x] FR/BR/AC implemented with backend authority and documented decisions.
+- [x] Additive migration, safe repeated seed and backup recovery verified on isolated DBs.
+- [x] Planned meaningful tests and all app regression/build checks pass; no invented pass status.
+- [x] Dashboard count/query comparison and seven-day boundary evidence recorded.
+- [x] Accessible desktop/tablet/mobile screens, safe error states and retained drafts verified.
+- [x] Each product issue has incremental commits, a PR description and actual PpAnpt review; documentation uses a branch without a new issue per the student's instruction.
 - [ ] Features merge into lab4-staging, then reviewed release merges into main; final checks rerun on main.
 - [ ] README, tests, reviewer and AI records reflect actual work; one concise PDF has working links and readable evidence.
-- [ ] Local report images, reports and captures are excluded from commits as requested by the student.
+- [x] Local report images, reports and captures are excluded from commits as requested by the student.
 
 ## 11. Assumptions and Decisions
 
@@ -187,4 +187,4 @@ BR-13's requirement for at least one COMPLETED action is a deliberate Sprint 4 p
 
 The primary action-list date shown to users and used for its ASC ordering is actionDateTime (date/time work occurred), with id as tie-break. createdAt is the server record-creation timestamp, shown separately in details/audit. History uses server createdAt and id; dashboard recent actions use updatedAt and id as explicitly specified in BR-22. These timestamps are not interchangeable.
 
-Version-required workflow writes intentionally replace the old unversioned mutation contract. Existing clients/tests are updated together; unversioned writes return validation error rather than silently bypassing concurrency safety. Preserve earlier user capabilities, not unsafe stale-write behavior. No application implementation or final test results are delivered in this contract-only PR.
+Version-required workflow writes intentionally replace the old unversioned mutation contract. Existing clients/tests are updated together; unversioned writes return validation error rather than silently bypassing concurrency safety. Preserve earlier user capabilities, not unsafe stale-write behavior. The original contract PR preceded application implementation. Current integrated results and the final-main release boundary are recorded in release-verification.md.

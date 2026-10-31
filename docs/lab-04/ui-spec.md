@@ -1,6 +1,6 @@
 # Lab 4 UI Specification
 
-Status: reviewed intended UI contract. Actions/workflow/Requester Dashboard (#45-#48) integrated. #49 implements Staff/Admin Dashboard, My Actions and URL-owned Queue; current evidence is in staff-dashboard-verification.md. Whole-product contrast/200% zoom/performance checks remain #50. These are not final-main results.
+Status: integrated UI verified at staging e25284b on 2026-10-31; backend 278 plus performance 1, client 109 and application Chromium 49 pass. Actual capture/checklist scope is in release-verification.md; final-main verification follows reviewed integration.
 
 ## Application shell and routes
 
@@ -71,12 +71,12 @@ Use existing typography/colors/spacing and semantic headings, buttons, links and
 
 At desktop/tablet/mobile widths verify cards, action list, create/edit/cancel modes, dashboard preview/view-all and workflow controls. Long names/descriptions/IDs wrap. Modal stays within viewport with internal vertical scrolling. No clipped nav, overlap or whole-page horizontal overflow. Check adequate text contrast (normal text 4.5:1, large text 3:1) and keyboard focus visibility against actual styles. Test zoom 200% and headings/screen-reader names; remove obsolete placeholder controls and console errors.
 
-Screenshots are real runtime captures stored locally under `artifacts/lab-04/screenshots/{staff-dashboard,requester-dashboard,actions-taken}/`. They and report assets remain uncommitted per student instruction. Visual checklist starts pending; mark complete only after inspecting actual rendered states.
+Screenshots are real runtime captures stored locally under `artifacts/lab-04/screenshots/{staff-dashboard,requester-dashboard,actions-taken}/`. They and report assets remain uncommitted per student instruction. The checklist below records inspected runtime states and scoped automated checks.
 
 | Check | Planned evidence | Status |
 |---|---|---|
-| Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Branch pass: actual captures inspected; Bootstrap precedes app theme and rendered button colors asserted; final main pending |
-| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester and Staff/Admin API/UI/E2E pass on feature branch; final main pending |
-| Actions modes, editable/read-only and validation placement | List/create/edit/terminal/follow-up/conflict | Actions branch checks pass; runtime lifecycle/failure E2E pass; images inspected |
-| Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Branch pass: earlier/new forms and Admin/removal dialogs, rendered solid-text contrast, four widths and 200% CSS zoom; precise audit limits in hardening-verification.md; final main pending |
-| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Branch pass: earlier/new role screens at 320/390/768/1280, bounded 200% CSS zoom dialogs; Requester Create/Staff Action/Admin user captures inspected; final main pending |
+| Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Integrated staging pass: actual captures inspected; Bootstrap precedes app theme and rendered button colors asserted; final main pending |
+| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester and Staff/Admin API/UI/E2E pass on integrated staging; final main pending |
+| Actions modes, editable/read-only and validation placement | List/create/edit/terminal/follow-up/conflict | Actions integrated checks pass; runtime lifecycle/failure E2E pass; images inspected |
+| Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Integrated staging pass: earlier/new forms and Admin/removal dialogs, rendered solid-text contrast, four widths and 200% CSS zoom; precise audit limits in hardening-verification.md; final main pending |
+| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Integrated staging pass: earlier/new role screens at 320/390/768/1280, bounded 200% CSS zoom dialogs; Requester Create/Staff Action/Admin user captures inspected; final main pending |
