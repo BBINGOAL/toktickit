@@ -1,51 +1,30 @@
-# Lab 4 AI Use and Reflection
+# LAB 4 AI Use and Reflection
 
-Status: initial factual record for the engineering-contract issue; expand as the sprint proceeds.
+ในการทำ Lab 4 นี้ผมใช้ OpenAI GPT-6 ผ่าน Codex เป็นทั้ง specification agent และ coding agent โดยเริ่มจากอ่าน labsheet และโค้ดเดิม กำหนด FR/BR/AC และแผนทดสอบก่อนทำฟีเจอร์ จากนั้นแบ่งงานเป็น branch และ PR ให้เพื่อนตรวจทีละส่วน ผมใช้ผลทดสอบ ภาพหน้าจอจริง และรีวิวเพื่อนประกอบการตรวจงาน ไม่ใช้เพียงคำตอบของ AI ว่าทำเสร็จแล้ว
 
-## Tool and roles
+## Selected Key Prompts
 
-Issue #50 (2026-10-29) began after the student's actual continue instruction and verified PR #57 merge 85a06ed. Codex created feature7/lab4-final-hardening-regression, moved #49 Done/#50 In progress on the existing board and committed tests, link fixes/component split and query optimization separately. New linked-action tests failed before implementation; real performance measurements found 13 Staff SQL statements against the contracted 12, fixed by a bounded parameterized preview join. Broader work covers earlier E2E, labelled/keyboard-accessible Admin/removal/discussion/forms, partial-upload duplicate prevention and safe errors. Backend 278/278 plus separate performance 1/1, client 109/109 and full application Chromium 49/49 pass. Actual capture inspection caught Bootstrap overriding the theme; final theme ordering and computed-color regressions are included. Real contrast/zoom failures and corrections are documented in hardening-verification.md; native browser menu zoom and final-main evidence are not claimed. Student reflection and future review are not fabricated.
+ข้อความในตารางเป็นส่วนที่คัดจากคำสั่งจริงในบทสนทนา ส่วน reflection สรุปจากงานและเหตุการณ์ที่เกิดขึ้นใน Lab 4
 
-Issue #49 (2026-10-28) began after the student's actual "เพื่อน merge มาละทำต่อได้เลย" and verification of PR #56 staging merge cdc2a65. Codex created feature6/lab4-staff-dashboard, moved #48 Done/#49 In progress on the existing board, and committed tests/backend/UI/E2E in separate steps. Implemented Staff/Admin metrics, assigned-work pagination, exact Queue drill-down/URL state and a bounded read-only linked-action endpoint/dialog; followed the actual four PR #56 suggestions. Final results: backend 278/278, client 93/93, Chromium 32/32, types/builds/drift checks pass; two existing lint warnings remain. Test-only status-marker/matcher failures were corrected and recorded in staff-dashboard-verification.md. Runtime captures were inspected and remain uncommitted. No new peer approval, final-main result, Docker recovery or student reflection was fabricated.
-
-Issue #48 (2026-10-28) followed the student's actual instruction, "เพื่อน merge มาเเล้วครับ ทำissue ถัดไปได้เลย", after verifying PR #55 merged into lab4-staging as be6e14f. Codex created feature5/lab4-requester-dashboard, updated the existing Kanban and committed tests, backend, UI, PR #55 follow-ups and E2E separately. Implemented scoped snapshot metrics, Bangkok dates, matching URL drill-down and stale-response protection. Actual final results: backend 244/244, client 72/72, combined Chromium 20/20, types/builds and drift checks pass. Initial fixture-count/selector/typecheck/keyboard-test issues and a transient workflow hook timeout are recorded in requester-dashboard-verification.md. Real captures remain local; no student reflection, peer approval, final-main result or Docker recovery was invented.
-
-LLM: OpenAI GPT-6 through Codex. Specification-agent work: read the Lab 4 handout and existing Lab 3 code, propose issue/branch decomposition, identify handout/rubric ambiguity, and draft FR/BR/AC, API/UI rules and test traceability. Coding-agent work for issue #45 implements the additive data model, Actions Taken APIs, seed preservation and automated validation/API/concurrency/migration/recovery tests after issue #44 integration.
-
-## Selected actual prompts
-
-These are excerpts from real student requests in this conversation, not invented later prompts.
-
-| No. | Student prompt excerpt | Use/outcome |
-|---|---|---|
-| 1 | "อย่างเเรกลองอ่านไฟล์ md ที่ชื่อ SE+Lab+4.md ว่าแลปนี้ต้องทำไร คุณลองทำ implementation plan มาให้ผมดูก่อน" | Read the handout, inspect baseline code, propose eight issues and one branch per issue. |
-| 2 | "commit ทีละสเตปนะ พอเสดเเล้ว issueนึงให้ไปสร้าง PR พร้อมทั้งเขียน Discription ... request บัญชีเพื่อนที่ชื่อ PpAnpt มารีวิว ... รอเพื่อนรีวิวก่อนค่อยทำต่อ" | Adopt incremental commits, one issue/PR at a time and a peer-review gate before the next issue. |
-| 3 | "อย่าไปcommit พวกที่เป็นรูปของเอกสารตอนจะส่งlab พวกรูปรายงาน" | Commit an explicit documentation allowlist and keep report/capture assets local. |
-| 4 | "เพื่อนรีวืวมาเเล้ว ... คุณลองอ่านเเละดูหน่อยเเต่มันขึ้นสถานะ approve นะ" | Read actual GitHub review, verify APPROVED status and distinguish suggestions from completed work. |
-| 5 | "คือผมเเค่งงว่าทำไมถุึงมาอ้างอิงจากlab3" | Explain that Lab 4 governs new functionality while earlier labs supply preservation/security constraints; identify the completed-action minimum as our added design decision. |
-| 6 | "เเก้ไขตามที่เพื่อน review มาก่อนมะ หรือสามารถ ให้เพื่อนmerged ให้ได้เลย" | Clarify the reviewed contract in the same PR and request confirmation before staging integration. |
-| 7 | "คุณลองรันเเล้ว ลองทำ issue2 นี้ต่อสิ" | Recover verification after Docker became available, use isolated PostgreSQL, fix real seed/schema issues, and verify the foundation before requesting peer review. |
-| 8 | "โอเคของเราทำต่อได้เลย ที่เพื่อน merge เเล้ว" | Verify PR #57 merge, create feature7, follow actual review suggestions, run full regression and measured hardening before opening the next peer-review PR. |
-
-The handout requires 6-10 selected prompts in the final submission. Eight actual excerpts are recorded; revise the selection later if later coding-agent prompts better demonstrate the final work.
-
-## Decisions AI helped expose
-
-- The submission rubric requires assign/complete/cancel although the opening Actions Taken description lists record fields. The contract therefore defines a lifecycle separately from recorded action content.
-- Current seed rewrites passwords/activity on repeat execution; final seed must preserve existing users.
-- Current Ticket status changes have no versioned atomic resolution gate. Action writes and Ticket transitions need shared parent locking and audit events.
-- Staff Queue currently fixes page 1/pageSize 50. Dashboard drill-down needs filters/sorting/pagination that expose the full matching collection.
-- Actual peer review exposed ownership error-message leakage, ambiguous action transition wording and missing direct FR-04 traceability. Contract revisions address those issues and document legacy zero-action behavior plus must-have/stretch boundaries. Approval of the initial commit does not automatically approve later revisions.
-- Real issue #45 verification caught an advisory-lock void-result incompatibility, a seed.ts/older seed.js import collision, and a baseline User.updatedAt default mismatch. These were corrected and verified, not hidden by resetting the original database. Final branch checks passed 124 backend tests (60 new foundation tests) and 31 existing UI tests; later workflow/dashboard/UI features are still pending.
+| Prompt | My Reflection |
+|---|---|
+| **1. "อย่างเเรกลองอ่านไฟล์ md ที่ชื่อ SE+Lab+4.md ว่าแลปนี้ต้องทำไร คุณลองทำ implementation plan มาให้ผมดูก่อน"** | การให้ AI อ่านข้อกำหนดก่อนช่วยแยก Actions Taken, Ticket workflow, Dashboard และ regression ได้ครบ โดยเฉพาะ rubric ที่ต้องมี assign/start/complete/cancel แม้คำอธิบายต้นเอกสารจะเน้นเพียงข้อมูลของ Action การมี spec และ test mapping ช่วยตรวจขอบเขตก่อนเริ่มเขียนโค้ด |
+| **2. "commit ทีละสเตปนะ พอเสดเเล้ว issueนึงให้ไปสร้าง PR พร้อมทั้งเขียน Discription ... request บัญชีเพื่อนที่ชื่อ PpAnpt มารีวิว ... รอเพื่อนรีวิวก่อนค่อยทำต่อ"** | ผมกำหนดให้ทำงานและ commit ทีละขั้น ทำให้ย้อนดูได้ว่าทดสอบ แก้โค้ด และปรับเอกสารเมื่อไร การรอเพื่อนตรวจแต่ละ PR ช่วยให้ข้อเสนอแนะจากงานก่อนถูกติดตามในงานถัดไป แทนการรวมการเปลี่ยนแปลงทั้งหมดครั้งเดียว |
+| **3. "คือผมเเค่งงว่าทำไมถุึงมาอ้างอิงจากlab3"** | ผมตั้งคำถามเมื่อ AI อ้างอิงข้อกำหนดเดิม ทำให้แยกชัดว่า Lab 4 เป็นข้อกำหนดฟีเจอร์ใหม่ ส่วน Lab 3 ใช้ตรวจสิ่งที่ต้องรักษาไว้ เช่น authentication และ role access กฎต้องมี completed action อย่างน้อยหนึ่งรายการก่อน resolve จึงถูกบันทึกเป็นการตัดสินใจของ spec นี้ ไม่อ้างว่า labsheet บังคับกลไกนี้ตรง ๆ |
+| **4. "เเก้ไขตามที่เพื่อน review มาก่อนมะ หรือสามารถ ให้เพื่อนmerged ให้ได้เลย"** | สถานะ Approve ไม่ได้แปลว่าข้อเสนอแนะทุกข้อถูกแก้แล้ว ผมให้ตรวจคอมเมนต์กับโค้ดและแยกข้อที่ต้องแก้จากข้อที่ไม่ block เช่น 403/404, seed ที่ไม่ reset บัญชี และความต่างระหว่าง Ticket owner กับ action assignee จากนั้นตอบเพื่อนให้ตรงกับสิ่งที่ทำจริง |
+| **5. "คุณลองรันเเล้ว ลองทำ issue2 นี้ต่อสิ"** | เมื่อ Docker มีปัญหา งานทดสอบต้องแยกจากข้อมูลเดิม จึงใช้ PostgreSQL ทดสอบบน B: การรันจริงพบปัญหา advisory lock, seed import และ baseline schema ที่ต้องแก้ก่อนผ่าน ผมเห็นว่าผล build อย่างเดียวไม่ยืนยัน migration หรือการรักษาข้อมูลเดิม |
+| **6. "เออต่อไปนี้หลังเพื่อน review เเล้วเราต้องตอบกลับเพื่อนด้วย ขอบคุณสำหรับคำเเนะนำไรงี้อะ ... คุณตอบให้ด้วยนะ"** | การตอบรีวิวทำให้มีหลักฐานว่าเข้าใจคำแนะนำและบอกสถานะติดตามได้ชัด ใน reviewer.md จึงแยกคอมเมนต์เพื่อน คำตอบ และสิ่งที่แก้ตาม ไม่เขียนว่าทดสอบหรือแก้แล้วหากยังไม่ได้ทำ |
+| **7. "โอเคของเราทำต่อได้เลย ที่เพื่อน merge เเล้ว"** | การทำต่อจาก staging ที่รวมแล้วช่วยให้ regression ครอบคลุมฟีเจอร์ที่เกี่ยวข้อง ในช่วง hardening พบ query 13 ครั้งเกินเกณฑ์ 12, ปัญหา dialog เมื่อขยาย 200%, contrast และ Bootstrap ทับสีปุ่ม จึงแก้แล้วรันทดสอบและตรวจภาพซ้ำโดยไม่ลดเกณฑ์เพื่อให้ผ่าน |
+| **8. "ดูจากไฟล์ SE+Lab+4.md ว่า require ... ในเอกสารมีไรบ้าง ... ไฟล์ pdf ให้ยึดโครงร่าง ... เหมือนของlab3"** | ผมให้ AI ทำรายงานจากหลักฐาน Lab 4 โดยใช้รูปแบบเอกสารเดิมเพื่อให้อ่านง่าย แต่ต้องตรวจว่ามี Answer Part 1-9 ครบ ตัวเลขตรงกับ log และแยกผล staging ออกจาก main ส่วนรูปและรายงานเก็บแยกจาก source commit ตามที่กำหนด |
 
 ## My Reflection
 
-Student-authored reflection is pending. The final reflection should discuss which specification-agent decisions were accepted or changed, how coding-agent output was checked against tests, and what the student learned from actual review/failures. This file does not claim a personal experience or final product result that has not occurred.
+การใช้ AI ในบทบาท specification agent ช่วยเปลี่ยน labsheet ให้เป็นข้อกำหนดและกรณีทดสอบที่ตรวจย้อนกลับได้ จุดที่ต้องทบทวนคือไม่ให้ AI เพิ่มกลไกซับซ้อนโดยไม่อธิบายเหตุผล และไม่เอากฎจากแลปเดิมมาอ้างเป็นข้อกำหนดใหม่ ผมจึงกำหนดลำดับงานและตั้งคำถามเรื่องขอบเขต โดยให้บันทึกการตัดสินใจ เช่น version, work cycle และ resolution gate ไว้ใน spec
 
-## Verification boundaries
+สำหรับ coding agent AI ช่วยเขียนโค้ด ทดสอบ และตรวจ regression ได้หลายส่วน แต่ผมไม่ควรตัดสินจากหน้าเว็บที่ดูใช้งานได้หรือคำว่า Approve อย่างเดียว การตรวจ backend โดยตรงช่วยเห็นเรื่อง ownership, inactive assignee, stale update และ duplicate retry ส่วนการตรวจภาพจริงช่วยพบปัญหาสีและ layout ที่ผลทดสอบบางชุดยังไม่พบ ตัวอย่าง query budget และ dialog ที่หลุดหน้าจอทำให้เห็นว่าต้องใช้หลักฐานหลายแบบประกอบกัน
 
-Issue #47 started only after the actual student merge/continue instruction and verification that PR #54 merged as 10dd684 on 2026-10-20. Work covers the complete versioned Ticket lifecycle/gate, append-only events, advisory/reopen, atomic cancellation and client workflow controls. TDD began with a missing workflow-rules module (red), then unit/API matrix/gate/concurrency/rollback checks passed. Full UI is 61/61 and combined Actions/workflow E2E 13/13. A first E2E run exposed four focus-restoration failures; refreshing every dialog close disabled the trigger. This was fixed rather than weakening the assertions. A mount synchronization race was also fixed. Explicit timezone, React intent state and uncertain-close refresh address three PR #54 suggestions; the general ActionsTaken split remains #50. Native isolated PostgreSQL 18.1 on B: remains the verification environment; no original data/report assets are committed. Exact final backend counts/commands are recorded in workflow-verification.md after the final rerun.
+Peer review ช่วยตรวจสมมติฐานที่ AI และผู้เขียนอาจมองข้าม เช่นไฟล์แนบที่ soft-remove แล้วยังต้องแสดง metadata และการแยกผู้รับผิดชอบ Ticket ออกจากผู้ดำเนินการ ผมให้ตอบรีวิวด้วยสถานะจริงและนำข้อเสนอแนะไปติดตามใน PR ถัดไป การใช้ AI จึงยังต้องมีคนกำหนดขอบเขต ตรวจหลักฐาน และรับผิดชอบความถูกต้องของงานก่อนส่ง
 
-Issue #46 began after the student's actual merge confirmation and verification of PR #53 as 3465088 on 2026-10-20. Coding-agent work added the typed action transport, shared list/history, accessible work dialog, one-edge transitions, exact-intent retry and draft comparison/recovery. Tests and image inspection exposed timestamp precision, focus-selection, unchanged-assignee PATCH, history-name and checkbox/long-header issues; these were fixed. Latest results: UI 53/53, backend 124/124, Actions E2E 9/9, schema drift none, client/server typechecks/builds pass. Docker remained stopping after C: filled; verification used a new isolated native PostgreSQL 18.1 cluster on B: at 127.0.0.1:55434, not localdb or Docker. Real screenshots were inspected and remain uncommitted. No approval, final-main result or student reflection was fabricated. Details: ui-verification.md.
+## Evidence and verification boundaries
 
-PR #52 delivered the contract. Issue #45 delivers the verified backend foundation described in foundation-verification.md; Ticket resolution/dashboard/UI increments and E2E/final-main checks remain pending. Peer review approval for each PR is recorded only from the actual GitHub review. Report images/PDF are deliberately excluded from commits at the student's request.
+ดู [tests.md](tests.md), [reviewer.md](reviewer.md), [hardening-verification.md](hardening-verification.md) และ [release-verification.md](release-verification.md) สำหรับคำสั่ง ผลรันจริง และขอบเขตของการตรวจ ไม่อ้างว่า reviewer รัน E2E หากเขาระบุว่าไม่ได้รัน ไม่อ้างว่า Docker กลับมาปกติจากการใช้ native PostgreSQL และไม่เปลี่ยนผลบน staging ให้เป็นผลจาก main
