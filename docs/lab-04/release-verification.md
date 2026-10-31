@@ -6,6 +6,8 @@ Verified integrated staging e25284be30c35a679069491092c356b574afc7aa on 2026-10-
 
 Documentation branch: `feature8/lab4-docs-release`, from reviewed PR #58 staging merge e25284b. Per the student's instruction, Documentation issue #51 was deleted, the seven product issues #44-#50 are Done on Project 4, and documentation/reporting continues on a branch without a replacement issue. No automatic merge into main.
 
+Documentation PR: [#59](https://github.com/BBINGOAL/toktickit/pull/59) into lab4-staging, with PpAnpt requested. Its documentation commits do not change the application source tested at e25284b. The local report includes nine ordered parts, real review/test/capture evidence and an explicit integrated-staging source label.
+
 Windows x64, Node 24.14.0, PostgreSQL 18.1, Ryzen 5 7535HS / 12 logical CPUs / 15.32 GiB RAM. Native isolated PostgreSQL on B:, 127.0.0.1:55434, database `toktickit_lab4_verify_20261014_actions`; JWT test secret matches the fixture. No localdb reset, original-data cleanup, or Docker-health claim. Browser suites start/stop their own API/Vite processes on ports 4000/5173.
 
 ## Actual commands, times and outcomes
