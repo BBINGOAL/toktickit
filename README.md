@@ -105,7 +105,7 @@ npm test
 ```
 
 ### End-to-End Tests (Playwright)
-Ensure both the frontend and backend servers are running locally before executing E2E tests.
+The Lab 4 config below starts its own API and frontend. Use an isolated test DATABASE_URL and free ports 4000/5173, as described below.
 ```bash
 cd e2e
 npm install
@@ -123,37 +123,6 @@ Never reseed a database containing work merely to restore passwords.
 
 See [specification](docs/lab-03/specification.md), [UI specification](docs/lab-03/ui-spec.md),
 [test evidence](docs/lab-03/tests.md), [AI use](docs/lab-03/ai-use.md), and [reviews](docs/lab-03/reviewer.md).
-
-## Reproducible isolated verification (PowerShell)
-
-Use a new database name beginning with `toktickit_lab3_verify_`.
-The example below creates a separate database; it does not reset `localdb`.
-Run setup once, with Docker PostgreSQL healthy.
-
-```powershell
-docker exec local-postgres createdb -U postgres toktickit_lab3_verify_local
-$env:DATABASE_URL='postgresql://postgres:password@127.0.0.1:5434/toktickit_lab3_verify_local'
-cd server
-npx prisma migrate deploy
-npx prisma db seed
-npm test
-npm run dev
-```
-
-Keep the API terminal open. In another terminal, start `npm run dev` in `client`
-(port 5173). In a third terminal, from the repository root:
-
-```powershell
-$env:DATABASE_URL='postgresql://postgres:password@127.0.0.1:5434/toktickit_lab3_verify_local'
-cd e2e
-npx playwright test --workers=1
-```
-
-The API and E2E process must use the same test database. E2E creates disposable accounts
-and tickets and cleans up its own data. It rejects non-test database names.
-Screenshots are saved under `report-assets/lab3-e2e/`.
-The two tests in `e2e/tests/example.spec.ts` are Playwright website examples, not application coverage.
-Run `npx playwright test lab-02 lab-03 --workers=1` for application-only tests.
 
 ## Lab 4 setup, preservation and demonstration
 
