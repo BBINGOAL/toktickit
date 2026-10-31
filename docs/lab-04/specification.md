@@ -1,6 +1,6 @@
 # Lab 4 Specification: Actions Taken, Dashboards and Final Regression
 
-Status: PpAnpt approved commit 02420fc on 2026-10-14; the revised contract was merged through PR #52 into lab4-staging at 7922e0e. Implementation and final-main verification follow the staged issue plan.
+Status: PpAnpt approved commit 02420fc on 2026-10-14; the revised contract was merged through PR #52 into lab4-staging at 7922e0e. All product PRs are integrated; final main 768975d is verified. See release-verification.md for actual results.
 Baseline: Lab 3 `main` commit `2b8531b`. Source: SE Lab 4 handout, sections 1-14.
 This document specifies intended behavior; it does not assert that features or tests already pass.
 
@@ -162,7 +162,7 @@ See [api-spec.md](api-spec.md) for endpoints, validation, pagination, status cod
 | AC-15 | All major Lab 4 screens pass desktop/tablet/mobile and keyboard/modal/focus/overflow inspection. |
 | AC-16 | Labs 1-3 regression and Staff Queue filter/sort/pagination work with stable ordering and no missing drill-down matches. |
 | AC-17 | Dashboard payload/query work stays bounded and meets documented local performance-smoke limits. |
-| AC-18 | Final reviewed main has passing unit/API/UI/E2E/build evidence, current docs and a real Part 1-9 report. |
+| AC-18 | Final integrated main has passing unit/API/UI/E2E/build evidence, current docs and a real Part 1-9 report. |
 
 Every AC is mapped in [tests.md](tests.md).
 
@@ -175,8 +175,8 @@ Every AC is mapped in [tests.md](tests.md).
 - [x] Dashboard count/query comparison and seven-day boundary evidence recorded.
 - [x] Accessible desktop/tablet/mobile screens, safe error states and retained drafts verified.
 - [x] Each product issue has incremental commits, a PR description and actual PpAnpt review; documentation uses a branch without a new issue per the student's instruction.
-- [ ] Features merge into lab4-staging, then reviewed release merges into main; final checks rerun on main.
-- [ ] README, tests, reviewer and AI records reflect actual work; one concise PDF has working links and readable evidence.
+- [x] Features merge into lab4-staging, then release PR #60 merges into main; final checks rerun on main. Documentation/release peer review is waived per the student's workflow.
+- [x] README, tests, reviewer and AI records reflect actual work; the Part 1-9 PDF has working links and inspected readable evidence.
 - [x] Local report images, reports and captures are excluded from commits as requested by the student.
 
 ## 11. Assumptions and Decisions

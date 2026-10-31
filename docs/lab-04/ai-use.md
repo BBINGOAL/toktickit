@@ -28,3 +28,7 @@ Peer review ช่วยตรวจสมมติฐานที่ AI แล�
 ## Evidence and verification boundaries
 
 ดู [tests.md](tests.md), [reviewer.md](reviewer.md), [hardening-verification.md](hardening-verification.md) และ [release-verification.md](release-verification.md) สำหรับคำสั่ง ผลรันจริง และขอบเขตของการตรวจ ไม่อ้างว่า reviewer รัน E2E หากเขาระบุว่าไม่ได้รัน ไม่อ้างว่า Docker กลับมาปกติจากการใช้ native PostgreSQL และไม่เปลี่ยนผลบน staging ให้เป็นผลจาก main
+
+## Final main verification
+
+ผู้ส่ง merge เอกสาร PR #59 และ release PR #60 เอง แล้ว pull main แบบ fast-forward ได้ commit 768975d ตรวจแล้วรายงาน/ภาพ/tmp ไม่ได้เข้า commit และไม่มี tracked change ค้าง Codex รัน backend 278, performance 1 แยกรอบ, client 109 และ application E2E 49 ผ่านบน main จริง พร้อม types/builds/lint/schema และ baseline-app recovery ไม่ได้นำผล staging มาเปลี่ยนชื่อเป็น main ผู้ส่งยืนยันว่า PR เอกสารและ release ไม่ต้องให้เพื่อนรีวิว จึงแก้บันทึกขั้นตอนให้ตรงและไม่สร้าง approval ที่ไม่มีจริง
