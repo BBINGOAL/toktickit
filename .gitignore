@@ -21,3 +21,12 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+
+# Local lab evidence and reports (source/test files remain versioned)
+/artifacts/
+/report-assets/
+/report_lab*.md
+/report_lab*.pdf
+/output/pdf/
+/tmp/

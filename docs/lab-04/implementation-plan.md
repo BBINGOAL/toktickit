@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: #44-#49 integrated through reviewed PRs #52-#57; latest staging merge 85a06ed on 2026-10-29. #50 is In review through PR #58 on feature7/lab4-final-hardening-regression, Development-linked to #50 with PpAnpt requested. Backend 278/278 plus separate performance 1/1, client 109/109 and all application Chromium 49/49 pass. #51 has not started. See hardening-verification.md for actual branch checks and release boundaries. Native PostgreSQL 18.1 provides isolated verification; Docker recovery is not claimed.
+Status: #44-#50 completed through reviewed PRs #52-#58, latest staging merge e25284b. Verified integrated staging e25284be30c35a679069491092c356b574afc7aa on 2026-10-31: backend 278/278 (24 files), separate performance 1/1, client 109/109 (20 files), Chromium 49/49 (14 files), source types/builds/lint and schema drift checks pass. Supplemental real-browser evidence 10/10 and full backup/restore plus baseline-app recovery pass. Main remains Lab 3 commit 2b8531b; no final-main pass is claimed. Documentation issue #51 was deleted at the student's request; use feature8/lab4-docs-release without a new issue.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -9,7 +9,7 @@ Complete Actions Taken, the Ticket lifecycle, and role dashboards while preservi
 
 ## Git and issue decomposition
 
-Use one feature branch and one reviewed PR per issue. Total: **8 issues**, GitHub #44-#51 respectively for rows 1-8 below. Commit in meaningful steps, request PpAnpt review for each completed issue PR, and wait for approval and staging integration before starting the next issue.
+Use one feature branch and one reviewed PR per issue. Current product scope: **7 issues**, GitHub #44-#50 for rows 1-7. Row 8 is branch-only documentation/release work, exempt from issue creation at the student's explicit request. Commit in meaningful steps, request PpAnpt review for each completed issue PR, and wait for approval and staging integration before starting the next issue.
 
 Flow: `main -> lab4-staging -> featureN/lab4-* -> PR into lab4-staging -> final PR into main`.
 Create subsequent feature branches from the latest integrated staging commit. Run targeted tests with each feature, all regression on staging, and final verification on merged main.
@@ -25,7 +25,7 @@ Create subsequent feature branches from the latest integrated staging commit. Ru
 | 7 | Lab4 Final Regression and Product Hardening | `feature7/lab4-final-hardening-regression` | Labs 1-3 regression, Staff Queue sorting/pagination, stable ordering, retry/double-submit, security, accessibility, responsive/style inspection, performance smoke and failure states. |
 | 8 | Lab4 Documentation Evidence and Release Integration | `feature8/lab4-docs-release` | README, actual test traceability, real review records and AI reflection, screenshots, concise MD/PDF Answer Part 1-9, staging release checks and post-merge main evidence. |
 
-Kanban: Backlog -> Ready -> In progress -> In review -> Done. Done requires tests and reviewed integration. Existing private Project 4: #44-#49 Done, #50 In review through PR #58, #51 Backlog. PR #58 is Development-linked to #50 and requests PpAnpt review; await actual review and staging merge. Release stays open until final-main verification succeeds.
+Kanban: Backlog -> Ready -> In progress -> In review -> Done. All seven product issues #44-#50 are Done; Project 4 no longer contains Documentation issue #51. Continue branch-only documentation and reviewed release integration, then verify actual main.
 
 ## Must-have versus stretch and complexity limits
 

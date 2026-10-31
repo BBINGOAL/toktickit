@@ -1,120 +1,108 @@
-# Lab 4 Peer Review Record
+# Peer Review Information
 
-## My Information
+**My Information:**
+- **Name:** ศิวรักษ์ ฉัตรวิชัย (Siwarak Chatvichai)
+- **Student ID:** 67070501086
+- **GitHub Username:** [BBINGOAL](https://github.com/BBINGOAL)
 
-- Name: Siwarak Chatvichai
-- Student ID: 67070501086
-- GitHub: [BBINGOAL](https://github.com/BBINGOAL)
+**My Peer Reviewer (คนที่มาตรวจโค้ดให้ผม):**
+- **Name:** อนพัช บรรเจิดศิลป์
+- **Student ID:** 67070501049
+- **GitHub Username:** [PpAnpt](https://github.com/PpAnpt)
 
-## My Peer Reviewer
+สรุปด้านล่างถอดความจากคอมเมนต์จริง โดยแยกข้อเสนอแนะ คำตอบ และผลที่แก้ตาม ไม่อ้างว่า reviewer รันทดสอบส่วนที่เขาระบุว่าไม่ได้รัน
 
-- GitHub: [PpAnpt](https://github.com/PpAnpt)
-- Name/student ID: to be confirmed for the Lab 4 record.
+## PR #52: Engineering contract
 
-## Reviews received
+- **Link to PR they reviewed for me:** [PR #52](https://github.com/BBINGOAL/toktickit/pull/52)
+- **Their Review Comment:** [ข้อเสนอแนะและ Approval จริง](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550)
 
-| Issue / scope | PR | Reviewer request | Actual comments / responses | Approval |
-|---|---|---|---|---|
-| [#44 Sprint 4 Engineering Contract](https://github.com/BBINGOAL/toktickit/issues/44) | [PR #52](https://github.com/BBINGOAL/toktickit/pull/52) into lab4-staging | PpAnpt requested on 2026-10-12 | [Review on 2026-10-14](https://github.com/BBINGOAL/toktickit/pull/52#pullrequestreview-5512844550), summarized below | APPROVED for commit 02420fc; revised PR merged as 7922e0e on 2026-10-14 (no separate later review recorded) |
-| [#45 Actions Taken Foundation and Migration](https://github.com/BBINGOAL/toktickit/issues/45) | [PR #53](https://github.com/BBINGOAL/toktickit/pull/53) into lab4-staging | PpAnpt requested on 2026-10-14 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/53#pullrequestreview-5568221570), 2026-10-19; four nonblocking suggestions below | APPROVED for f6bae9e; merged as 3465088 on 2026-10-20 |
-| [#46 Actions Taken UI](https://github.com/BBINGOAL/toktickit/issues/46) | [PR #54](https://github.com/BBINGOAL/toktickit/pull/54) into lab4-staging | PpAnpt requested on 2026-10-20 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/54#pullrequestreview-5581899545), nonblocking suggestions below; author replied | APPROVED for latest head 2cb79da; merged as 10dd684 on 2026-10-20 |
-| [#47 Ticket Workflow and Resolution](https://github.com/BBINGOAL/toktickit/issues/47) | [PR #55](https://github.com/BBINGOAL/toktickit/pull/55) into lab4-staging | PpAnpt requested on 2026-10-20 | [Review](https://github.com/BBINGOAL/toktickit/pull/55#pullrequestreview-5638567438) and [author response](https://github.com/BBINGOAL/toktickit/pull/55#issuecomment-6459305158); follow-up below | APPROVED for latest head d1f9e72 on 2026-10-24; merged be6e14f on 2026-10-28 |
-| [#48 Requester Dashboard](https://github.com/BBINGOAL/toktickit/issues/48) | [PR #56](https://github.com/BBINGOAL/toktickit/pull/56) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-28 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/56#pullrequestreview-5682178217) and [author response](https://github.com/BBINGOAL/toktickit/pull/56#issuecomment-6468406174) | APPROVED latest head 947e090; merged cdc2a65 on 2026-10-28 |
-| [#49 Staff/Admin Dashboard](https://github.com/BBINGOAL/toktickit/issues/49) | [PR #57](https://github.com/BBINGOAL/toktickit/pull/57) into lab4-staging, Development-linked | PpAnpt requested 2026-10-28 | [Actual review](https://github.com/BBINGOAL/toktickit/pull/57#pullrequestreview-5683665723) and [author response](https://github.com/BBINGOAL/toktickit/pull/57#issuecomment-6471169069); four nonblocking suggestions addressed in #50 | APPROVED latest head 191e425 on 2026-10-28; merged 85a06ed on 2026-10-29 |
-| [#50 Final Regression and Product Hardening](https://github.com/BBINGOAL/toktickit/issues/50) | [PR #58](https://github.com/BBINGOAL/toktickit/pull/58) into lab4-staging, Development link verified | PpAnpt requested on 2026-10-29; verified in GitHub metadata | Backend 278/278 plus separate performance 1/1, client 109/109 and all app Chromium 49/49; actual review awaited | Pending; no approval or merge claimed |
-
-Record exact PR/review/comment URLs, reviewer identity, feedback and author response only after they occur. A review request is not approval. Wait for peer review and staging integration before starting each next issue.
-
-Issues #44-#49 are Done after reviewed staging integration. Issue #50 began only after the student confirmed merge and instructed continuation, and GitHub verified PR #57 merge 85a06ed. New #50 changes require their own review; earlier approval is not reused.
-
-### PR #57 feedback and follow-up in #50
-
-PpAnpt approved exact head 191e425 on 2026-10-28 at 20:47 Asia/Bangkok, reporting backend 278/278 on a fresh isolated DB, client 93/93 and typecheck; E2E was explicitly not rerun by the reviewer. Author replied with thanks and accurate dispositions at 21:06. GitHub merged PR #57 into lab4-staging as 85a06ed on 2026-10-29 at 20:32. All four suggestions were nonblocking.
-
-| Suggestion | Actual follow-up in #50 |
+| Subject | Record |
 |---|---|
-| Invalid actionId uses form error | Client validates IDs and gives link-specific feedback before GET; regression covers malformed values and inaccessible-link retry. |
-| Closing details leaves actionId in URL | Callback removes only actionId with replace; Close/Escape/reload/unrelated-query/history-length regressions. Literally empty actionId already opened no dialog. |
-| Staff windowStart is unused | API doc explains compatible shared metadata, never a Staff seven-day predicate; no formula changed. |
-| Card snapshot versus live Queue | Existing asOf retained; adjacent current-data explanation and component coverage added. |
+| Reviewer feedback | 403/404 เปิดเผยการมีอยู่ของ Ticket; completed-action minimum เข้มกว่าข้อความเดิม; BR-08/PATCH ขัดกัน; แยก must-have/stretch; เพิ่ม FR-04 mapping, BR-20 table, นิยามเวลาที่ใช้เรียง และ Kanban ให้ครบ |
+| My Response / follow-up | [คำตอบจริง](https://github.com/BBINGOAL/toktickit/pull/52#issuecomment-6160807329): ปรับ non-owner เป็น 404 เหมือน missing และคง role-level 403; บันทึก completed-action minimum เป็น product decision พร้อมผลต่อ legacy/seed/regression; หนึ่ง transition ต่อ request; เพิ่ม scope table, mapping และนิยาม actionDateTime/createdAt ตรวจโครงเอกสาร 16 FR/24 BR/18 AC/37 test rows ผ่าน |
+| Approval / integration | Initial APPROVED ที่ 02420fc; แก้เอกสาร 1c7b55e แล้วรวมเป็น 7922e0e โดยไม่อ้างว่ามี review ใหม่แยกจาก approval เดิม |
 
-See [hardening verification](hardening-verification.md). These changes are submitted for a new peer review, not claimed covered by PR #57's approval.
+## PR #53: Actions Taken foundation and migration
 
-### PR #56 feedback and follow-up in #49
+- **Link to PR they reviewed for me:** [PR #53](https://github.com/BBINGOAL/toktickit/pull/53)
+- **Their Review Comment:** [ข้อเสนอแนะและ Approval จริง](https://github.com/BBINGOAL/toktickit/pull/53#pullrequestreview-5568221570)
 
-PpAnpt approved latest head 947e090 on 2026-10-28 at 18:55 Asia/Bangkok, reporting backend 244/244 on a fresh isolated DB, client 72/72 and typecheck. Reviewer explicitly did not rerun E2E. All four suggestions were nonblocking. Author replied with thanks/dispositions at 18:59; GitHub records staging merge cdc2a65 at 19:03. These are actual review records, not inferred AI-tool use.
-
-| Suggestion | Actual follow-up |
+| Subject | Record |
 |---|---|
-| Split shared req.path-switching Requester handler | Separate explicit Dashboard/list handlers with shared role/error helpers, extended for Staff; earlier Requester regression passes. |
-| Document encoded + in timezone offsets | api-spec.md adds %2B example and equivalent Z; transport test verifies the decoded value and credentialed request. |
-| Document global RoleRoute behavior change | tests.md/UI/spec and PR compatibility notes distinguish authenticated Access denied from signed-out redirect; two App regression cases pass. |
-| Confirm removed-download 410 UI compatibility | Prior author reply inspected code only; #49 now adds a transport regression asserting 410 rejects before blob handling. No false claim that this test existed during the earlier response. |
+| Reviewer feedback | เทส assignee พึ่ง 50 คนแรก; seed ไม่ reset บัญชีเดิม; demo version=0 และ Ticket ไม่มี owner แต่ action มี assignee; พิจารณา CHECK constraints/index ที่ซ้ำ |
+| My Response / follow-up | [คำตอบจริง](https://github.com/BBINGOAL/toktickit/pull/53#issuecomment-6286073824): PR #54 ใช้ search ชื่อ fixture; ระบุ seed update:{} ไม่ reset credentials/roles/activity; PR #55 ชี้แจง version เป็น concurrency token และ assignee แยกจาก owner; hardening ตรวจ indexes/วัด performance แล้วคง schema เดิมโดยบันทึกขอบเขต application validation |
+| Approval / integration | APPROVED f6bae9e; reviewer รายงาน server 124/124 สองรอบและไม่มี drift; merged 3465088 |
 
-### PR #55 feedback and follow-up in #48
+## PR #54: Actions Taken UI
 
-PpAnpt approved d1f9e72 on 2026-10-24 at 21:17 Asia/Bangkok, reporting server 209/209 on a new isolated DB and client 61/61 plus typecheck; E2E was explicitly not rerun by the reviewer. The author replied with thanks and dispositions on 2026-10-28. Student subsequently confirmed merge; GitHub records be6e14f into lab4-staging on 2026-10-28 at 16:58 Asia/Bangkok. Approval was for PR #55, not the subsequent #48 changes.
+- **Link to PR they reviewed for me:** [PR #54](https://github.com/BBINGOAL/toktickit/pull/54)
+- **Their Review Comment:** [ข้อเสนอแนะและ Approval จริง](https://github.com/BBINGOAL/toktickit/pull/54#pullrequestreview-5581899545)
 
-| Suggestion | Actual follow-up |
+| Subject | Record |
 |---|---|
-| Removed attachments now reappear with time/reason; verify intent | Preserve Lab 2 BR-19/AC-17 visible soft-removal metadata. Added reload/Requester/Staff regression and blocked-download checks. Corrected removed download to authorized 410 and missing/non-owned identical 404 before disk/removal-state checks. No removed content is exposed. |
-| Confirm owner/priority edits on CLOSED/CANCELLED | Documented as metadata-only versioned/history-recorded edits; two terminal-state tests ensure Ticket status and completed Actions remain unchanged. |
-| Confirm Resolve actor need not equal Ticket owner | Explicit spec/API clarification and non-owner Staff resolve test, retaining eligible owner gate and actual actor attribution. |
-| Document cross-requester 403 to 404 compatibility change | tests.md and API compatibility section now explicitly state Lab 2/3 behavior change; role-level denial remains 403. |
+| Reviewer feedback | ระบุ input timezone ให้ตรงการแสดง Bangkok; ปิด dialog หลัง response หายควร refresh/เตือน; frozen อ่าน ref ใน render; แยก ActionsTaken.tsx |
+| My Response / follow-up | [คำตอบจริง](https://github.com/BBINGOAL/toktickit/pull/54#issuecomment-6286074513): PR #55 เพิ่ม timezone hint, เตือนและ refresh authoritative state เมื่อปิด uncertain submission และใช้ React state เก็บ intent; PR #58 แยก list/editor/details/history/pager/presentation และใช้ shared Dialog พร้อม regression |
+| Approval / integration | APPROVED 2cb79da; reviewer รัน server 124/124, client 53/53 และ types ผ่าน ไม่ได้รัน E2E; merged 10dd684 |
 
-The later 410/404 correction is part of #48's reviewable diff and will receive its own peer review. The earlier author reply accurately said these follow-ups were not yet implemented at the time it was posted.
+## PR #55: Ticket workflow and resolution
 
-### PR #54 feedback and response
+- **Link to PR they reviewed for me:** [PR #55](https://github.com/BBINGOAL/toktickit/pull/55)
+- **Their Review Comment:** [ข้อเสนอแนะและ Approval จริง](https://github.com/BBINGOAL/toktickit/pull/55#pullrequestreview-5638567438)
 
-PpAnpt APPROVED latest head 2cb79da on 2026-10-20 at 14:20 Asia/Bangkok. Reviewer reports client 53/53, TypeScript and server 124/124 passed; reviewer explicitly did **not** rerun E2E. All four suggestions were nonblocking. PR merged at 10dd684 on 2026-10-20 at 14:45 Asia/Bangkok.
-
-| Suggestion | Follow-up in issue #47 |
+| Subject | Record |
 |---|---|
-| Clarify input timezone versus Bangkok display | Explicit Intl input timezone and Asia/Bangkok display hint in the Action form; runtime images inspected |
-| Uncertain submission may have committed when closing dialog | Warning explains possible prior success, refreshes authoritative list/parent; test verifies warning/refresh; focus restored after reload |
-| frozen reads intent ref in render | Submission intent is React state; ref remains only for synchronous double-submit lock |
-| Split ActionsTaken.tsx later | #50 splits list/editor/details/history/pager/presentation and reuses the accessible Dialog; lifecycle/draft/focus regressions retained |
+| Reviewer feedback | removed attachments กลับมาใน detail; owner/priority แก้ได้บน CLOSED/CANCELLED; Resolve ไม่บังคับ actor=owner; บันทึก cross-requester 403->404 compatibility |
+| My Response / follow-up | [คำตอบจริง](https://github.com/BBINGOAL/toktickit/pull/55#issuecomment-6459305158): คง soft-removal metadata/time/reason ตามกฎเดิม โดยไฟล์จริงดาวน์โหลดไม่ได้; เพิ่ม reload/role/410 checks และ indistinguishable missing/non-owned 404 ใน PR #56; บันทึก terminal metadata-only policy และทดสอบ; eligible owner เป็น gate ไม่ใช่ข้อจำกัด actor พร้อม non-owner Staff resolve test |
+| Approval / integration | APPROVED d1f9e72; reviewer รัน server 209/209, client 61/61 และ types ผ่าน ไม่ได้รัน E2E; merged be6e14f |
 
-Actual author replies: [PR #53 response](https://github.com/BBINGOAL/toktickit/pull/53#issuecomment-6286073824), [PR #54 response](https://github.com/BBINGOAL/toktickit/pull/54#issuecomment-6286074513). Going forward, read the review and reply with thanks plus accurate dispositions before recommending merge; never claim pending suggestions were already fixed.
+## PR #56: Requester Dashboard
 
-### PR #53 feedback and follow-up
+- **Link to PR they reviewed for me:** [PR #56](https://github.com/BBINGOAL/toktickit/pull/56)
+- **Their Review Comment:** [ข้อเสนอแนะและ Approval จริง](https://github.com/BBINGOAL/toktickit/pull/56#pullrequestreview-5682178217)
 
-Reviewer: PpAnpt, APPROVED on 2026-10-19 at 14:27 Asia/Bangkok, for the latest head f6bae9e. The reviewer reports 124/124 tests twice on a newly migrated/seeded isolated database and no Prisma schema drift. This is the reviewer's reported verification, not a new author rerun. All four suggestions were explicitly nonblocking. GitHub merge is 3465088cd7f38bca224b5a99ce86fc19da929d61 into lab4-staging on 2026-10-20.
-
-| Suggestion | Follow-up status |
+| Subject | Record |
 |---|---|
-| Assignee test depends on the fixture user appearing in the first 50 global matches | Issue #46 searches its unique staff name with matching inactive/Requester control prefixes, retaining meaningful exclusion assertions. Changed test passes in the 124/124 native PostgreSQL 18.1 rerun on 2026-10-20. |
-| Repeat seed uses update: {} and no longer resets Lab 3 demo accounts | Documented explicitly in implementation-plan.md and ui-verification.md; keep current credentials/roles/activity and do not use repeat seed as a password reset. README consolidation remains #51. |
-| Demo Tickets have version 0 despite actions; OPEN sample has no owner but assigned actions | #47 documents the initial-snapshot decision: version is a concurrency token, not child count; unowned Tickets may have assigned work but cannot resolve until owner/work gates pass. Gate/owner/legacy-zero-action tests pass. No demo rewrite or fictional historical events; see specification section 7 and workflow-verification.md. |
-| Consider DB CHECK constraints and remove redundant single-column requesterId/ownerId indexes | #50 inspects actual indexes and measures the representative workload; retains legacy indexes and application validation without a new migration. Explicit rationale/limits are in hardening-verification.md; no claim of production query-plan proof or privileged-SQL protection. |
+| Reviewer feedback | แยก handler ที่ใช้ req.path; encode offset + เป็น %2B; RoleRoute เปลี่ยนเป็น Access denied; removed-download เปลี่ยน 404->410 ต้องตรวจ client |
+| My Response / follow-up | [คำตอบจริง](https://github.com/BBINGOAL/toktickit/pull/56#issuecomment-6468406174): PR #57 แยก explicit handlers; เพิ่มเอกสารและ transport test ของ offset; บันทึกพร้อมทดสอบ signed-out redirect/authenticated forbidden; เพิ่ม 410 rejects-before-blob test โดยไม่อ้างว่าเทสนี้มีอยู่ตอนตอบครั้งแรก |
+| Approval / integration | APPROVED 947e090; reviewer รัน server 244/244, client 72/72 และ types ผ่าน ไม่ได้รัน E2E; merged cdc2a65 |
 
-Positive review notes: Ticket-before-User lock ordering, idempotency scope/payload digest, concurrency tests, and non-owner Requester 404. Reviewer's AI-tool usage cannot be verified from GitHub metadata.
+## PR #57: Staff/Admin Dashboard
 
-### PR #52 feedback and response
+- **Link to PR they reviewed for me:** [PR #57](https://github.com/BBINGOAL/toktickit/pull/57)
+- **Their Review Comment:** [ข้อเสนอแนะและ Approval จริง](https://github.com/BBINGOAL/toktickit/pull/57#pullrequestreview-5683665723)
 
-Reviewer: PpAnpt. GitHub state: APPROVED, submitted 2026-10-14 at 10:50 Asia/Bangkok, reviewing commit 02420fc. Reviewer's use of any AI tool is not verifiable from the review metadata.
-
-| Reviewer feedback | Author response in revised documents |
+| Subject | Record |
 |---|---|
-| Non-owner Requester 403 vs missing resource 404 reveals existence | Shared API rules/BR-03 now require indistinguishable 404 for non-owned/missing resources; role-level denial stays 403 before lookup. API-02 and earlier-regression expectations updated. |
-| BR-13 completed-action minimum is stricter and affects zero-action legacy Tickets | Retained as an explicit Sprint 4 product choice, not a quoted Lab 3 mandate; added assumptions plus seed/migration/regression consequences and zero-action gate tests. |
-| BR-08 conflicts with wording allowing start/complete in one PATCH | One edge per request; direct PLANNED -> COMPLETED rejects even with result. Separate start/complete, refreshed versions; UNIT-01/API/UI clarified. |
-| Extra mechanisms may exceed reasonable scope | Added must-have/minimal-mechanism/stretch table with issue ownership. Existing contracted safety behavior retained; generic platforms, graph editor, optional Admin metrics and advanced UI excluded from required delivery. |
-| FR-04 lacks explicit test reference | Added FR-04 to API-01 and E2E-01; behavior was already covered via AC-04. |
-| BR-20 absent from BR table | Dashboard BR-20 through BR-24 now use a consistent BR table. |
-| Clarify actionDateTime vs createdAt display/order | Action list uses work time actionDateTime/id; details label createdAt as Recorded at; history uses createdAt/id. API-05 plan explicitly tests differing timestamps. |
-| Kanban needs #44-#51 | Already present in original Project 4; #44 linked to PR #52 and In review. Updated stale plan/PR status information. |
+| Reviewer feedback | actionId ผิดรูปแบบใช้ข้อความฟอร์มที่สับสน; Close/Escape ควรลบ query ด้วย replace; windowStart ไม่ได้กรอง Staff; อธิบาย snapshot กับรายการสด |
+| My Response / follow-up | [คำตอบจริง](https://github.com/BBINGOAL/toktickit/pull/57#issuecomment-6471169069): PR #58 ตรวจ positive safe ID ก่อน GET และใช้ link-specific error; ปิด dialog ลบเฉพาะ actionId คง query อื่นและไม่เพิ่ม history; windowStart คงเพื่อ compatibility พร้อมอธิบายว่าไม่จำกัด Staff metrics; เพิ่มคำอธิบาย snapshot/current-list โดย actionId ว่างเดิมไม่เปิด dialog อยู่แล้ว |
+| Approval / integration | APPROVED 191e425; reviewer รัน server 278/278, client 93/93 และ types ผ่าน ไม่ได้รัน E2E; merged 85a06ed |
 
-Author response: [PR comment addressing all review points](https://github.com/BBINGOAL/toktickit/pull/52#issuecomment-6160807329), posted 2026-10-14 after clarification commit 1c7b55e was pushed.
+## PR #58: Final regression and product hardening
 
-The student subsequently confirmed that the friend merged the revised PR; GitHub reports merge 7922e0e on 2026-10-14. Initial approval is recorded accurately and is not presented as a separate approval of later commits. Issue #45 began only after that integration and the student's instruction to continue.
+- **Link to PR they reviewed for me:** [PR #58](https://github.com/BBINGOAL/toktickit/pull/58)
+- **Their Review Comment:** [ข้อเสนอแนะและ Approval จริง](https://github.com/BBINGOAL/toktickit/pull/58#pullrequestreview-5701988526)
 
-## Reviews I performed
+| Subject | Record |
+|---|---|
+| Reviewer feedback | ระบุ myActionsQuery ใกล้ raw SQL predicate; เปลี่ยน shared dialog class action-* เป็นชื่อกลาง; ตรวจ err.message ของแต่ละไฟล์ที่ upload ไม่สำเร็จ |
+| My Response / follow-up | [คำตอบจริง](https://github.com/BBINGOAL/toktickit/pull/58#issuecomment-6527514521): ตอบขอบคุณและตรวจ parity ของ assignee/pending/active-parent กับ myActionsQuery แล้ว มี shared-rule comment เดิม; generic class naming และการระบุ helper ให้ชัดเป็น optional refactor ยังไม่ได้เปลี่ยน; uploadAttachment ใช้ responseError ที่แทน 5xx/non-JSON ด้วย safe fallback และ endpoint validation ไม่ส่ง exception ดิบ helper มี PRIVATE-message tests ใน write API อื่น แต่ไม่อ้างว่ามี upload-specific PRIVATE-message test |
+| Approval / integration | เริ่ม COMMENTED แล้วเปลี่ยนเป็น APPROVED 98bc6cf หลัง reviewer รัน server 279/279 รวม performance และ client 109/109/types ผ่านบน DB แยก; ไม่ได้รัน E2E; merged e25284b วันที่ 2026-10-31 01:36 Asia/Bangkok |
 
-[PpAnpt/toktickit PR #37](https://github.com/PpAnpt/toktickit/pull/37), engineering contract at e2ba4cc, reviewed on 2026-10-29. [Submitted review](https://github.com/PpAnpt/toktickit/pull/37#pullrequestreview-5698709294): **CHANGES_REQUESTED**, with three inline comments:
+---
 
-1. [Action assignment/lifecycle](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413085333): address the labsheet Part 6 rubric across model/API/UI/AC/tests.
-2. [Append-only history](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413085344): define preserved history rather than only overwriting current state/last editor.
-3. [Recently Resolved drill-down](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413085359): metric includes recent Resolved+Closed while destination filters only Resolved without the window.
+## Who I Reviewed (คนที่ผมไปตรวจโค้ดให้เขา)
 
-Static review read all five changed files and base API/Prisma, checked 16 FR/28 BR/30 AC/111 planned rows and valid traceability IDs. No friend's application tests were run and no merge/approval was issued. Further recommendations cover repeatable performance fixtures, bounded action lists and atomic stale writes. GitHub connector write returned 403; authenticated gh CLI submitted the authorized review, verified under BBINGOAL. This records the actual submitted review, not a claimed later disposition by the peer.
+- **Name:** อนพัช บรรเจิดศิลป์
+- **Student ID:** 67070501049
+- **GitHub Username:** [PpAnpt](https://github.com/PpAnpt)
+- **Link to PR I reviewed for them:** [PR #37: Sprint 4 engineering contract](https://github.com/PpAnpt/toktickit/pull/37)
+
+| Subject | Record |
+|---|---|
+| My Review Comment | [CHANGES_REQUESTED รอบแรก](https://github.com/PpAnpt/toktickit/pull/37#pullrequestreview-5698709294), e2ba4cc: ต้องมี action assignee/lifecycle ตาม rubric; ต้องมี append-only history ที่เก็บค่าเดิม/actor; Recently Resolved drill-down ต้องรวม Resolved+Closed ใน window เดียวกับ metric |
+| Further suggestions | กำหนด performance fixture/warmup/p95 ให้ทำซ้ำได้; จำกัด/paginate list/history; ให้ stale check กับ write เป็น atomic พร้อม parallel-edit test |
+| Their Response | [เพื่อนตอบและขอ re-review](https://github.com/PpAnpt/toktickit/pull/37#issuecomment-6499616614): เพิ่ม assignee/lifecycle, revision/Ticket event history, recent=updated/resolved, atomic timestamp token, pagination และ performance protocol |
+| My Re-review | [CHANGES_REQUESTED รอบสอง](https://github.com/PpAnpt/toktickit/pull/37#pullrequestreview-5699694394), b749842: ตรวจแล้ว 3 ข้อเดิมและข้อเสนอแนะเพิ่มแก้ครบ มี 19 FR/39 BR/39 AC/144 planned rows ทุก AC mapped; เหลือขั้นตอน recovery ที่ใช้ migrate resolve --rolled-back กับ successful migration ซึ่งใช้ไม่ได้ใน Prisma 7 |
+| Requested correction | [Inline finding](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413824789): แยก failed migration recovery จาก successful rollback; ใช้ pre-upgrade backup restore พร้อม baseline/migration history หรือ compensating migration ใหม่ และแก้ MIG-02 ให้ตรวจ schema/data/history; อัปเดต PR description เก่าเป็นข้อเสนอแนะไม่ block |
+| Review boundary | อ่านเอกสารและตรวจ traceability ไม่ได้รัน application tests ของเพื่อน ไม่อ้างว่ามี approval หรือ merge หลัง request changes |
