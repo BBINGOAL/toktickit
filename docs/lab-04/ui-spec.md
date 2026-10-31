@@ -1,6 +1,6 @@
 # Lab 4 UI Specification
 
-Status: integrated UI verified at staging e25284b on 2026-10-31; backend 278 plus performance 1, client 109 and application Chromium 49 pass. Actual capture/checklist scope is in release-verification.md; final-main verification follows reviewed integration.
+Status: final main 768975d verified on 2026-10-31; backend 278 plus performance 1, client 109 and full application Chromium 49 pass. See release-verification.md for exact scope and real capture conditions.
 
 ## Application shell and routes
 
@@ -75,8 +75,8 @@ Screenshots are real runtime captures stored locally under `artifacts/lab-04/scr
 
 | Check | Planned evidence | Status |
 |---|---|---|
-| Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Integrated staging pass: actual captures inspected; Bootstrap precedes app theme and rendered button colors asserted; final main pending |
-| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester and Staff/Admin API/UI/E2E pass on integrated staging; final main pending |
+| Zen Green consistency, statuses and private/shared distinction | Major screens and Ticket Detail | Main pass: actual captures inspected; Bootstrap precedes app theme and rendered button colors asserted; main 768975d verified |
+| Dashboard cards/counts/drill-down | Both role dashboards, zero and populated | Requester and Staff/Admin API/UI/E2E pass on verified main; main 768975d verified |
 | Actions modes, editable/read-only and validation placement | List/create/edit/terminal/follow-up/conflict | Actions integrated checks pass; runtime lifecycle/failure E2E pass; images inspected |
-| Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Integrated staging pass: earlier/new forms and Admin/removal dialogs, rendered solid-text contrast, four widths and 200% CSS zoom; precise audit limits in hardening-verification.md; final main pending |
-| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Integrated staging pass: earlier/new role screens at 320/390/768/1280, bounded 200% CSS zoom dialogs; Requester Create/Staff Action/Admin user captures inspected; final main pending |
+| Keyboard, focus, modal, labels and contrast | Keyboard inspection and component/E2E | Main pass: earlier/new forms and Admin/removal dialogs, rendered solid-text contrast, four widths and 200% CSS zoom; precise audit limits in hardening-verification.md; main 768975d verified |
+| Clipping, overlap and overflow | Desktop/tablet/mobile plus minimum width/zoom | Main pass: earlier/new role screens at 320/390/768/1280, bounded 200% CSS zoom dialogs; Requester Create/Staff Action/Admin user captures inspected; main 768975d verified |

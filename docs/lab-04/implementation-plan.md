@@ -1,6 +1,6 @@
 # Lab 4 Implementation Plan
 
-Status: #44-#50 completed through reviewed PRs #52-#58, latest staging merge e25284b. Verified integrated staging e25284be30c35a679069491092c356b574afc7aa on 2026-10-31: backend 278/278 (24 files), separate performance 1/1, client 109/109 (20 files), Chromium 49/49 (14 files), source types/builds/lint and schema drift checks pass. Supplemental real-browser evidence 10/10 and full backup/restore plus baseline-app recovery pass. Main remains Lab 3 commit 2b8531b; no final-main pass is claimed. Documentation issue #51 was deleted at the student's request; use feature8/lab4-docs-release without a new issue.
+Status: seven product issues #44-#50 completed through reviewed PRs #52-#58. Documentation #59 merged at 112497e; release #60 merged into main at 768975d. Verified final main `768975d27754543d03d32a103682ccf81c14b606` on 2026-10-31: backend **278/278** (24 files), separate performance **1/1**, client **109/109** (20 files), application Chromium **49/49** (14 files), source types/builds/lint and schema drift checks pass. Actual main backup/restore and real baseline-app smoke pass; a separate main browser capture/metric comparison passes **1/1**. The prior 10-scenario evidence run remains labeled as staging evidence. Documentation/release use branches without new issues or mandatory peer review per the student's explicit workflow.
 Source: `SE+Lab+4.md`. Baseline: Lab 3 main commit `2b8531b`.
 
 ## Sprint goal
@@ -25,7 +25,7 @@ Create subsequent feature branches from the latest integrated staging commit. Ru
 | 7 | Lab4 Final Regression and Product Hardening | `feature7/lab4-final-hardening-regression` | Labs 1-3 regression, Staff Queue sorting/pagination, stable ordering, retry/double-submit, security, accessibility, responsive/style inspection, performance smoke and failure states. |
 | 8 | Lab4 Documentation Evidence and Release Integration | `feature8/lab4-docs-release` | README, actual test traceability, real review records and AI reflection, screenshots, concise MD/PDF Answer Part 1-9, staging release checks and post-merge main evidence. |
 
-Kanban: Backlog -> Ready -> In progress -> In review -> Done. All seven product issues #44-#50 are Done; Project 4 no longer contains Documentation issue #51. Continue branch-only documentation and reviewed release integration, then verify actual main.
+Kanban: Backlog -> Ready -> In progress -> In review -> Done. All seven product issues #44-#50 are Done; Project 4 no longer contains Documentation issue #51. Documentation #59 and release #60 are integrated; actual main checks are complete. Final evidence uses a documentation-only branch without a new issue.
 
 ## Must-have versus stretch and complexity limits
 
@@ -92,6 +92,6 @@ Create `docs/lab-04/{specification,api-spec,ui-spec,tests,reviewer,ai-use}.md`. 
 2. Deliver foundation/migration, then Actions UI and Ticket Workflow.
 3. Deliver Requester Dashboard, then Staff Dashboard, with query-compatible drill-down.
 4. Complete hardening/regression and visual inspection.
-5. Finish review/reflection/evidence, integrate staging into main, then rerun final verification and update the report with actual main results.
+5. Finish review/reflection/evidence, integrate staging into main, then rerun final verification and update the report with actual main results (completed at 768975d).
 
 Excluded: SLA/escalation, external notifications, inventory/cost/billing, multilevel approvals, advanced BI, multitenancy/cloud operations and unrelated new product features.

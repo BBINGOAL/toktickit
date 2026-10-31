@@ -1,12 +1,13 @@
-# Lab 4 Integrated Release Verification
+# Lab 4 Final Main Release Verification
 
 ## Verified source and environment
 
-Verified integrated staging e25284be30c35a679069491092c356b574afc7aa on 2026-10-31: backend 278/278 (24 files), separate performance 1/1, client 109/109 (20 files), Chromium 49/49 (14 files), source types/builds/lint and schema drift checks pass. Supplemental real-browser evidence 10/10 and full backup/restore plus baseline-app recovery pass. Main remains Lab 3 commit 2b8531b; no final-main pass is claimed.
+Verified final main `768975d27754543d03d32a103682ccf81c14b606` on 2026-10-31: backend **278/278** (24 files), separate performance **1/1**, client **109/109** (20 files), application Chromium **49/49** (14 files), source types/builds/lint and schema drift checks pass. Actual main backup/restore and real baseline-app smoke pass; a separate main browser capture/metric comparison passes **1/1**. The prior 10-scenario evidence run remains labeled as staging evidence.
 
-Documentation branch: `feature8/lab4-docs-release`, from reviewed PR #58 staging merge e25284b. Per the student's instruction, Documentation issue #51 was deleted, the seven product issues #44-#50 are Done on Project 4, and documentation/reporting continues on a branch without a replacement issue. No automatic merge into main.
+Feature PRs #52-#58 were peer reviewed and merged into staging. Documentation PR [#59](https://github.com/BBINGOAL/toktickit/pull/59) merged as `112497e` at 08:34:05 Asia/Bangkok; release PR [#60](https://github.com/BBINGOAL/toktickit/pull/60) merged into main as `768975d` at 08:39:17. The student explicitly clarified that documentation/release PRs do not need peer review. Their absence of peer approval is not presented as approval; no unnecessary reviewer gate is imposed. Documentation issue #51 was deleted and seven product issues #44-#50 are Done.
 
-Documentation PR: [#59](https://github.com/BBINGOAL/toktickit/pull/59) into lab4-staging. The student explicitly waived peer review for this documentation PR on 2026-10-31; the PpAnpt review request was withdrawn. This exemption is limited to PR #59 and is not a claimed peer approval. Its documentation commits do not change the application source tested at e25284b. The local report includes nine ordered parts, real review/test/capture evidence and an explicit integrated-staging source label.
+The student then checked out main and pulled at 08:39:58. Reflog records a normal fast-forward from 2b8531b to 768975d; local and GitHub main match. No tracked work was lost. `git ls-tree` confirms report-assets, artifacts/lab-04, output reports, report MD and tmp are not in the main commit. `git diff --quiet e25284b 768975d -- server client e2e` exits 0: reviewed runtime/test source is unchanged by the documentation/release merges. Nevertheless, all required application checks below were run freshly on actual main; earlier staging passes were not renamed.
+
 
 Windows x64, Node 24.14.0, PostgreSQL 18.1, Ryzen 5 7535HS / 12 logical CPUs / 15.32 GiB RAM. Native isolated PostgreSQL on B:, 127.0.0.1:55434, database `toktickit_lab4_verify_20261014_actions`; JWT test secret matches the fixture. No localdb reset, original-data cleanup, or Docker-health claim. Browser suites start/stop their own API/Vite processes on ports 4000/5173.
 
@@ -16,17 +17,17 @@ Times below use Asia/Bangkok; UTC timestamps remain in the local machine-readabl
 
 | Check | Actual command (in indicated directory) | Result |
 |---|---|---|
-| Backend (server) | `node node_modules/vitest/vitest.mjs run --pool=threads --maxWorkers=1 --fileParallelism=false --exclude **/dashboard-performance.test.ts` | 278/278; 24 files; 07:56:53-07:57:52 |
-| Performance (server) | `node node_modules/vitest/vitest.mjs run tests/lab-04/dashboard-performance.test.ts --pool=threads --maxWorkers=1 --fileParallelism=false` | 1/1; 07:57:52-07:57:56 |
-| UI (client) | `node node_modules/vitest/vitest.mjs run --maxWorkers=1 --fileParallelism=false --reporter=dot` | 109/109; 20 files; 07:57:56-07:58:52 |
-| Chromium (e2e) | `node node_modules/@playwright/test/cli.js test --config lab4-hardening.config.ts` | 49/49; 14 application files; 07:59:02-08:01:20 |
+| Backend (server) | `node node_modules/vitest/vitest.mjs run --pool=threads --maxWorkers=1 --fileParallelism=false --exclude **/dashboard-performance.test.ts` | 278/278; 24 files; 08:41:47-08:42:41 |
+| Performance (server) | `node node_modules/vitest/vitest.mjs run tests/lab-04/dashboard-performance.test.ts --pool=threads --maxWorkers=1 --fileParallelism=false` | 1/1; 1 file; 08:42:41-08:42:45 |
+| UI (client) | `node node_modules/vitest/vitest.mjs run --maxWorkers=1 --fileParallelism=false --reporter=dot` | 109/109; 20 files; 08:42:45-08:43:35 |
+| Chromium (e2e) | `node node_modules/@playwright/test/cli.js test --config lab4-hardening.config.ts` | 49/49; 14 application files; 08:43:41-08:45:49 |
 | Client types/build/lint | `tsc -b --noEmit`; `vite build`; `oxlint` | Pass; one existing AuthContext only-export-components warning |
 | Server types/build | source-only `tsc` configuration; `node node_modules/typescript/bin/tsc` | Pass |
 | Schema | `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code` | No drift |
-| Supplemental captures | Same existing Actions/failure/workflow scenarios, with screenshots; separate metric-comparison capture scenario | 10/10; not counted again in the 49 application tests |
+| Supplemental captures | Fresh main metric/database and desktop/tablet/mobile capture | 1/1 on main; prior 10/10 lifecycle/failure run was staging, not added to 49 app tests |
 | Recovery | Baseline archive at 2b8531b, baseline deploy/client, pre-upgrade dump, Lab 4 deploy, separate restore, baseline app smoke | Pass; exact legacy data/schema/migration history and role checks |
 
-Local transcripts: `tmp/lab4-release-verification/{backend,performance,client-ui,e2e,recovery,supplemental-browser}.txt`; result JSON records command/exit/time. Runtime metrics comparison is `report-assets/lab4-runtime/metric-comparison.json`; GitHub capture manifests and actual board/PR exports are kept locally. These files feed the report and deliberately remain uncommitted.
+Local transcripts: `tmp/lab4-main-verification/{backend,performance,client-ui,e2e,recovery,dashboard-captures}.txt`; result JSON records command/exit/time. Runtime metrics comparison is `report-assets/lab4-runtime/metric-comparison.json`; GitHub capture manifests and actual board/PR exports are kept locally. These files feed the report and deliberately remain uncommitted.
 
 ## Dashboard query and performance evidence
 
@@ -36,9 +37,9 @@ Performance adds 1000 Tickets/3000 Actions with unique owned fixture keys and re
 
 | Role | p95 ms | Max SQL | Max JSON bytes |
 |---|---|---|---|
-| Requester | 14.7 | 10 | 2953 |
-| Staff | 16.45 | 12 | 5240 |
-| Administrator | 20.22 | 12 | 5238 |
+| Requester | 9.68 | 10 | 2953 |
+| Staff | 14.74 | 12 | 5240 |
+| Administrator | 21.3 | 12 | 5238 |
 
 ## MIG-02 complete recovery rehearsal
 
@@ -55,8 +56,8 @@ The first local rehearsal assumed fixture IDs began at 1 and failed an FK; chang
 
 Real browser evidence covers Staff/Admin/Requester Dashboards, Actions list/form and lifecycle/failure states. Captures at 390x900, 768x900 and 1280x900 accompany the existing four-width 320/390/768/1280 regression. Keyboard traps/Escape/restoration, semantic labels, dirty-draft protection, long text, internal table scrolling, rendered solid-text contrast and CSS zoom=2 pass. This is not a claim of native Chrome-menu zoom, full assistive-technology/WCAG certification or image/gradient contrast coverage. Actual PDF pages are rendered and inspected separately.
 
-## Review and release gate
+## Actual integration and evidence boundary
 
 PRs #52-#58 have actual PpAnpt approvals and staging merges. #58 reviewer reports 279 backend/performance and 109 client passes on a separate database; explicitly did not rerun E2E. Author reply: https://github.com/BBINGOAL/toktickit/pull/58#issuecomment-6527514521. Generic dialog class naming and a more explicit SQL helper comment remain optional nonblocking refactors; current upload failure sanitization was inspected. No source change followed #58 approval.
 
-The student waived peer review for documentation PR #59; it may proceed to integration without waiting for PpAnpt. No automatic merge is authorized by that exemption. The reviewed staging-to-main release remains a separate step. Once main is integrated, rerun the documented release commands and regenerate tests/report against the real main SHA. Until that happens REL-01 and the final-main DoD remain open; the integrated-staging passes are not relabeled as main. Runtime/report images and report MD/PDF are excluded from source commits.
+Documentation/release PRs #59/#60 are merged; peer review was waived by the student for this workflow. REL-01 and AC-18 now have actual main execution, seven reviewed product increments and the Part 1-9 report. This final evidence update is documentation only on a branch from main; it does not change the already verified application code. No report images, PDF/MD, temporary scripts, dumps or local database files are committed.
