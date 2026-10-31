@@ -106,3 +106,12 @@
 | My Re-review | [CHANGES_REQUESTED รอบสอง](https://github.com/PpAnpt/toktickit/pull/37#pullrequestreview-5699694394), b749842: ตรวจแล้ว 3 ข้อเดิมและข้อเสนอแนะเพิ่มแก้ครบ มี 19 FR/39 BR/39 AC/144 planned rows ทุก AC mapped; เหลือขั้นตอน recovery ที่ใช้ migrate resolve --rolled-back กับ successful migration ซึ่งใช้ไม่ได้ใน Prisma 7 |
 | Requested correction | [Inline finding](https://github.com/PpAnpt/toktickit/pull/37#discussion_r4413824789): แยก failed migration recovery จาก successful rollback; ใช้ pre-upgrade backup restore พร้อม baseline/migration history หรือ compensating migration ใหม่ และแก้ MIG-02 ให้ตรวจ schema/data/history; อัปเดต PR description เก่าเป็นข้อเสนอแนะไม่ block |
 | Review boundary | อ่านเอกสารและตรวจ traceability ไม่ได้รัน application tests ของเพื่อน ไม่อ้างว่ามี approval หรือ merge หลัง request changes |
+
+## Documentation and release integration (no peer review required)
+
+| PR | Actual integration | Review record |
+|---|---|---|
+| [#59 Documentation](https://github.com/BBINGOAL/toktickit/pull/59) | feature8/lab4-docs-release -> lab4-staging; merged 112497e on 2026-10-31 at 08:34:05 Asia/Bangkok | The student explicitly waived review; the PpAnpt request was withdrawn. No approval is fabricated. |
+| [#60 Release](https://github.com/BBINGOAL/toktickit/pull/60) | lab4-staging -> main; merged 768975d on 2026-10-31 at 08:39:17 Asia/Bangkok | The student clarified release PRs do not require peer review in this workflow. Seven product PR reviews above remain valid; no separate release approval is claimed. |
+
+Fresh main verification: backend 278/278 + separate performance 1/1, client 109/109, all application Chromium 49/49, types/builds/lint/schema pass. Native isolated PostgreSQL and real baseline recovery were verified; these are author runs on main, distinct from the earlier reviewer-reported runs.

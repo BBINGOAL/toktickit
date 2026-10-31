@@ -176,3 +176,5 @@ Back up before upgrade with pg_dump; restore that backup into a separate empty r
 Lab 4: [specification](docs/lab-04/specification.md), [API](docs/lab-04/api-spec.md), [UI](docs/lab-04/ui-spec.md), [planned/actual tests](docs/lab-04/tests.md), [peer reviews](docs/lab-04/reviewer.md), [AI use/reflection](docs/lab-04/ai-use.md), [implementation history](docs/lab-04/implementation-plan.md).
 
 Runtime screenshots, report assets, report Markdown/PDF, temporary logs and test databases remain local and are excluded from commits. Clone users can regenerate evidence by running the documented suites. A staging verification is not a claim of final-main verification.
+
+Final Lab 4 release: PR #60 merged main at `768975d`; fresh backend 278 + separate performance 1, client 109 and application Chromium 49 pass. See [actual main evidence](docs/lab-04/release-verification.md) for exact commands, limits and recovery. Documentation/release PRs follow the student's workflow without mandatory peer review; feature peer approvals are recorded separately.
